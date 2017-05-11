@@ -33,6 +33,7 @@ public:
 
 signals:
     void newPlayer(Tank *t);
+    void newlvlObj(int x,int y,int w,int h);
     void delPlayer(int i);
 public slots:
 };

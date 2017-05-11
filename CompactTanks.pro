@@ -16,11 +16,13 @@ SOURCES += main.cpp\
         frmmain.cpp \
     tank.cpp \
     movement.cpp \
-    network.cpp
+    network.cpp \
+    terrain.cpp
 
 HEADERS  += frmmain.h \
     tank.h \
     movement.h \
-    network.h
+    network.h \
+    terrain.h
 
 FORMS    += frmmain.ui

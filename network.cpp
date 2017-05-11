@@ -93,6 +93,11 @@ void Network::fetchTCP(QString data)
                     emit delPlayer(pos);
                 }
             break;
+            case 3: //lvlobj
+                {
+                    emit newlvlObj(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                }
+            break;
         }
     }
 }

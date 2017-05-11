@@ -8,6 +8,7 @@
 #include "tank.h"
 #include "movement.h"
 #include "network.h"
+#include "terrain.h"
 
 namespace Ui {
 class FrmMain;
@@ -24,10 +25,12 @@ private slots:
     void on_tdraw();
     void on_newPlayer(Tank *t);
     void on_delPlayer(int pos);
+    void on_newlvlObj(int x,int y,int w,int h);
 private:
     Ui::FrmMain *ui;
     Tank *ownTank;
     QVector <Tank*> tanks;
+    QVector <Terrain*> lvlObjs;
     QTimer *t_draw;
     QTimer *t_moveW;
     QTimer *t_moveA;

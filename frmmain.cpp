@@ -14,6 +14,7 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(t_draw,SIGNAL(timeout()),this,SLOT(on_tdraw()));
     connect(network,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*))); //bei neuem spieler aufrufen
     connect(network,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
+    connect(network,SIGNAL(newlvlObj(int,int,int,int)),this,SLOT(on_newlvlObj(int,int,int,int)));
     t_draw->start(10);
 }
 
@@ -25,6 +26,12 @@ FrmMain::~FrmMain()
 void FrmMain::on_newPlayer(Tank *t)
 {
     tanks.append(t);
+}
+
+void FrmMain::on_newlvlObj(int x, int y, int w, int h)
+{
+    Terrain *t = new Terrain(x,y,w,h);
+    lvlObjs.append(t);
 }
 
 void FrmMain::on_delPlayer(int pos)
@@ -44,6 +51,9 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawRect(ownTank->getRect());
     for(int i=0;i<tanks.size();i++) {
         painter.drawRect(tanks[i]->getRect());
+    }
+    for(int i=0;i<lvlObjs.size();i++) {
+        painter.drawRect(lvlObjs[i]->getRect());
     }
 
 }
