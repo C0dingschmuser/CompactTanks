@@ -55,6 +55,11 @@ void FrmMain::paintEvent(QPaintEvent *e)
     for(int i=0;i<lvlObjs.size();i++) {
         painter.drawRect(lvlObjs[i]->getRect());
     }
+    QRect viewRect;
+    int viewRange=120;
+    viewRect = QRect(ownTank->getRect().center().x()-viewRange-10,ownTank->getRect().center().y()-viewRange-10,
+                            (viewRange*2)+10,(viewRange*2)+10);
+    painter.drawRect(viewRect);
 
 }
 

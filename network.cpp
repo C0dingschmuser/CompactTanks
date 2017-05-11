@@ -79,7 +79,7 @@ void Network::fetchTCP(QString data)
         switch(m) {
             case 1: //spieler hinzufügen
                 {
-                    Tank *t = new Tank(QRect(list.at(2).toInt(),list.at(3).toInt(),20,20),list.at(1));
+                    Tank *t = new Tank(QRect(-200,-200,20,20),list.at(1));
                     players.append(t);
                     emit newPlayer(t);
                 }
@@ -105,12 +105,14 @@ void Network::fetchTCP(QString data)
 void Network::fetchUDP(QString data)
 {
     QStringList list = data.split("#"); //max: 11
-    Tank *tmp = sucheTank(list.at(1));
-    int m = list.at(0).toInt();
-    switch(m) {
-        case 0: //pos
-            tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),0);
-        break;
+    if(list.at(1)!=ownTank->getName()) {
+        Tank *tmp = sucheTank(list.at(1));
+        int m = list.at(0).toInt();
+        switch(m) {
+            case 0: //pos
+                tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),0);
+            break;
+        }
     }
 }
 
