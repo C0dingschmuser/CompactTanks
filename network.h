@@ -6,6 +6,7 @@
 #include <QUdpSocket>
 #include <QTimer>
 #include "tank.h"
+#include "bullet.h"
 
 class Network : public QObject
 {
@@ -30,11 +31,15 @@ private:
 public:
     explicit Network(Tank *ownTank, QVector<Tank*> t, QHostAddress ip, QObject *parent = 0);
     ~Network();
+    void send(QString data);
 
 signals:
     void newPlayer(Tank *t);
     void newlvlObj(int x,int y,int w,int h);
     void delPlayer(int i);
+    void newBullet(Bullet *b);
+    void delBullet(int pos);
+    void syncBullet(int pos,int x,int y);
 public slots:
 };
 

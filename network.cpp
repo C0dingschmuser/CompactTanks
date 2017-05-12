@@ -71,6 +71,12 @@ void Network::on_udpRecv()
     }
 }
 
+void Network::send(QString data)
+{
+    tcpSocket->write(data.toLatin1());
+    tcpSocket->flush();
+}
+
 void Network::fetchTCP(QString data)
 {
     QStringList list = data.split("#"); //max: 11
@@ -98,6 +104,17 @@ void Network::fetchTCP(QString data)
                     emit newlvlObj(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
                 }
             break;
+            case 4: //add bullet
+                {
+                    Bullet *b = new Bullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toDouble(),list.at(4).toDouble(),list.at(5).toInt(),list.at(6));
+                    emit newBullet(b);
+                }
+            break;
+            case 5: //del bullet
+                {
+                    emit delBullet(list.at(1).toInt());
+                }
+            break;
         }
     }
 }
@@ -106,11 +123,16 @@ void Network::fetchUDP(QString data)
 {
     QStringList list = data.split("#"); //max: 11
     if(list.at(1)!=ownTank->getName()) {
-        Tank *tmp = sucheTank(list.at(1));
         int m = list.at(0).toInt();
         switch(m) {
             case 0: //pos
-                tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),0);
+                {
+                    Tank *tmp = sucheTank(list.at(1));
+                    tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),0);
+                }
+            break;
+            case 1: //bulletsync
+                emit syncBullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt());
             break;
         }
     }

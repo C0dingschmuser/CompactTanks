@@ -17,12 +17,18 @@ SOURCES += main.cpp\
     tank.cpp \
     movement.cpp \
     network.cpp \
-    terrain.cpp
+    terrain.cpp \
+    bullet.cpp \
+    shoot.cpp \
+    weapon.cpp
 
 HEADERS  += frmmain.h \
     tank.h \
     movement.h \
     network.h \
-    terrain.h
+    terrain.h \
+    bullet.h \
+    shoot.h \
+    weapon.h
 
 FORMS    += frmmain.ui
