@@ -134,6 +134,9 @@ void Network::fetchUDP(QString data)
             case 1: //bulletsync
                 emit syncBullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt());
             break;
+            case 2: //viewRange
+                ownTank->setViewRange(list.at(1).toInt());
+            break;
         }
     }
 }

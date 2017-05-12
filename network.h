@@ -40,6 +40,7 @@ signals:
     void newBullet(Bullet *b);
     void delBullet(int pos);
     void syncBullet(int pos,int x,int y);
+    void setViewRange(int vr);
 public slots:
 };
 

@@ -17,6 +17,7 @@ private:
     int kills;
     int deaths;
     int dir;
+    int viewRange;
     bool moved;
 public:
     Tank();
@@ -36,8 +37,10 @@ public:
     int getKills();
     int getDeaths();
     int getDir();
+    int getViewRange();
     void setAll(int x, int y, int dir);
     void setMoved(bool m);
+    void setViewRange(int vr);
     QString getName();
     QString toString();
 };

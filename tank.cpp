@@ -14,6 +14,7 @@ Tank::Tank(QRect rect, QString name)
     kills = 0;
     deaths = 0;
     moved = true;
+    viewRange = 120;
 }
 
 Tank::~Tank()
@@ -78,7 +79,8 @@ QString Tank::getName()
 
 QString Tank::toString()
 {
-    return this->name + "#" + QString::number(rect.x(),'f',0) + "#" + QString::number(rect.y(),'f',0) + "#";
+    return this->name + "#" + QString::number(rect.x(),'f',0)+"#"+QString::number(rect.y(),'f',0)+"#"+
+            QString::number(dir,'f',0)+"#";
 }
 
 void Tank::setAll(int x, int y, int dir)
@@ -115,4 +117,14 @@ int Tank::getDeaths()
 int Tank::getDir()
 {
     return this->dir;
+}
+
+int Tank::getViewRange()
+{
+    return this->viewRange;
+}
+
+void Tank::setViewRange(int vr)
+{
+    this->viewRange = vr;
 }

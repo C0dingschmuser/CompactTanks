@@ -10,7 +10,7 @@ FrmMain::FrmMain(QWidget *parent) :
     mpos = new QPoint();
     ownTank = new Tank(QRect(50,50,20,20),name);
     move = new Movement(ownTank);
-    network = new Network(ownTank,tanks,QHostAddress::LocalHost); //ip noch ändern!
+    network = new Network(ownTank,tanks,QHostAddress("94.114.254.180")); //ip noch ändern!
     shoot = new Shoot(ownTank,network);
     t_draw = new QTimer();
     connect(t_draw,SIGNAL(timeout()),this,SLOT(on_tdraw()));
@@ -88,6 +88,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     for(int i=0;i<tanks.size();i++) {
         painter.drawRect(tanks[i]->getRect());
     }
+    painter.setBrush(Qt::black);
     for(int i=0;i<lvlObjs.size();i++) {
         painter.drawRect(lvlObjs[i]->getRect());
     }
@@ -96,7 +97,8 @@ void FrmMain::paintEvent(QPaintEvent *e)
         bullets[i]->update();
     }
     QRect viewRect;
-    int viewRange=120;
+    int viewRange=ownTank->getViewRange();
+    painter.setBrush(Qt::transparent);
     viewRect = QRect(ownTank->getRect().center().x()-viewRange-10,ownTank->getRect().center().y()-viewRange-10,
                             (viewRange*2)+10,(viewRange*2)+10);
     painter.drawRect(viewRect);
