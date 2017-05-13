@@ -119,16 +119,16 @@ void Tank::drawTank(QPainter &p)
     }
     switch(dir) {
         case 1:
-            r = QRect(rect.x()+3,rect.y()+2,13,16);
+            r = QRect(rect.x()+3,rect.y()+2,14,17);
         break;
         case 2:
-            r = QRect(rect.x()+2,rect.y()+3,16,13);
+            r = QRect(rect.x()+2,rect.y()+3,18,14);
         break;
         case 3:
-            r = QRect(rect.x()+3,rect.y()+1,13,16);
+            r = QRect(rect.x()+3,rect.y()+1,14,17);
         break;
         case 4:
-            r = QRect(rect.x()+1,rect.y()+3,16,13);
+            r = QRect(rect.x()+1,rect.y()+3,17,14);
         break;
     }
     p.setBrush(rcolor);

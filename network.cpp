@@ -18,7 +18,7 @@ Network::Network(Tank *ownTank, QVector<Tank *> t, QHostAddress ip,QObject *pare
     connect(udpSocketListen,SIGNAL(readyRead()),this,SLOT(on_udpRecv()));
     connect(tcpSocket,SIGNAL(readyRead()),this,SLOT(on_tcpRecv()));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
-    t_main->start(10);
+    //t_main->start(10);
 }
 
 Network::~Network()
@@ -96,7 +96,10 @@ void Network::fetchTCP(QString data)
                 ownTank->setViewRange(list.at(1).toInt());
             break;
             case 0: //farbe setzen
+                qDebug()<<list;
                 ownTank->setColor(list.at(1).toInt());
+                ownTank->setAll(list.at(2).toInt(),list.at(3).toInt(),1);
+                t_main->start(10);
             break;
             case 1: //spieler hinzufügen
                 {

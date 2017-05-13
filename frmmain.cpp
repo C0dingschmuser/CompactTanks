@@ -2,10 +2,12 @@
 #include "ui_frmmain.h"
 
 FrmMain::FrmMain(QWidget *parent) :
-    QWidget(parent),
+    QOpenGLWidget(parent),
     ui(new Ui::FrmMain)
 {
     ui->setupUi(this);
+    setUpdateBehavior(UpdateBehavior(PartialUpdate));
+    initializeGL();
     QString name = QInputDialog::getText(this,"Name","Name:");
     mpos = new QPoint();
     ownTank = new Tank(QRect(50,50,20,20),name);
@@ -88,6 +90,9 @@ void FrmMain::paintEvent(QPaintEvent *e)
                             (viewRange*2)+10,(viewRange*2)+10);
     QPainter painter(this);
     //painter.setRenderHint(QPainter::HighQualityAntialiasing);
+    painter.setPen(Qt::white);
+    painter.setBrush(Qt::white);
+    painter.drawRect(0,0,1280,720);
     ownTank->drawTank(painter);
     for(int i=0;i<tanks.size();i++) {
         if(tanks[i]->getRect().intersects(viewRect)) {
