@@ -83,25 +83,40 @@ void FrmMain::on_tdraw()
 
 void FrmMain::paintEvent(QPaintEvent *e)
 {
+    int viewRange=ownTank->getViewRange();
+    QRect viewRect = QRect(ownTank->getRect().center().x()-viewRange-10,ownTank->getRect().center().y()-viewRange-10,
+                            (viewRange*2)+10,(viewRange*2)+10);
     QPainter painter(this);
-    painter.drawRect(ownTank->getRect());
+    painter.setRenderHint(QPainter::HighQualityAntialiasing);
+    ownTank->drawTank(painter);
     for(int i=0;i<tanks.size();i++) {
-        painter.drawRect(tanks[i]->getRect());
+        if(tanks[i]->getRect().intersects(viewRect)) {
+            tanks[i]->drawTank(painter);
+        }
     }
+    painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
     for(int i=0;i<lvlObjs.size();i++) {
-        painter.drawRect(lvlObjs[i]->getRect());
+        if(lvlObjs[i]->getRect().intersects(viewRect)) {
+            painter.drawRect(lvlObjs[i]->getRect());
+        }
     }
     for(int i=0;i<bullets.size();i++) {
-        painter.drawRect(bullets[i]->get());
         bullets[i]->update();
+        if(bullets[i]->get().intersects(viewRect)) {
+            painter.drawRect(bullets[i]->get());
+        }
     }
-    QRect viewRect;
-    int viewRange=ownTank->getViewRange();
+    //painter.setBrush(Qt::transparent);
+    //painter.drawRect(viewRect);
+    QPainterPath path;
+    QPainterPath inner;
+    path.addRect(0,0,1280,720);
+    inner.addEllipse(ownTank->getRect().center(),viewRange,viewRange);
+    path = path.subtracted(inner);
+    painter.fillPath(path,QBrush(QColor(255, 255, 255, 255)));
     painter.setBrush(Qt::transparent);
-    viewRect = QRect(ownTank->getRect().center().x()-viewRange-10,ownTank->getRect().center().y()-viewRange-10,
-                            (viewRange*2)+10,(viewRange*2)+10);
-    painter.drawRect(viewRect);
+    painter.drawEllipse(ownTank->getRect().center(),viewRange,viewRange);
 
 }
 

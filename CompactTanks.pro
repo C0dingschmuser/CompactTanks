@@ -32,3 +32,6 @@ HEADERS  += frmmain.h \
     weapon.h
 
 FORMS    += frmmain.ui
+
+RESOURCES += \
+    resources.qrc

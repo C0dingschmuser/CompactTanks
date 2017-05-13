@@ -15,6 +15,11 @@ Tank::Tank(QRect rect, QString name)
     deaths = 0;
     moved = true;
     viewRange = 120;
+    for(int i=0;i<4;i++) {
+        QPixmap p = QPixmap(":/images/tank/tank"+QString::number(i+1,'f',0)+".png");
+        imgs.append(p);
+    }
+    currentImg = imgs[0];
 }
 
 Tank::~Tank()
@@ -34,24 +39,28 @@ QRect Tank::getRect()
 
 void Tank::w()
 {
+    currentImg = imgs[0];
     this->dir = 1;
     this->rect.moveTo(rect.x(),rect.y()-speed);
 }
 
 void Tank::a()
 {
+    currentImg = imgs[1];
     this->dir = 2;
     this->rect.moveTo(rect.x()-speed,rect.y());
 }
 
 void Tank::s()
 {
+    currentImg = imgs[2];
     this->dir = 3;
     this->rect.moveTo(rect.x(),rect.y()+speed);
 }
 
 void Tank::d()
 {
+    currentImg = imgs[3];
     this->dir = 4;
     this->rect.moveTo(rect.x()+speed,rect.y());
 }
@@ -72,6 +81,62 @@ void Tank::setDK(int kills, int deaths)
     this->deaths = deaths;
 }
 
+void Tank::drawTank(QPainter &p)
+{
+    QColor rcolor;
+    QRect r;
+    switch(color) {
+        case 0:
+            rcolor = QColor(160,0,94);
+        break;
+        case 1:
+            rcolor = QColor(238,205,125);
+        break;
+        case 2:
+            rcolor = QColor(92,163,99);
+        break;
+        case 3:
+            rcolor = QColor(157,139,126);
+        break;
+        case 4:
+            rcolor = QColor(31,240,127);
+        break;
+        case 5:
+            rcolor = QColor(200,92,112);
+        break;
+        case 6:
+            rcolor = QColor(132,240,109);
+        break;
+        case 7:
+            rcolor = QColor(50,192,122);
+        break;
+        case 8:
+            rcolor = QColor(14,99,128);
+        break;
+        case 9:
+            rcolor = QColor(255,165,0);
+        break;
+    }
+    switch(dir) {
+        case 1:
+            r = QRect(rect.x()+3,rect.y()+2,13,16);
+        break;
+        case 2:
+            r = QRect(rect.x()+2,rect.y()+3,16,13);
+        break;
+        case 3:
+            r = QRect(rect.x()+3,rect.y()+1,13,16);
+        break;
+        case 4:
+            r = QRect(rect.x()+1,rect.y()+3,16,13);
+        break;
+    }
+    p.setBrush(rcolor);
+    p.setPen(rcolor);
+    p.drawRect(r);
+    p.drawPixmap(rect,currentImg);
+}
+
 QString Tank::getName()
 {
     return this->name;
@@ -81,6 +146,11 @@ QString Tank::toString()
 {
     return this->name + "#" + QString::number(rect.x(),'f',0)+"#"+QString::number(rect.y(),'f',0)+"#"+
             QString::number(dir,'f',0)+"#";
+}
+
+QPixmap Tank::getIMG()
+{
+    return this->currentImg;
 }
 
 void Tank::setAll(int x, int y, int dir)
@@ -97,6 +167,11 @@ void Tank::setMoved(bool m)
 void Tank::setSpeed(int speed)
 {
     this->speed = speed;
+}
+
+void Tank::setColor(int color)
+{
+    this->color = color;
 }
 
 int Tank::getSpeed()

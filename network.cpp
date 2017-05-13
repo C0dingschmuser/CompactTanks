@@ -79,13 +79,17 @@ void Network::send(QString data)
 
 void Network::fetchTCP(QString data)
 {
-    QStringList list = data.split("#"); //max: 11
+    QStringList list = data.split("#");
     int m = list.at(0).toInt();
     if(list.at(1)!=ownTank->getName()) {
         switch(m) {
+            case 0: //farbe setzen
+                ownTank->setColor(list.at(1).toInt());
+            break;
             case 1: //spieler hinzufügen
                 {
                     Tank *t = new Tank(QRect(-200,-200,20,20),list.at(1));
+                    t->setColor(list.at(5).toInt());
                     players.append(t);
                     emit newPlayer(t);
                 }
@@ -128,7 +132,7 @@ void Network::fetchUDP(QString data)
             case 0: //pos
                 {
                     Tank *tmp = sucheTank(list.at(1));
-                    tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),0);
+                    tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
                 }
             break;
             case 1: //bulletsync
