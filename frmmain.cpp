@@ -2,7 +2,7 @@
 #include "ui_frmmain.h"
 
 FrmMain::FrmMain(QWidget *parent) :
-    QOpenGLWidget(parent),
+    QWidget(parent),
     ui(new Ui::FrmMain)
 {
     ui->setupUi(this);
@@ -20,7 +20,6 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(network,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(network,SIGNAL(delBullet(int)),this,SLOT(on_delBullet(int)));
     connect(network,SIGNAL(syncBullet(int,int,int)),this,SLOT(on_syncBullet(int,int,int)));
-    setAutoFillBackground(false);
     t_draw->start(10);
 }
 
@@ -87,12 +86,8 @@ void FrmMain::paintEvent(QPaintEvent *e)
     int viewRange=ownTank->getViewRange();
     QRect viewRect = QRect(ownTank->getRect().center().x()-viewRange-10,ownTank->getRect().center().y()-viewRange-10,
                             (viewRange*2)+10,(viewRange*2)+10);
-    QPainter painter;
-    painter.begin(this);
-    painter.setPen(Qt::white);
-    painter.setBrush(Qt::white);
-    painter.drawRect(0,0,1280,720);
-    //painter.setRenderHint(QPainter::HighQualityAntialiasing);
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::HighQualityAntialiasing);
     ownTank->drawTank(painter);
     for(int i=0;i<tanks.size();i++) {
         if(tanks[i]->getRect().intersects(viewRect)) {
@@ -114,17 +109,14 @@ void FrmMain::paintEvent(QPaintEvent *e)
     }
     //painter.setBrush(Qt::transparent);
     //painter.drawRect(viewRect);
-    painter.setPen(Qt::black);
-    painter.setBrush(Qt::black);
     QPainterPath path;
     QPainterPath inner;
     path.addRect(0,0,1280,720);
     inner.addEllipse(ownTank->getRect().center(),viewRange,viewRange);
     path = path.subtracted(inner);
-    painter.fillPath(path,Qt::black);
+    painter.fillPath(path,QBrush(QColor(255, 255, 255, 255)));
     painter.setBrush(Qt::transparent);
     painter.drawEllipse(ownTank->getRect().center(),viewRange,viewRange);
-    painter.end();
 
 }
 

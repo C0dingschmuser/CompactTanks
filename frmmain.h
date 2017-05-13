@@ -1,6 +1,6 @@
 #ifndef FRMMAIN_H
 #define FRMMAIN_H
-#include <QOpenGLWidget>
+#include <QWidget>
 #include <QPainter>
 #include <QKeyEvent>
 #include <QInputDialog>
@@ -16,7 +16,7 @@ namespace Ui {
 class FrmMain;
 }
 
-class FrmMain : public QOpenGLWidget
+class FrmMain : public QWidget
 {
     Q_OBJECT
 
