@@ -39,28 +39,28 @@ QRect Tank::getRect()
 
 void Tank::w()
 {
-    currentImg = imgs[0];
+    //currentImg = imgs[0];
     this->dir = 1;
     this->rect.moveTo(rect.x(),rect.y()-speed);
 }
 
 void Tank::a()
 {
-    currentImg = imgs[1];
+    //currentImg = imgs[1];
     this->dir = 2;
     this->rect.moveTo(rect.x()-speed,rect.y());
 }
 
 void Tank::s()
 {
-    currentImg = imgs[2];
+    //currentImg = imgs[2];
     this->dir = 3;
     this->rect.moveTo(rect.x(),rect.y()+speed);
 }
 
 void Tank::d()
 {
-    currentImg = imgs[3];
+    //currentImg = imgs[3];
     this->dir = 4;
     this->rect.moveTo(rect.x()+speed,rect.y());
 }
@@ -134,7 +134,7 @@ void Tank::drawTank(QPainter &p)
     p.setBrush(rcolor);
     p.setPen(rcolor);
     p.drawRect(r);
-    p.drawPixmap(rect,currentImg);
+    p.drawPixmap(rect,imgs[dir-1]);
 }
 
 QString Tank::getName()

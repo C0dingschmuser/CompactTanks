@@ -87,7 +87,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     QRect viewRect = QRect(ownTank->getRect().center().x()-viewRange-10,ownTank->getRect().center().y()-viewRange-10,
                             (viewRange*2)+10,(viewRange*2)+10);
     QPainter painter(this);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
+    //painter.setRenderHint(QPainter::HighQualityAntialiasing);
     ownTank->drawTank(painter);
     for(int i=0;i<tanks.size();i++) {
         if(tanks[i]->getRect().intersects(viewRect)) {
@@ -114,7 +114,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     path.addRect(0,0,1280,720);
     inner.addEllipse(ownTank->getRect().center(),viewRange,viewRange);
     path = path.subtracted(inner);
-    painter.fillPath(path,QBrush(QColor(255, 255, 255, 255)));
+    painter.fillPath(path,Qt::black);
     painter.setBrush(Qt::transparent);
     painter.drawEllipse(ownTank->getRect().center(),viewRange,viewRange);
 

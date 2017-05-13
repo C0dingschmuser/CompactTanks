@@ -83,6 +83,18 @@ void Network::fetchTCP(QString data)
     int m = list.at(0).toInt();
     if(list.at(1)!=ownTank->getName()) {
         switch(m) {
+            case -3: //pos
+                {
+                    Tank *tmp = sucheTank(list.at(1));
+                    tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                }
+            break;
+            case -2: //bulletsync
+                emit syncBullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt());
+            break;
+            case -1: //viewRange
+                ownTank->setViewRange(list.at(1).toInt());
+            break;
             case 0: //farbe setzen
                 ownTank->setColor(list.at(1).toInt());
             break;
@@ -126,20 +138,20 @@ void Network::fetchTCP(QString data)
 void Network::fetchUDP(QString data)
 {
     QStringList list = data.split("#"); //max: 11
-    if(list.at(1)!=ownTank->getName()) {
+    if(list.at(1)==ownTank->getName()) {
         int m = list.at(0).toInt();
         switch(m) {
             case 0: //pos
                 {
-                    Tank *tmp = sucheTank(list.at(1));
-                    tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                    Tank *tmp = sucheTank(list.at(2));
+                    tmp->setAll(list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt());
                 }
             break;
             case 1: //bulletsync
-                emit syncBullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt());
+                emit syncBullet(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
             break;
             case 2: //viewRange
-                ownTank->setViewRange(list.at(1).toInt());
+                ownTank->setViewRange(list.at(2).toInt());
             break;
         }
     }
