@@ -32,13 +32,14 @@ void Bullet::setColl(bool coll)
 
 void Bullet::update()
 {
-    this->elapsed = 0.1;
-    this->x += x2*vel*elapsed;
-    this->y += y2*vel*elapsed;
+    elapsed += 1;
+    this->x += x2*vel*0.1;
+    this->y += y2*vel*0.1;
 }
 
-void Bullet::sync(int x, int y)
+void Bullet::sync(int x, int y,int elapsed)
 {
+    this->elapsed = elapsed;
     this->x = x;
     this->y = y;
 }
@@ -66,4 +67,9 @@ QColor Bullet::getColor()
 int Bullet::getImpactID()
 {
     return this->onImpact;
+}
+
+int Bullet::getElapsed()
+{
+    return this->elapsed;
 }

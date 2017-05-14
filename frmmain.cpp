@@ -22,7 +22,9 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(network,SIGNAL(newlvlObj(int,int,int,int)),this,SLOT(on_newlvlObj(int,int,int,int)));
     connect(network,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(network,SIGNAL(delBullet(int)),this,SLOT(on_delBullet(int)));
-    connect(network,SIGNAL(syncBullet(int,int,int)),this,SLOT(on_syncBullet(int,int,int)));
+    connect(network,SIGNAL(syncBullet(int,int,int,int)),this,SLOT(on_syncBullet(int,int,int,int)));
+    connect(network,SIGNAL(delObjs()),this,SLOT(on_dellObjs()));
+    connect(network,SIGNAL(disconnect()),this,SLOT(on_disconnect()));
     t_draw->start(10);
 }
 
@@ -41,6 +43,11 @@ FrmMain::~FrmMain()
     delete aim;
     delete mpos;
     delete ui;
+}
+
+void FrmMain::on_disconnect()
+{
+    QApplication::exit();
 }
 
 void FrmMain::on_newPlayer(Tank *t)
@@ -66,16 +73,24 @@ void FrmMain::on_delBullet(int pos)
     }
 }
 
-void FrmMain::on_syncBullet(int pos, int x, int y)
+void FrmMain::on_syncBullet(int pos, int x, int y, int elapsed)
 {
     if(bullets.size()-1>=pos) {
-        bullets[pos]->sync(x,y);
+        bullets[pos]->sync(x,y,elapsed);
     }
 }
 
 void FrmMain::on_delPlayer(int pos)
 {
     tanks.removeAt(pos);
+}
+
+void FrmMain::on_dellObjs()
+{
+    for(int i=0;i<lvlObjs.size();i++) {
+        delete lvlObjs[i];
+    }
+    lvlObjs.resize(0);
 }
 
 void FrmMain::on_tdraw()
@@ -101,6 +116,14 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.setPen(Qt::white);
     painter.setBrush(Qt::white);
     painter.drawRect(0,0,1280,720);
+    painter.setPen(Qt::black);
+    painter.setBrush(Qt::black);
+    for(int i=0;i<bullets.size();i++) {
+        bullets[i]->update();
+        if(bullets[i]->get().intersects(viewRect)) {
+            painter.drawRect(bullets[i]->get());
+        }
+    }
     ownTank->drawTank(painter);
     for(int i=0;i<tanks.size();i++) {
         if(tanks[i]->getRect().intersects(viewRect)) {
@@ -113,12 +136,6 @@ void FrmMain::paintEvent(QPaintEvent *e)
         //if(lvlObjs[i]->getRect().intersects(viewRect)) {
             painter.drawRect(lvlObjs[i]->getRect());
         //}
-    }
-    for(int i=0;i<bullets.size();i++) {
-        bullets[i]->update();
-        if(bullets[i]->get().intersects(viewRect)) {
-            painter.drawRect(bullets[i]->get());
-        }
     }
     //painter.setBrush(Qt::transparent);
     //painter.drawRect(viewRect);

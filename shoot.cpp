@@ -44,9 +44,15 @@ void Shoot::on_tmain()
                 mpos->setX(t->getRect().center().x()+30);
                 mpos->setY(t->getRect().center().y());
         }
+        int v;
+        if(t->getMoved()) {
+            v = w->getVel()+t->getSpeed();
+        } else {
+            v = w->getVel();
+        }
         network->send("|1#"+t->getName()+"#"+QString::number(mpos->x(),'f',0)+
                       "#"+QString::number(mpos->y(),'f',0)+"#"+
-                      QString::number(w->getVel(),'f',0)+"#");
+                      QString::number(v,'f',0)+"#");
     }
 }
 

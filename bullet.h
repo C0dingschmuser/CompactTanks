@@ -11,12 +11,13 @@ public:
     Bullet(int x, int y, double x2, double y2, int vel, QString shooter, QColor color = Qt::black,int onImpact = 0);
     void setColl(bool coll);
     void update();
-    void sync(int x,int y);
+    void sync(int x, int y, int elapsed);
     bool getColl();
     QString getShooter();
     QRect get();
     QColor getColor();
     int getImpactID();
+    int getElapsed();
 private:
     QColor color;
     double x;
@@ -26,7 +27,7 @@ private:
     int vel;
     int onImpact;
     QString shooter;
-    double elapsed;
+    int elapsed;
     bool coll;
 };
 

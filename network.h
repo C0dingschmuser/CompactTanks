@@ -39,8 +39,10 @@ signals:
     void delPlayer(int i);
     void newBullet(Bullet *b);
     void delBullet(int pos);
-    void syncBullet(int pos,int x,int y);
+    void syncBullet(int pos,int x,int y, int elapsed);
     void setViewRange(int vr);
+    void delObjs();
+    void disconnect();
 public slots:
 };
 

@@ -109,15 +109,19 @@ void Movement::keyReleaseEvent(QKeyEvent *e)
 {
     if(e->key()==Qt::Key_W) {
         t_moveW->stop();
+        ownTank->setMoved(false);
     }
     if(e->key()==Qt::Key_A) {
         t_moveA->stop();
+        ownTank->setMoved(false);
     }
     if(e->key()==Qt::Key_S) {
         t_moveS->stop();
+        ownTank->setMoved(false);
     }
     if(e->key()==Qt::Key_D) {
         t_moveD->stop();
+        ownTank->setMoved(false);
     }
     if(e->key()==Qt::Key_Tab) {
         //tab = false;

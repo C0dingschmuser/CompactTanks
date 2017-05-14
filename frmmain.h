@@ -5,6 +5,7 @@
 #include <QKeyEvent>
 #include <QInputDialog>
 #include <QTimer>
+#include <QMessageBox>
 #include "bullet.h"
 #include "tank.h"
 #include "movement.h"
@@ -30,7 +31,9 @@ private slots:
     void on_newlvlObj(int x,int y,int w,int h);
     void on_newBullet(Bullet *b);
     void on_delBullet(int pos);
-    void on_syncBullet(int pos,int x,int y);
+    void on_syncBullet(int pos,int x,int y, int elapsed);
+    void on_dellObjs();
+    void on_disconnect();
 private:
     Ui::FrmMain *ui;
     Tank *ownTank;

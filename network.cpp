@@ -17,6 +17,7 @@ Network::Network(Tank *ownTank, QVector<Tank *> t, QHostAddress ip,QObject *pare
     tcpSocket->flush();
     connect(udpSocketListen,SIGNAL(readyRead()),this,SLOT(on_udpRecv()));
     connect(tcpSocket,SIGNAL(readyRead()),this,SLOT(on_tcpRecv()));
+    connect(tcpSocket,SIGNAL(disconnected()),this,SIGNAL(disconnect()));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
     //t_main->start(10);
 }
@@ -90,7 +91,7 @@ void Network::fetchTCP(QString data)
                 }
             break;
             case -2: //bulletsync
-                emit syncBullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt());
+                emit syncBullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
             break;
             case -1: //viewRange
                 ownTank->setViewRange(list.at(1).toInt());
@@ -133,6 +134,11 @@ void Network::fetchTCP(QString data)
                     emit delBullet(list.at(1).toInt());
                 }
             break;
+            case 6: //del all objs
+                {
+                    emit delObjs();
+                }
+            break;
         }
     }
 }
@@ -150,7 +156,7 @@ void Network::fetchUDP(QString data)
                 }
             break;
             case 1: //bulletsync
-                emit syncBullet(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                emit syncBullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
             break;
             case 2: //viewRange
                 ownTank->setViewRange(list.at(2).toInt());
