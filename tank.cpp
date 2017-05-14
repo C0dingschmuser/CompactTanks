@@ -11,6 +11,7 @@ Tank::Tank(QRect rect, QString name)
     this->name = name;
     speed = 3;
     dir = 1;
+    angle = 0;
     kills = 0;
     deaths = 0;
     moved = true;
@@ -40,6 +41,9 @@ QRect Tank::getRect()
 void Tank::w()
 {
     //currentImg = imgs[0];
+    rect.setWidth(40);
+    rect.setHeight(50);
+    angle = 90;
     this->dir = 1;
     this->rect.moveTo(rect.x(),rect.y()-speed);
 }
@@ -47,6 +51,9 @@ void Tank::w()
 void Tank::a()
 {
     //currentImg = imgs[1];
+    rect.setWidth(50);
+    rect.setHeight(40);
+    angle = 180;
     this->dir = 2;
     this->rect.moveTo(rect.x()-speed,rect.y());
 }
@@ -54,6 +61,9 @@ void Tank::a()
 void Tank::s()
 {
     //currentImg = imgs[2];
+    rect.setWidth(40);
+    rect.setHeight(50);
+    angle = 270;
     this->dir = 3;
     this->rect.moveTo(rect.x(),rect.y()+speed);
 }
@@ -61,6 +71,9 @@ void Tank::s()
 void Tank::d()
 {
     //currentImg = imgs[3];
+    rect.setWidth(50);
+    rect.setHeight(40);
+    angle = 360;
     this->dir = 4;
     this->rect.moveTo(rect.x()+speed,rect.y());
 }
@@ -119,16 +132,16 @@ void Tank::drawTank(QPainter &p)
     }
     switch(dir) {
         case 1:
-            r = QRect(rect.x()+3,rect.y()+2,14,17);
+            r = QRect(rect.x()+5,rect.y()+14,30,35);
         break;
         case 2:
-            r = QRect(rect.x()+2,rect.y()+3,18,14);
+            r = QRect(rect.x()+14,rect.y()+5,35,30);
         break;
         case 3:
-            r = QRect(rect.x()+3,rect.y()+1,14,17);
+            r = QRect(rect.x()+5,rect.y()+1,30,35);
         break;
         case 4:
-            r = QRect(rect.x()+1,rect.y()+3,17,14);
+            r = QRect(rect.x()+1,rect.y()+5,35,30);
         break;
     }
     p.setBrush(rcolor);
@@ -155,6 +168,23 @@ QPixmap Tank::getIMG()
 
 void Tank::setAll(int x, int y, int dir)
 {
+    switch(dir) {
+        case 1:
+            rect.setWidth(40);
+            rect.setHeight(50);
+        break;
+        case 2:
+            rect.setWidth(50);
+            rect.setHeight(40);
+        break;
+        case 3:
+            rect.setWidth(40);
+            rect.setHeight(50);
+        break;
+        case 4:
+            rect.setWidth(50);
+            rect.setHeight(40);
+    }
     this->dir = dir;
     this->rect.moveTo(x,y);
 }
@@ -172,6 +202,21 @@ void Tank::setSpeed(int speed)
 void Tank::setColor(int color)
 {
     this->color = color;
+}
+
+void Tank::setAngle(int angle)
+{
+    this->angle += angle;
+    if(this->angle<0) {
+        this->angle=360;
+    } else if(this->angle>360) {
+        this->angle=0;
+    }
+}
+
+int Tank::getAngle()
+{
+    return angle;
 }
 
 int Tank::getSpeed()
@@ -202,4 +247,13 @@ int Tank::getViewRange()
 void Tank::setViewRange(int vr)
 {
     this->viewRange = vr;
+}
+
+QLineF Tank::getBarrel()
+{
+    QLineF barrel;
+    barrel.setP1(QPoint(rect.center().x(),rect.center().y()));
+    barrel.setP2(QPoint(rect.center().x(),rect.center().y()-15));
+    barrel.setAngle(angle);
+    return barrel;
 }

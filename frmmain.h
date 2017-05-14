@@ -41,6 +41,7 @@ private:
     Movement *move;
     Network *network;
     Shoot *shoot;
+    QPoint *aim;
     QPoint *mpos;
 protected:
     void paintEvent(QPaintEvent *e) override;

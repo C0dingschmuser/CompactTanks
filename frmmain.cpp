@@ -9,8 +9,9 @@ FrmMain::FrmMain(QWidget *parent) :
     setUpdateBehavior(UpdateBehavior(PartialUpdate));
     initializeGL();
     QString name = QInputDialog::getText(this,"Name","Name:");
+    aim = new QPoint();
     mpos = new QPoint();
-    ownTank = new Tank(QRect(50,50,20,20),name);
+    ownTank = new Tank(QRect(50,50,40,40),name);
     move = new Movement(ownTank);
     network = new Network(ownTank,tanks,QHostAddress("94.114.254.180")); //ip noch ändern!
     shoot = new Shoot(ownTank,network);
@@ -37,6 +38,7 @@ FrmMain::~FrmMain()
     delete ownTank;
     delete move;
     delete network;
+    delete aim;
     delete mpos;
     delete ui;
 }
@@ -78,8 +80,10 @@ void FrmMain::on_delPlayer(int pos)
 
 void FrmMain::on_tdraw()
 {
-    mpos->setX(this->mapFromGlobal(QCursor::pos()).x());
-    mpos->setY(this->mapFromGlobal(QCursor::pos()).y());
+    this->mpos->setX(this->mapFromGlobal(QCursor::pos()).x());
+    this->mpos->setY(this->mapFromGlobal(QCursor::pos()).y());
+    this->aim->setX(ownTank->getRect().x()+mpos->x()-400);
+    this->aim->setY(ownTank->getRect().y()+mpos->y()-220);
     update();
 }
 
@@ -90,6 +94,10 @@ void FrmMain::paintEvent(QPaintEvent *e)
                             (viewRange*2)+10,(viewRange*2)+10);
     QPainter painter(this);
     //painter.setRenderHint(QPainter::HighQualityAntialiasing);
+    painter.translate((ownTank->getRect().x()-600)*-1,(ownTank->getRect().y()-400)*-1);
+    painter.setPen(Qt::black);
+    painter.setBrush(Qt::black);
+    painter.drawRect(-400,-220,2000,2500);
     painter.setPen(Qt::white);
     painter.setBrush(Qt::white);
     painter.drawRect(0,0,1280,720);
@@ -102,9 +110,9 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
     for(int i=0;i<lvlObjs.size();i++) {
-        if(lvlObjs[i]->getRect().intersects(viewRect)) {
+        //if(lvlObjs[i]->getRect().intersects(viewRect)) {
             painter.drawRect(lvlObjs[i]->getRect());
-        }
+        //}
     }
     for(int i=0;i<bullets.size();i++) {
         bullets[i]->update();
@@ -119,9 +127,15 @@ void FrmMain::paintEvent(QPaintEvent *e)
     path.addRect(0,0,1280,720);
     inner.addEllipse(ownTank->getRect().center(),viewRange,viewRange);
     path = path.subtracted(inner);
-    painter.fillPath(path,Qt::black);
+    painter.fillPath(path,QBrush(QColor(100,100,100,200)));
     painter.setBrush(Qt::transparent);
     painter.drawEllipse(ownTank->getRect().center(),viewRange,viewRange);
+    painter.setPen(Qt::red);
+    painter.setBrush(Qt::red);
+    painter.drawRect(-10,-10,1300,10);
+    painter.drawRect(-10,720,1300,10);
+    painter.drawRect(-10,-10,10,730);
+    painter.drawRect(1280,-10,10,730);
 
 }
 
@@ -137,10 +151,10 @@ void FrmMain::keyReleaseEvent(QKeyEvent *e)
 
 void FrmMain::mousePressEvent(QMouseEvent *e)
 {
-    shoot->MousePressEvent(e,mpos);
+    shoot->MousePressEvent(e);
 }
 
 void FrmMain::mouseReleaseEvent(QMouseEvent *e)
 {
-    shoot->MouseReleaseEvent(e,mpos);
+    shoot->MouseReleaseEvent(e);
 }

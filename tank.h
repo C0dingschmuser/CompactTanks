@@ -6,6 +6,7 @@
 #include <QString>
 #include <QVector>
 #include <QPointF>
+#include <QLineF>
 #include <QPixmap>
 #include <QPainter>
 
@@ -20,6 +21,7 @@ private:
     int deaths;
     int dir;
     int viewRange;
+    int angle;
     bool moved;
     QVector <QPixmap> imgs;
     QPixmap currentImg;
@@ -38,11 +40,13 @@ public:
     void setDK(int kills,int deaths);
     void setSpeed(int speed);
     void setColor(int color);
+    void setAngle(int angle);
     int getSpeed();
     int getKills();
     int getDeaths();
     int getDir();
     int getViewRange();
+    int getAngle();
     void setAll(int x, int y, int dir);
     void setMoved(bool m);
     void setViewRange(int vr);
@@ -50,6 +54,7 @@ public:
     QString getName();
     QString toString();
     QPixmap getIMG();
+    QLineF getBarrel();
 };
 
 #endif // TANK_H

@@ -28,8 +28,8 @@ private:
     Tank *t;
 public:
     explicit Shoot(Tank *t, Network *n, QObject *parent = 0);
-    void MousePressEvent(QMouseEvent *e, QPoint *mpos);
-    void MouseReleaseEvent(QMouseEvent *e, QPoint *mpos);
+    void MousePressEvent(QMouseEvent *e);
+    void MouseReleaseEvent(QMouseEvent *e);
     void setMpos(QPoint mpos);
 
 signals:
