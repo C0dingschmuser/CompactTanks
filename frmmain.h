@@ -34,6 +34,8 @@ private slots:
     void on_syncBullet(int pos,int x,int y, int elapsed);
     void on_dellObjs();
     void on_disconnect();
+    void on_tbullet();
+    void on_death();
 private:
     Ui::FrmMain *ui;
     Tank *ownTank;
@@ -41,6 +43,7 @@ private:
     QVector <Terrain*> lvlObjs;
     QVector <Bullet*> bullets;
     QTimer *t_draw;
+    QTimer *t_bullet;
     Movement *move;
     Network *network;
     Shoot *shoot;

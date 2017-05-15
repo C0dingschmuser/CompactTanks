@@ -32,6 +32,7 @@ public:
     explicit Network(Tank *ownTank, QVector<Tank*> t, QHostAddress ip, QObject *parent = 0);
     ~Network();
     void send(QString data);
+    int getDistance(QPoint p1,QPoint p2);
 
 signals:
     void newPlayer(Tank *t);
@@ -43,6 +44,7 @@ signals:
     void setViewRange(int vr);
     void delObjs();
     void disconnect();
+    void playerDeath();
 public slots:
 };
 

@@ -41,8 +41,6 @@ QRect Tank::getRect()
 void Tank::w()
 {
     //currentImg = imgs[0];
-    rect.setWidth(40);
-    rect.setHeight(50);
     angle = 90;
     this->dir = 1;
     this->rect.moveTo(rect.x(),rect.y()-speed);
@@ -51,8 +49,6 @@ void Tank::w()
 void Tank::a()
 {
     //currentImg = imgs[1];
-    rect.setWidth(50);
-    rect.setHeight(40);
     angle = 180;
     this->dir = 2;
     this->rect.moveTo(rect.x()-speed,rect.y());
@@ -61,8 +57,6 @@ void Tank::a()
 void Tank::s()
 {
     //currentImg = imgs[2];
-    rect.setWidth(40);
-    rect.setHeight(50);
     angle = 270;
     this->dir = 3;
     this->rect.moveTo(rect.x(),rect.y()+speed);
@@ -71,8 +65,6 @@ void Tank::s()
 void Tank::d()
 {
     //currentImg = imgs[3];
-    rect.setWidth(50);
-    rect.setHeight(40);
     angle = 360;
     this->dir = 4;
     this->rect.moveTo(rect.x()+speed,rect.y());
@@ -132,16 +124,16 @@ void Tank::drawTank(QPainter &p)
     }
     switch(dir) {
         case 1:
-            r = QRect(rect.x()+5,rect.y()+14,30,35);
+            r = QRect(rect.x()+3,rect.y()+2,14,17);
         break;
         case 2:
-            r = QRect(rect.x()+14,rect.y()+5,35,30);
+            r = QRect(rect.x()+2,rect.y()+3,18,14);
         break;
         case 3:
-            r = QRect(rect.x()+5,rect.y()+1,30,35);
+            r = QRect(rect.x()+3,rect.y()+1,14,17);
         break;
         case 4:
-            r = QRect(rect.x()+1,rect.y()+5,35,30);
+            r = QRect(rect.x()+1,rect.y()+3,17,14);
         break;
     }
     p.setBrush(rcolor);

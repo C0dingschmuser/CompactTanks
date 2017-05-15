@@ -78,6 +78,11 @@ void Network::send(QString data)
     tcpSocket->flush();
 }
 
+int Network::getDistance(QPoint p1, QPoint p2)
+{
+    return abs((int)sqrt(pow(p1.x()-p2.x(),2)+pow(p1.y()-p2.y(),2)));
+}
+
 void Network::fetchTCP(QString data)
 {
     QStringList list = data.split("#");
@@ -138,6 +143,10 @@ void Network::fetchTCP(QString data)
                 {
                     emit delObjs();
                 }
+            break;
+            case 7: //playerdeath
+                ownTank->setAll(list.at(2).toInt(),list.at(3).toInt(),1);
+                emit playerDeath();
             break;
         }
     }

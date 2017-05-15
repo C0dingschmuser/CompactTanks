@@ -27,7 +27,7 @@ private:
     QPoint *mpos;
     Tank *t;
 public:
-    explicit Shoot(Tank *t, Network *n, QObject *parent = 0);
+    explicit Shoot(Tank *t, Network *n, QPoint *aim,QObject *parent = 0);
     void MousePressEvent(QMouseEvent *e);
     void MouseReleaseEvent(QMouseEvent *e);
     void setMpos(QPoint mpos);

@@ -39,7 +39,9 @@ void Bullet::update()
 
 void Bullet::sync(int x, int y,int elapsed)
 {
-    this->elapsed = elapsed;
+    if(elapsed!=-1) {
+        this->elapsed = elapsed;
+    }
     this->x = x;
     this->y = y;
 }
@@ -72,4 +74,9 @@ int Bullet::getImpactID()
 int Bullet::getElapsed()
 {
     return this->elapsed;
+}
+
+int Bullet::getVel()
+{
+    return this->vel*0.1;
 }

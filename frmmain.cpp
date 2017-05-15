@@ -11,12 +11,14 @@ FrmMain::FrmMain(QWidget *parent) :
     QString name = QInputDialog::getText(this,"Name","Name:");
     aim = new QPoint();
     mpos = new QPoint();
-    ownTank = new Tank(QRect(50,50,40,40),name);
+    ownTank = new Tank(QRect(-200,-200,40,40),name);
     move = new Movement(ownTank);
     network = new Network(ownTank,tanks,QHostAddress("94.114.254.180")); //ip noch ändern!
-    shoot = new Shoot(ownTank,network);
+    shoot = new Shoot(ownTank,network,aim);
     t_draw = new QTimer();
+    t_bullet = new QTimer();
     connect(t_draw,SIGNAL(timeout()),this,SLOT(on_tdraw()));
+    connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
     connect(network,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*))); //bei neuem spieler aufrufen
     connect(network,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
     connect(network,SIGNAL(newlvlObj(int,int,int,int)),this,SLOT(on_newlvlObj(int,int,int,int)));
@@ -26,6 +28,7 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(network,SIGNAL(delObjs()),this,SLOT(on_dellObjs()));
     connect(network,SIGNAL(disconnect()),this,SLOT(on_disconnect()));
     t_draw->start(10);
+    t_bullet->start(10);
 }
 
 FrmMain::~FrmMain()
@@ -93,12 +96,17 @@ void FrmMain::on_dellObjs()
     lvlObjs.resize(0);
 }
 
+void FrmMain::on_tbullet()
+{
+    if(bullets.size()>0) {
+        for(int i=0;i<bullets.size();i++) {
+            bullets[i]->update();
+        }
+    }
+}
+
 void FrmMain::on_tdraw()
 {
-    this->mpos->setX(this->mapFromGlobal(QCursor::pos()).x());
-    this->mpos->setY(this->mapFromGlobal(QCursor::pos()).y());
-    this->aim->setX(ownTank->getRect().x()+mpos->x()-400);
-    this->aim->setY(ownTank->getRect().y()+mpos->y()-220);
     update();
 }
 
@@ -110,6 +118,10 @@ void FrmMain::paintEvent(QPaintEvent *e)
     QPainter painter(this);
     //painter.setRenderHint(QPainter::HighQualityAntialiasing);
     painter.translate((ownTank->getRect().x()-600)*-1,(ownTank->getRect().y()-400)*-1);
+    this->mpos->setX(this->mapFromGlobal(QCursor::pos()).x());
+    this->mpos->setY(this->mapFromGlobal(QCursor::pos()).y());
+    this->aim->setX(ownTank->getRect().x()+mpos->x()-600);
+    this->aim->setY(ownTank->getRect().y()+mpos->y()-400);
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
     painter.drawRect(-400,-220,2000,2500);
@@ -119,16 +131,16 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
     for(int i=0;i<bullets.size();i++) {
-        bullets[i]->update();
-        if(bullets[i]->get().intersects(viewRect)) {
-            painter.drawRect(bullets[i]->get());
-        }
+        //bullets[i]->update();
+        //if(bullets[i]->get().intersects(viewRect)) {
+            painter.drawEllipse(bullets[i]->get().center(),5,5);
+        //}
     }
     ownTank->drawTank(painter);
     for(int i=0;i<tanks.size();i++) {
-        if(tanks[i]->getRect().intersects(viewRect)) {
+        //if(tanks[i]->getRect().intersects(viewRect)) {
             tanks[i]->drawTank(painter);
-        }
+        //}
     }
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
@@ -153,6 +165,12 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawRect(-10,720,1300,10);
     painter.drawRect(-10,-10,10,730);
     painter.drawRect(1280,-10,10,730);
+    painter.drawRect(QRect(aim->x(),aim->y(),10,10));
+
+}
+
+void FrmMain::on_death()
+{
 
 }
 
