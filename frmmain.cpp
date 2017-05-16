@@ -6,9 +6,14 @@ FrmMain::FrmMain(QWidget *parent) :
     ui(new Ui::FrmMain)
 {
     ui->setupUi(this);
-    setUpdateBehavior(UpdateBehavior(PartialUpdate));
+    //setUpdateBehavior(UpdateBehavior(PartialUpdate));
     initializeGL();
     QString name = QInputDialog::getText(this,"Name","Name:");
+    if(contains(name,"|#äöü.,-_<>")&&name.length()>8) {
+        QMessageBox box;
+        box.setText("Falsche Eingabe!");
+        QApplication::exit();
+    }
     aim = new QPoint();
     mpos = new QPoint();
     ownTank = new Tank(QRect(-200,-200,40,40),name);
@@ -112,11 +117,21 @@ void FrmMain::on_tdraw()
     update();
 }
 
+bool FrmMain::contains(QString data,QString c)
+{
+    bool ok = false;
+    for(int i=0;i<c.size();i++) {
+        if(data.contains(c.at(i))) {
+            ok = true;
+        }
+    }
+    return ok;
+}
+
 void FrmMain::paintEvent(QPaintEvent *e)
 {
-    int viewRange=ownTank->getViewRange();
-    QRect viewRect = QRect(ownTank->getRect().center().x()-viewRange-10,ownTank->getRect().center().y()-viewRange-10,
-                            (viewRange*2)+10,(viewRange*2)+10);
+    QRect viewRect = QRect(ownTank->getRect().center().x()-620,
+                           ownTank->getRect().center().y()-420,1280,720);
     QPainter painter(this);
     //painter.setRenderHint(QPainter::HighQualityAntialiasing);
     painter.translate((ownTank->getRect().x()-600)*-1,(ownTank->getRect().y()-400)*-1);
@@ -126,31 +141,31 @@ void FrmMain::paintEvent(QPaintEvent *e)
     this->aim->setY(ownTank->getRect().y()+mpos->y()-400);
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
-    painter.drawRect(-600,-500,3000,3000);
+    painter.drawRect(ownTank->getRect().center().x()-620,ownTank->getRect().center().y()-420,1281,720);
+    //painter.drawRect(-600,-500,6000,3000);
     painter.setPen(Qt::white);
     painter.setBrush(Qt::white);
-    painter.drawRect(0,0,1280,720);
+    painter.drawRect(0,0,2560,720);
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
     for(int i=0;i<bullets.size();i++) {
-        //bullets[i]->update();
-        //if(bullets[i]->get().intersects(viewRect)) {
+        if(bullets[i]->get().intersects(viewRect)) {
             painter.drawEllipse(bullets[i]->get().center(),5,5);
-        //}
+        }
     }
-    ownTank->drawTank(painter);
+    ownTank->drawTank(painter,true);
     for(int i=0;i<tanks.size();i++) {
-        //if(tanks[i]->getRect().intersects(viewRect)) {
+        if(tanks[i]->getRect().intersects(viewRect)) {
             tanks[i]->move();
             tanks[i]->drawTank(painter);
-        //}
+        }
     }
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
     for(int i=0;i<lvlObjs.size();i++) {
-        //if(lvlObjs[i]->getRect().intersects(viewRect)) {
+        if(lvlObjs[i]->getRect().intersects(viewRect)) {
             painter.drawRect(lvlObjs[i]->getRect());
-        //}
+        }
     }
     //painter.setBrush(Qt::transparent);
     //painter.drawRect(viewRect);
@@ -164,11 +179,12 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawEllipse(ownTank->getRect().center(),viewRange,viewRange);*/
     painter.setPen(Qt::red);
     painter.setBrush(Qt::red);
-    painter.drawRect(-10,-10,1300,10);
-    painter.drawRect(-10,720,1300,10);
+    painter.drawRect(-10,-10,2580,10);
+    painter.drawRect(-10,720,2580,10);
     painter.drawRect(-10,-10,10,730);
-    painter.drawRect(1280,-10,10,730);
-    //painter.drawRect(QRect(aim->x(),aim->y(),10,10));
+    painter.drawRect(2560,-10,10,730);
+    //painter.drawRect(ownTank->getRect().center().x()-620,ownTank->getRect().center().y()-420,1280,720);
+    painter.drawRect(QRect(aim->x(),aim->y(),10,10));
 
 }
 

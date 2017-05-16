@@ -91,11 +91,13 @@ void Network::fetchTCP(QString data)
         switch(m) {
             case -3: //pos
                 {
-                    Tank *tmp = sucheTank(list.at(1));
-                    if(tmp->getRect().x()==-200) {
-                        tmp->teleport(list.at(2).toInt(),list.at(3).toInt());
-                    } else {
-                        tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                    if(list.size()>3) {
+                        Tank *tmp = sucheTank(list.at(1));
+                        if(tmp->getRect().x()==-200) {
+                            tmp->teleport(list.at(2).toInt(),list.at(3).toInt());
+                        } else {
+                            tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                        }
                     }
                 }
             break;
@@ -134,8 +136,10 @@ void Network::fetchTCP(QString data)
             break;
             case 4: //add bullet
                 {
-                    Bullet *b = new Bullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toDouble(),list.at(4).toDouble(),list.at(5).toInt(),list.at(6));
-                    emit newBullet(b);
+                    if(list.size()>5) {
+                        Bullet *b = new Bullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toDouble(),list.at(4).toDouble(),list.at(5).toInt(),list.at(6));
+                        emit newBullet(b);
+                    }
                 }
             break;
             case 5: //del bullet

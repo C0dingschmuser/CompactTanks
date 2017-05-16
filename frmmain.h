@@ -49,6 +49,7 @@ private:
     Shoot *shoot;
     QPoint *aim;
     QPoint *mpos;
+    bool contains(QString data, QString c);
 protected:
     void paintEvent(QPaintEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;

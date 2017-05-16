@@ -82,7 +82,7 @@ void Tank::setDK(int kills, int deaths)
     this->deaths = deaths;
 }
 
-void Tank::drawTank(QPainter &p)
+void Tank::drawTank(QPainter &p, bool barrel)
 {
     QColor rcolor;
     QRect r;
@@ -136,12 +136,19 @@ void Tank::drawTank(QPainter &p)
     p.setPen(rcolor);
     p.drawRect(r);
     p.drawPixmap(rect,imgs[dir-1]);
-    QPen pen;
-    pen.setColor(Qt::black);
-    pen.setWidth(5);
-    p.setPen(pen);
-    p.drawLine(getBarrel());
+    QFont f("Fixedsys");
+    p.setFont(f);
+    p.drawRect(rect.x(),rect.y()+rect.height()+1,9*name.length(),10);
     p.setPen(Qt::black);
+    p.drawText(QPoint(rect.x(),rect.y()+rect.height()+8),name);
+    if(barrel) {
+        QPen pen;
+        pen.setColor(Qt::black);
+        pen.setWidth(5);
+        p.setPen(pen);
+        p.drawLine(getBarrel());
+        p.setPen(Qt::black);
+    }
 }
 
 void Tank::move()

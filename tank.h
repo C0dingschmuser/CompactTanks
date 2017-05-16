@@ -52,7 +52,7 @@ public:
     void setAll(int x, int y, int dir);
     void setMoved(bool m);
     void setViewRange(int vr);
-    void drawTank(QPainter &p);
+    void drawTank(QPainter &p,bool barrel=false);
     void move();
     QString getName();
     QString toString();

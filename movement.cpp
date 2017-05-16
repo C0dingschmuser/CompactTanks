@@ -69,7 +69,7 @@ void Movement::on_tmoveD() {
     QRect r = ownTank->getRect();
     int s = ownTank->getSpeed();
     if(!t_moveW->isActive()&&!t_moveS->isActive()) {
-        if(r.right()<=1280-s*2) {
+        if(r.right()<=2560-s*2) {
             ownTank->d();
         }
         ownTank->setMoved(true);
@@ -96,7 +96,7 @@ void Movement::keyPressEvent(QKeyEvent *e)
         }
     }
     if(e->key()==Qt::Key_D) {
-        if(r.right()<=1280-s) {
+        if(r.right()<=2560-s) {
             t_moveD->start(10);
         }
     }
