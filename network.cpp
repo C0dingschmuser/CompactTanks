@@ -92,7 +92,11 @@ void Network::fetchTCP(QString data)
             case -3: //pos
                 {
                     Tank *tmp = sucheTank(list.at(1));
-                    tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                    if(tmp->getRect().x()==-200) {
+                        tmp->teleport(list.at(2).toInt(),list.at(3).toInt());
+                    } else {
+                        tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                    }
                 }
             break;
             case -2: //bulletsync
@@ -103,7 +107,7 @@ void Network::fetchTCP(QString data)
             break;
             case 0: //farbe setzen
                 ownTank->setColor(list.at(1).toInt());
-                ownTank->setAll(list.at(2).toInt(),list.at(3).toInt(),1);
+                ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());
                 t_main->start(10);
             break;
             case 1: //spieler hinzufügen
@@ -144,9 +148,13 @@ void Network::fetchTCP(QString data)
                     emit delObjs();
                 }
             break;
-            case 7: //playerdeath
-                ownTank->setAll(list.at(2).toInt(),list.at(3).toInt(),1);
+            case 7: //ownplayerdeath
+                ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());
                 emit playerDeath();
+            break;
+            case 8: //otherdeath
+                Tank *tmp = sucheTank(list.at(1));
+                tmp->teleport(list.at(2).toInt(),list.at(3).toInt());
             break;
         }
     }
@@ -161,7 +169,11 @@ void Network::fetchUDP(QString data)
             case 0: //pos
                 {
                     Tank *tmp = sucheTank(list.at(2));
-                    tmp->setAll(list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt());
+                    if(tmp->getRect().x()==-200) {
+                        tmp->teleport(list.at(3).toInt(),list.at(4).toInt());
+                    } else {
+                        tmp->setAll(list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt());
+                    }
                 }
             break;
             case 1: //bulletsync

@@ -41,7 +41,6 @@ QRect Tank::getRect()
 void Tank::w()
 {
     //currentImg = imgs[0];
-    angle = 90;
     this->dir = 1;
     this->rect.moveTo(rect.x(),rect.y()-speed);
 }
@@ -49,7 +48,6 @@ void Tank::w()
 void Tank::a()
 {
     //currentImg = imgs[1];
-    angle = 180;
     this->dir = 2;
     this->rect.moveTo(rect.x()-speed,rect.y());
 }
@@ -57,7 +55,6 @@ void Tank::a()
 void Tank::s()
 {
     //currentImg = imgs[2];
-    angle = 270;
     this->dir = 3;
     this->rect.moveTo(rect.x(),rect.y()+speed);
 }
@@ -65,7 +62,6 @@ void Tank::s()
 void Tank::d()
 {
     //currentImg = imgs[3];
-    angle = 360;
     this->dir = 4;
     this->rect.moveTo(rect.x()+speed,rect.y());
 }
@@ -140,6 +136,26 @@ void Tank::drawTank(QPainter &p)
     p.setPen(rcolor);
     p.drawRect(r);
     p.drawPixmap(rect,imgs[dir-1]);
+    QPen pen;
+    pen.setColor(Qt::black);
+    pen.setWidth(5);
+    p.setPen(pen);
+    p.drawLine(getBarrel());
+    p.setPen(Qt::black);
+}
+
+void Tank::move()
+{
+    if(rect.x()<targetPos.x()-speed-1) {
+        rect.moveTo(rect.x()+speed,rect.y());
+    } else if(rect.x()>targetPos.x()+speed-1) {
+        rect.moveTo(rect.x()-speed,rect.y());
+    }
+    if(rect.y()<targetPos.y()-speed-1) {
+        rect.moveTo(rect.x(),rect.y()+speed);
+    } else if(rect.y()>targetPos.y()+speed-1) {
+        rect.moveTo(rect.x(),rect.y()-speed);
+    }
 }
 
 QString Tank::getName()
@@ -158,27 +174,17 @@ QPixmap Tank::getIMG()
     return this->currentImg;
 }
 
+void Tank::teleport(int x, int y)
+{
+    this->dir = 1;
+    rect.moveTo(x,y);
+}
+
 void Tank::setAll(int x, int y, int dir)
 {
-    switch(dir) {
-        case 1:
-            rect.setWidth(40);
-            rect.setHeight(50);
-        break;
-        case 2:
-            rect.setWidth(50);
-            rect.setHeight(40);
-        break;
-        case 3:
-            rect.setWidth(40);
-            rect.setHeight(50);
-        break;
-        case 4:
-            rect.setWidth(50);
-            rect.setHeight(40);
-    }
+    targetPos = QPoint(x,y);
     this->dir = dir;
-    this->rect.moveTo(x,y);
+    //this->rect.moveTo(x,y);
 }
 
 void Tank::setMoved(bool m)
@@ -198,12 +204,12 @@ void Tank::setColor(int color)
 
 void Tank::setAngle(int angle)
 {
-    this->angle += angle;
-    if(this->angle<0) {
+    this->angle = angle;
+    /*if(this->angle<0) {
         this->angle=360;
     } else if(this->angle>360) {
         this->angle=0;
-    }
+    }*/
 }
 
 int Tank::getAngle()

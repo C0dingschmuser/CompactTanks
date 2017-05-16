@@ -57,7 +57,7 @@ void Movement::on_tmoveA() {
 void Movement::on_tmoveS() {
     QRect r = ownTank->getRect();
     int s = ownTank->getSpeed();
-    if(!t_moveA->isActive()||!t_moveD->isActive()) {
+    if(!t_moveA->isActive()&&!t_moveD->isActive()) {
         if(r.bottom()<=720-s*2) {
             ownTank->s();
         }

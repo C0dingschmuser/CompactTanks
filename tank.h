@@ -25,6 +25,7 @@ private:
     bool moved;
     QVector <QPixmap> imgs;
     QPixmap currentImg;
+    QPoint targetPos;
 public:
     Tank();
     Tank(QRect rect, QString name);
@@ -47,10 +48,12 @@ public:
     int getDir();
     int getViewRange();
     int getAngle();
+    void teleport(int x,int y);
     void setAll(int x, int y, int dir);
     void setMoved(bool m);
     void setViewRange(int vr);
     void drawTank(QPainter &p);
+    void move();
     QString getName();
     QString toString();
     QPixmap getIMG();

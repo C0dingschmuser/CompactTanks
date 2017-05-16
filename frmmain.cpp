@@ -107,6 +107,8 @@ void FrmMain::on_tbullet()
 
 void FrmMain::on_tdraw()
 {
+    ownTank->setAngle((int)qRadiansToDegrees(atan2(aim->y()-ownTank->getRect().center().y(),
+                                 aim->x()-ownTank->getRect().center().x()))*-1);
     update();
 }
 
@@ -124,7 +126,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     this->aim->setY(ownTank->getRect().y()+mpos->y()-400);
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
-    painter.drawRect(-400,-220,2000,2500);
+    painter.drawRect(-600,-500,3000,3000);
     painter.setPen(Qt::white);
     painter.setBrush(Qt::white);
     painter.drawRect(0,0,1280,720);
@@ -139,6 +141,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     ownTank->drawTank(painter);
     for(int i=0;i<tanks.size();i++) {
         //if(tanks[i]->getRect().intersects(viewRect)) {
+            tanks[i]->move();
             tanks[i]->drawTank(painter);
         //}
     }
@@ -151,21 +154,21 @@ void FrmMain::paintEvent(QPaintEvent *e)
     }
     //painter.setBrush(Qt::transparent);
     //painter.drawRect(viewRect);
-    QPainterPath path;
+    /*QPainterPath path;
     QPainterPath inner;
     path.addRect(0,0,1280,720);
     inner.addEllipse(ownTank->getRect().center(),viewRange,viewRange);
     path = path.subtracted(inner);
     painter.fillPath(path,QBrush(QColor(100,100,100,200)));
     painter.setBrush(Qt::transparent);
-    painter.drawEllipse(ownTank->getRect().center(),viewRange,viewRange);
+    painter.drawEllipse(ownTank->getRect().center(),viewRange,viewRange);*/
     painter.setPen(Qt::red);
     painter.setBrush(Qt::red);
     painter.drawRect(-10,-10,1300,10);
     painter.drawRect(-10,720,1300,10);
     painter.drawRect(-10,-10,10,730);
     painter.drawRect(1280,-10,10,730);
-    painter.drawRect(QRect(aim->x(),aim->y(),10,10));
+    //painter.drawRect(QRect(aim->x(),aim->y(),10,10));
 
 }
 
