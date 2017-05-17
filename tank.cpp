@@ -15,6 +15,7 @@ Tank::Tank(QRect rect, QString name)
     kills = 0;
     deaths = 0;
     moved = true;
+    visible = true;
     viewRange = 120;
     for(int i=0;i<4;i++) {
         QPixmap p = QPixmap(":/images/tank/tank"+QString::number(i+1,'f',0)+".png");
@@ -28,6 +29,11 @@ Tank::~Tank()
 
 }
 
+bool Tank::getVisible()
+{
+    return visible;
+}
+
 bool Tank::getMoved()
 {
     return this->moved;
@@ -36,6 +42,11 @@ bool Tank::getMoved()
 QRect Tank::getRect()
 {
     return this->rect;
+}
+
+void Tank::setVisible(bool visible)
+{
+    this->visible = visible;
 }
 
 void Tank::w()
@@ -120,16 +131,16 @@ void Tank::drawTank(QPainter &p, bool barrel)
     }
     switch(dir) {
         case 1:
-            r = QRect(rect.x()+3,rect.y()+2,14,17);
+            r = QRect(rect.x()+5,rect.y()+4,30,34);
         break;
         case 2:
-            r = QRect(rect.x()+2,rect.y()+3,18,14);
+            r = QRect(rect.x()+5,rect.y()+4,34,30);
         break;
         case 3:
-            r = QRect(rect.x()+3,rect.y()+1,14,17);
+            r = QRect(rect.x()+5,rect.y()+2,30,34);
         break;
         case 4:
-            r = QRect(rect.x()+1,rect.y()+3,17,14);
+            r = QRect(rect.x()+2,rect.y()+5,34,30);
         break;
     }
     p.setBrush(rcolor);

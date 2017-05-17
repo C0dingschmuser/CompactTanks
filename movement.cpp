@@ -1,7 +1,9 @@
 #include "movement.h"
 
-Movement::Movement(Tank *t, QObject *parent) : QObject(parent)
+Movement::Movement(Tank *t, int width, int height, QObject *parent) : QObject(parent)
 {
+    this->width = width;
+    this->height = height;
     ownTank = t;
     t_move = new QTimer();
     t_moveW = new QTimer();
@@ -58,7 +60,7 @@ void Movement::on_tmoveS() {
     QRect r = ownTank->getRect();
     int s = ownTank->getSpeed();
     if(!t_moveA->isActive()&&!t_moveD->isActive()) {
-        if(r.bottom()<=720-s*2) {
+        if(r.bottom()<=height-s*2) {
             ownTank->s();
         }
         ownTank->setMoved(true);
@@ -69,7 +71,7 @@ void Movement::on_tmoveD() {
     QRect r = ownTank->getRect();
     int s = ownTank->getSpeed();
     if(!t_moveW->isActive()&&!t_moveS->isActive()) {
-        if(r.right()<=2560-s*2) {
+        if(r.right()<=width-s*2) {
             ownTank->d();
         }
         ownTank->setMoved(true);
@@ -91,12 +93,12 @@ void Movement::keyPressEvent(QKeyEvent *e)
         }
     }
     if(e->key()==Qt::Key_S) {
-        if(r.bottom()<=720-s) {
+        if(r.bottom()<=height-s) {
             t_moveS->start(10);
         }
     }
     if(e->key()==Qt::Key_D) {
-        if(r.right()<=2560-s) {
+        if(r.right()<=width-s) {
             t_moveD->start(10);
         }
     }

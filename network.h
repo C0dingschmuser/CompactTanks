@@ -36,7 +36,7 @@ public:
 
 signals:
     void newPlayer(Tank *t);
-    void newlvlObj(int x,int y,int w,int h);
+    void newlvlObj(int x,int y,int w,int h,int type);
     void delPlayer(int i);
     void newBullet(Bullet *b);
     void delBullet(int pos);

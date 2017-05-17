@@ -14,10 +14,12 @@ FrmMain::FrmMain(QWidget *parent) :
         box.setText("Falsche Eingabe!");
         QApplication::exit();
     }
+    width = 2560;
+    height = 1440;
     aim = new QPoint();
     mpos = new QPoint();
     ownTank = new Tank(QRect(-200,-200,40,40),name);
-    move = new Movement(ownTank);
+    move = new Movement(ownTank,width,height);
     network = new Network(ownTank,tanks,QHostAddress("94.114.254.180")); //ip noch ändern!
     shoot = new Shoot(ownTank,network,aim);
     t_draw = new QTimer();
@@ -26,7 +28,7 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
     connect(network,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*))); //bei neuem spieler aufrufen
     connect(network,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
-    connect(network,SIGNAL(newlvlObj(int,int,int,int)),this,SLOT(on_newlvlObj(int,int,int,int)));
+    connect(network,SIGNAL(newlvlObj(int,int,int,int,int)),this,SLOT(on_newlvlObj(int,int,int,int,int)));
     connect(network,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(network,SIGNAL(delBullet(int)),this,SLOT(on_delBullet(int)));
     connect(network,SIGNAL(syncBullet(int,int,int,int)),this,SLOT(on_syncBullet(int,int,int,int)));
@@ -63,9 +65,9 @@ void FrmMain::on_newPlayer(Tank *t)
     tanks.append(t);
 }
 
-void FrmMain::on_newlvlObj(int x, int y, int w, int h)
+void FrmMain::on_newlvlObj(int x, int y, int w, int h, int type)
 {
-    Terrain *t = new Terrain(x,y,w,h);
+    Terrain *t = new Terrain(x,y,w,h,type);
     lvlObjs.append(t);
 }
 
@@ -143,9 +145,25 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.setBrush(Qt::black);
     painter.drawRect(ownTank->getRect().center().x()-620,ownTank->getRect().center().y()-420,1281,720);
     //painter.drawRect(-600,-500,6000,3000);
-    painter.setPen(Qt::white);
-    painter.setBrush(Qt::white);
-    painter.drawRect(0,0,2560,720);
+    painter.setPen(QColor(0,110,0));
+    painter.setBrush(QColor(0,110,0));
+    painter.drawRect(0,0,width,height);
+    painter.setPen(QColor(205,133,63));
+    painter.setBrush(QColor(205,133,63));
+    for(int i=0;i<lvlObjs.size();i++) {
+        if(lvlObjs[i]->getRect().intersects(viewRect)) {
+            if(lvlObjs[i]->getType()) {
+                painter.drawRect(lvlObjs[i]->getRect());
+            }
+        }
+    }
+    //painter.setPen(QColor(185,122,87));
+    //painter.setPen(QColor(185,122,87));
+    ownTank->drawTank(painter,true);
+    for(int i=0;i<tanks.size();i++) {
+        tanks[i]->move();
+        tanks[i]->drawTank(painter);
+    }
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
     for(int i=0;i<bullets.size();i++) {
@@ -153,18 +171,11 @@ void FrmMain::paintEvent(QPaintEvent *e)
             painter.drawEllipse(bullets[i]->get().center(),5,5);
         }
     }
-    ownTank->drawTank(painter,true);
-    for(int i=0;i<tanks.size();i++) {
-        if(tanks[i]->getRect().intersects(viewRect)) {
-            tanks[i]->move();
-            tanks[i]->drawTank(painter);
-        }
-    }
-    painter.setPen(Qt::black);
-    painter.setBrush(Qt::black);
     for(int i=0;i<lvlObjs.size();i++) {
         if(lvlObjs[i]->getRect().intersects(viewRect)) {
-            painter.drawRect(lvlObjs[i]->getRect());
+            if(!lvlObjs[i]->getType()) {
+                painter.drawPixmap(lvlObjs[i]->getRect(),lvlObjs[i]->getPixmap());
+            }
         }
     }
     //painter.setBrush(Qt::transparent);
@@ -177,14 +188,15 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.fillPath(path,QBrush(QColor(100,100,100,200)));
     painter.setBrush(Qt::transparent);
     painter.drawEllipse(ownTank->getRect().center(),viewRange,viewRange);*/
-    painter.setPen(Qt::red);
-    painter.setBrush(Qt::red);
-    painter.drawRect(-10,-10,2580,10);
-    painter.drawRect(-10,720,2580,10);
-    painter.drawRect(-10,-10,10,730);
-    painter.drawRect(2560,-10,10,730);
-    //painter.drawRect(ownTank->getRect().center().x()-620,ownTank->getRect().center().y()-420,1280,720);
-    painter.drawRect(QRect(aim->x(),aim->y(),10,10));
+    painter.setPen(Qt::darkGray);
+    painter.setBrush(Qt::darkGray);
+    painter.drawRect(-10,-10,width+20,10);
+    painter.drawRect(-10,height,width+20,10);
+    painter.drawRect(-10,-10,10,height+10);
+    painter.drawRect(width,-10,10,height+10);
+    painter.setBrush(QColor(25,25,112,200));
+    painter.drawRect(ownTank->getRect().center().x()-620,ownTank->getRect().center().y()-420,1280,720);
+    //painter.drawRect(QRect(aim->x(),aim->y(),10,10));
 
 }
 

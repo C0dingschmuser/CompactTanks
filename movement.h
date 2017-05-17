@@ -22,8 +22,10 @@ private:
     QTimer *t_moveA;
     QTimer *t_moveS;
     QTimer *t_moveD;
+    int width;
+    int height;
 public:
-    explicit Movement(Tank *t,QObject *parent = 0);
+    explicit Movement(Tank *t,int width,int height,QObject *parent = 0);
     ~Movement();
     void keyPressEvent(QKeyEvent *e);
     void keyReleaseEvent(QKeyEvent *e);

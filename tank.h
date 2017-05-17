@@ -7,6 +7,7 @@
 #include <QVector>
 #include <QPointF>
 #include <QLineF>
+#include <QFont>
 #include <QPixmap>
 #include <QPainter>
 
@@ -23,6 +24,7 @@ private:
     int viewRange;
     int angle;
     bool moved;
+    bool visible;
     QVector <QPixmap> imgs;
     QPixmap currentImg;
     QPoint targetPos;
@@ -48,12 +50,14 @@ public:
     int getDir();
     int getViewRange();
     int getAngle();
+    void setVisible(bool visible);
     void teleport(int x,int y);
     void setAll(int x, int y, int dir);
     void setMoved(bool m);
     void setViewRange(int vr);
     void drawTank(QPainter &p,bool barrel=false);
     void move();
+    bool getVisible();
     QString getName();
     QString toString();
     QPixmap getIMG();

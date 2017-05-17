@@ -28,7 +28,7 @@ private slots:
     void on_tdraw();
     void on_newPlayer(Tank *t);
     void on_delPlayer(int pos);
-    void on_newlvlObj(int x,int y,int w,int h);
+    void on_newlvlObj(int x,int y,int w,int h,int type);
     void on_newBullet(Bullet *b);
     void on_delBullet(int pos);
     void on_syncBullet(int pos,int x,int y, int elapsed);
@@ -49,6 +49,8 @@ private:
     Shoot *shoot;
     QPoint *aim;
     QPoint *mpos;
+    int width;
+    int height;
     bool contains(QString data, QString c);
 protected:
     void paintEvent(QPaintEvent *e) override;

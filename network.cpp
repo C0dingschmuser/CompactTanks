@@ -88,21 +88,20 @@ void Network::fetchTCP(QString data)
     QStringList list = data.split("#");
     int m = list.at(0).toInt();
     if(list.at(1)!=ownTank->getName()) {
+        //qDebug()<<list;
         switch(m) {
             case -3: //pos
                 {
                     if(list.size()>3) {
                         Tank *tmp = sucheTank(list.at(1));
-                        if(tmp->getRect().x()==-200) {
-                            tmp->teleport(list.at(2).toInt(),list.at(3).toInt());
-                        } else {
-                            tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
-                        }
+                        tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
                     }
                 }
             break;
             case -2: //bulletsync
-                emit syncBullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                if(list.size()>3) {
+                    emit syncBullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                }
             break;
             case -1: //viewRange
                 ownTank->setViewRange(list.at(1).toInt());
@@ -114,8 +113,9 @@ void Network::fetchTCP(QString data)
             break;
             case 1: //spieler hinzufügen
                 {
-                    Tank *t = new Tank(QRect(-200,-200,40,40),list.at(1));
+                    Tank *t = new Tank(QRect(list.at(2).toInt(),list.at(3).toInt(),40,40),list.at(1));
                     t->setColor(list.at(5).toInt());
+                    t->teleport(list.at(2).toInt(),list.at(3).toInt());
                     players.append(t);
                     emit newPlayer(t);
                 }
@@ -131,7 +131,7 @@ void Network::fetchTCP(QString data)
             break;
             case 3: //lvlobj
                 {
-                    emit newlvlObj(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                    emit newlvlObj(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt());
                 }
             break;
             case 4: //add bullet
