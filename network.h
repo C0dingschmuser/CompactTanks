@@ -27,6 +27,7 @@ private:
     int getArrayPos(QString name);
     void fetchUDP(QString data);
     void fetchTCP(QString data);
+    bool check(QStringList l,int anz);
     quint16 udpPort;
 public:
     explicit Network(Tank *ownTank, QVector<Tank*> t, QHostAddress ip, QObject *parent = 0);

@@ -13,11 +13,11 @@ Terrain::Terrain(int x, int y, int w, int h, int type)
     this->h = h;
     this->type = type;
     if(type==0) {
-        int a = qrand() % 3;
+        int a = qrand() % 3 + 1;
         if(!a) {
             this->p = QPixmap(":/images/area/trees2.png");
         } else {
-            this->p = QPixmap(":/images/area/trees1.png");
+            this->p = QPixmap(":/images/area/trees"+QString::number(a,'f',0)+".png");
         }
     }
 }
