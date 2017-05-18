@@ -104,34 +104,45 @@ void Network::fetchTCP(QString data)
                 }
             break;
             case -1: //viewRange
-                ownTank->setViewRange(list.at(1).toInt());
+                if(list.size()>0) {
+                    ownTank->setViewRange(list.at(1).toInt());
+                }
             break;
             case 0: //farbe setzen
-                ownTank->setColor(list.at(1).toInt());
-                ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());
-                t_main->start(10);
+                if(list.size()>2) {
+                    ownTank->setColor(list.at(1).toInt());
+                    ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());
+                    t_main->start(10);
+                }
             break;
             case 1: //spieler hinzufügen
                 {
-                    Tank *t = new Tank(QRect(list.at(2).toInt(),list.at(3).toInt(),40,40),list.at(1));
-                    t->setColor(list.at(5).toInt());
-                    t->teleport(list.at(2).toInt(),list.at(3).toInt());
-                    players.append(t);
-                    emit newPlayer(t);
+                    if(list.size()>2) {
+                        Tank *t = new Tank(QRect(list.at(2).toInt(),list.at(3).toInt(),40,40),list.at(1));
+                        t->setColor(list.at(5).toInt());
+                        t->teleport(list.at(2).toInt(),list.at(3).toInt());
+                        players.append(t);
+                        emit newPlayer(t);
+                        emit message(list.at(1)+" joined",5);
+                    }
                 }
             break;
             case 2: //spieler entfernen
                 {
-                    Tank *t = sucheTank(list.at(1));
-                    int pos = getArrayPos(t->getName());
-                    delete t;
-                    players.removeAt(pos);
-                    emit delPlayer(pos);
+                    if(list.size()>0) {
+                        Tank *t = sucheTank(list.at(1));
+                        int pos = getArrayPos(t->getName());
+                        delete t;
+                        players.removeAt(pos);
+                        emit delPlayer(pos);
+                    }
                 }
             break;
             case 3: //lvlobj
                 {
-                    emit newlvlObj(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt());
+                    if(list.size()>4) {
+                        emit newlvlObj(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt());
+                    }
                 }
             break;
             case 4: //add bullet
@@ -144,7 +155,9 @@ void Network::fetchTCP(QString data)
             break;
             case 5: //del bullet
                 {
-                    emit delBullet(list.at(1).toInt());
+                    if(list.size()>0) {
+                        emit delBullet(list.at(1).toInt());
+                    }
                 }
             break;
             case 6: //del all objs
@@ -153,12 +166,19 @@ void Network::fetchTCP(QString data)
                 }
             break;
             case 7: //ownplayerdeath
-                ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());
-                emit playerDeath();
+                if(list.size()>2) {
+                    ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());
+                    emit playerDeath();
+                }
             break;
             case 8: //otherdeath
-                Tank *tmp = sucheTank(list.at(1));
-                tmp->teleport(list.at(2).toInt(),list.at(3).toInt());
+                if(list.size()>2) {
+                    Tank *tmp = sucheTank(list.at(1));
+                    tmp->teleport(list.at(2).toInt(),list.at(3).toInt());
+                }
+            break;
+            case 9: //message
+                emit message(list.at(1),list.at(2).toInt());
             break;
         }
     }

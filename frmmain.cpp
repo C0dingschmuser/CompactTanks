@@ -14,7 +14,8 @@ FrmMain::FrmMain(QWidget *parent) :
         box.setText("Falsche Eingabe!");
         QApplication::exit();
     }
-    width = 2560;
+    bmessage = false;
+    width = 2880;
     height = 1440;
     aim = new QPoint();
     mpos = new QPoint();
@@ -24,8 +25,10 @@ FrmMain::FrmMain(QWidget *parent) :
     shoot = new Shoot(ownTank,network,aim);
     t_draw = new QTimer();
     t_bullet = new QTimer();
+    t_message = new QTimer();
     connect(t_draw,SIGNAL(timeout()),this,SLOT(on_tdraw()));
     connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
+    connect(t_message,SIGNAL(timeout()),this,SLOT(on_tmessage()));
     connect(network,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*))); //bei neuem spieler aufrufen
     connect(network,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
     connect(network,SIGNAL(newlvlObj(int,int,int,int,int)),this,SLOT(on_newlvlObj(int,int,int,int,int)));
@@ -34,6 +37,7 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(network,SIGNAL(syncBullet(int,int,int,int)),this,SLOT(on_syncBullet(int,int,int,int)));
     connect(network,SIGNAL(delObjs()),this,SLOT(on_dellObjs()));
     connect(network,SIGNAL(disconnect()),this,SLOT(on_disconnect()));
+    connect(network,SIGNAL(message(QString,int)),this,SLOT(on_message(QString,int)));
     t_draw->start(10);
     t_bullet->start(10);
 }
@@ -58,6 +62,31 @@ FrmMain::~FrmMain()
 void FrmMain::on_disconnect()
 {
     QApplication::exit();
+}
+
+void FrmMain::on_message(QString message, int length)
+{
+    this->messageText.append(message);
+    this->messageLength = length;
+    if(!t_message->isActive()) {
+        bmessage = true;
+        t_message->start(length*1000);
+   }
+}
+
+void FrmMain::on_tmessage()
+{
+    if(messageText.size()==0) {
+        bmessage = false;
+        t_message->stop();
+    } else {
+        messageText.removeLast();
+            if(messageText.size()==0) {
+                bmessage = false;
+                t_message->stop();
+            }
+
+    }
 }
 
 void FrmMain::on_newPlayer(Tank *t)
@@ -114,6 +143,9 @@ void FrmMain::on_tbullet()
 
 void FrmMain::on_tdraw()
 {
+    if(!QApplication::activeWindow()) {
+        move->stop();
+    }
     ownTank->setAngle((int)qRadiansToDegrees(atan2(aim->y()-ownTank->getRect().center().y(),
                                  aim->x()-ownTank->getRect().center().x()))*-1);
     update();
@@ -141,6 +173,9 @@ void FrmMain::paintEvent(QPaintEvent *e)
     this->mpos->setY(this->mapFromGlobal(QCursor::pos()).y());
     this->aim->setX(ownTank->getRect().x()+mpos->x()-600);
     this->aim->setY(ownTank->getRect().y()+mpos->y()-400);
+    //QFont f = QFont("Fixedsys");
+    //painter.setFont(f);
+    painter.setFont(QFont("Times"));
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
     painter.drawRect(ownTank->getRect().center().x()-620,ownTank->getRect().center().y()-420,1281,720);
@@ -196,6 +231,20 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawRect(width,-10,10,height+10);
     painter.setBrush(QColor(25,25,112,200));
     painter.drawRect(ownTank->getRect().center().x()-620,ownTank->getRect().center().y()-420,1280,720);
+    painter.resetTransform();
+    if(bmessage) {
+        QFont f = painter.font();
+        f.setPointSize(32);
+        painter.setFont(f);
+        painter.setPen(Qt::white);
+        painter.setBrush(Qt::white);
+        QFontMetrics m(QFont("Times",32));
+        QRect br = m.boundingRect(messageText.last());
+        //QRect a = QRect(ownTank->getRect().x()-402,ownTank->getRect().y()+278,100,33);
+        painter.drawRect(100,600,br.width()+2,br.height());
+        painter.setPen(Qt::black);
+        painter.drawText(100,640,messageText.last());
+    }
     //painter.drawRect(QRect(aim->x(),aim->y(),10,10));
 
 }
@@ -203,6 +252,11 @@ void FrmMain::paintEvent(QPaintEvent *e)
 void FrmMain::on_death()
 {
 
+}
+
+void FrmMain::leaveEvent(QEvent *event)
+{
+    //QCursor::setPos(mapToGlobal(QPoint(1280/2,720/2)));
 }
 
 void FrmMain::keyPressEvent(QKeyEvent *e)

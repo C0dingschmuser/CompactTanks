@@ -36,6 +36,8 @@ private slots:
     void on_disconnect();
     void on_tbullet();
     void on_death();
+    void on_message(QString message, int length);
+    void on_tmessage();
 private:
     Ui::FrmMain *ui;
     Tank *ownTank;
@@ -44,13 +46,17 @@ private:
     QVector <Bullet*> bullets;
     QTimer *t_draw;
     QTimer *t_bullet;
+    QTimer *t_message;
     Movement *move;
     Network *network;
     Shoot *shoot;
     QPoint *aim;
     QPoint *mpos;
+    int messageLength;
     int width;
     int height;
+    bool bmessage;
+    QVector <QString> messageText;
     bool contains(QString data, QString c);
 protected:
     void paintEvent(QPaintEvent *e) override;
@@ -58,6 +64,7 @@ protected:
     void keyReleaseEvent(QKeyEvent *e) override;
     void mousePressEvent(QMouseEvent *e) override;
     void mouseReleaseEvent(QMouseEvent *e) override;
+    void leaveEvent(QEvent *event) override;
 };
 
 #endif // FRMMAIN_H

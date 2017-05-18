@@ -45,6 +45,7 @@ signals:
     void delObjs();
     void disconnect();
     void playerDeath();
+    void message(QString messageText,int length);
 public slots:
 };
 

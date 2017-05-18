@@ -129,3 +129,11 @@ void Movement::keyReleaseEvent(QKeyEvent *e)
         //tab = false;
     }
 }
+
+void Movement::stop()
+{
+    t_moveW->stop();
+    t_moveA->stop();
+    t_moveS->stop();
+    t_moveD->stop();
+}

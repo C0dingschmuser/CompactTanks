@@ -29,6 +29,7 @@ public:
     ~Movement();
     void keyPressEvent(QKeyEvent *e);
     void keyReleaseEvent(QKeyEvent *e);
+    void stop();
 
 
 signals:

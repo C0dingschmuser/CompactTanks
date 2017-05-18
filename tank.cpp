@@ -147,8 +147,6 @@ void Tank::drawTank(QPainter &p, bool barrel)
     p.setPen(rcolor);
     p.drawRect(r);
     p.drawPixmap(rect,imgs[dir-1]);
-    QFont f("Fixedsys");
-    p.setFont(f);
     p.drawRect(rect.x(),rect.y()+rect.height()+1,9*name.length(),10);
     p.setPen(Qt::black);
     p.drawText(QPoint(rect.x(),rect.y()+rect.height()+8),name);
