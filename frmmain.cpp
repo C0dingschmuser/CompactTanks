@@ -26,9 +26,11 @@ FrmMain::FrmMain(QWidget *parent) :
     t_draw = new QTimer();
     t_bullet = new QTimer();
     t_message = new QTimer();
+    t_killMessage = new QTimer();
     connect(t_draw,SIGNAL(timeout()),this,SLOT(on_tdraw()));
     connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
     connect(t_message,SIGNAL(timeout()),this,SLOT(on_tmessage()));
+    connect(t_killMessage,SIGNAL(timeout()),this,SLOT(on_tkillMessage()));
     connect(network,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*))); //bei neuem spieler aufrufen
     connect(network,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
     connect(network,SIGNAL(newlvlObj(int,int,int,int,int)),this,SLOT(on_newlvlObj(int,int,int,int,int)));
@@ -38,6 +40,7 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(network,SIGNAL(delObjs()),this,SLOT(on_dellObjs()));
     connect(network,SIGNAL(disconnect()),this,SLOT(on_disconnect()));
     connect(network,SIGNAL(message(QString,int)),this,SLOT(on_message(QString,int)));
+    connect(network,SIGNAL(killMessage(QString)),this,SLOT(on_killMessage(QString)));
     t_draw->start(10);
     t_bullet->start(10);
 }
@@ -72,6 +75,30 @@ void FrmMain::on_message(QString message, int length)
         bmessage = true;
         t_message->start(length*1000);
    }
+}
+
+void FrmMain::on_killMessage(QString message)
+{
+    this->killMessageText.append(message);
+    if(!t_killMessage->isActive()) {
+        killMessage = true;
+        t_killMessage->start(3000);
+    }
+}
+
+void FrmMain::on_tkillMessage()
+{
+    if(killMessageText.size()==0) {
+        killMessage = false;
+        t_killMessage->stop();
+    } else {
+        killMessageText.removeFirst();
+            if(killMessageText.size()==0) {
+                killMessage = false;
+                t_killMessage->stop();
+            }
+
+    }
 }
 
 void FrmMain::on_tmessage()
@@ -244,6 +271,21 @@ void FrmMain::paintEvent(QPaintEvent *e)
         painter.drawRect(100,600,br.width()+2,br.height());
         painter.setPen(Qt::black);
         painter.drawText(100,640,messageText.last());
+    }
+    if(killMessage) {
+        QFont f = painter.font();
+        f.setPointSize(16);
+        painter.setFont(f);
+        painter.setPen(Qt::white);
+        painter.setBrush(Qt::white);
+        QFontMetrics m(QFont("Times",16));
+        for(int i=0;i<killMessageText.size();i++) {
+            QRect br = m.boundingRect(killMessageText[i]);
+            //QRect a = QRect(ownTank->getRect().x()-402,ownTank->getRect().y()+278,100,33);
+            painter.drawRect(1100,50+20*i,br.width()+2,br.height());
+            painter.setPen(Qt::black);
+            painter.drawText(1100,70+20*i,killMessageText[i]);
+        }
     }
     //painter.drawRect(QRect(aim->x(),aim->y(),10,10));
 

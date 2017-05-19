@@ -123,6 +123,7 @@ void Network::fetchTCP(QString data)
                 case 1: //spieler hinzufügen
                     {
                         if(list.size()>2) {
+                            qDebug()<<list;
                             Tank *t = new Tank(QRect(list.at(2).toInt(),list.at(3).toInt(),40,40),list.at(1));
                             t->setColor(list.at(5).toInt());
                             t->teleport(list.at(2).toInt(),list.at(3).toInt());
@@ -173,6 +174,7 @@ void Network::fetchTCP(QString data)
                 case 7: //ownplayerdeath
                     if(list.size()>2) {
                         ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());
+                        emit killMessage(list.at(1)+" killed "+ownTank->getName());
                         emit playerDeath();
                     }
                 break;
@@ -180,6 +182,7 @@ void Network::fetchTCP(QString data)
                     if(list.size()>2) {
                         Tank *tmp = sucheTank(list.at(1));
                         tmp->teleport(list.at(2).toInt(),list.at(3).toInt());
+                        emit killMessage(list.at(4)+" killed "+list.at(1));
                     }
                 break;
                 case 9: //message

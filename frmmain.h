@@ -38,6 +38,8 @@ private slots:
     void on_death();
     void on_message(QString message, int length);
     void on_tmessage();
+    void on_killMessage(QString message);
+    void on_tkillMessage();
 private:
     Ui::FrmMain *ui;
     Tank *ownTank;
@@ -47,6 +49,7 @@ private:
     QTimer *t_draw;
     QTimer *t_bullet;
     QTimer *t_message;
+    QTimer *t_killMessage;
     Movement *move;
     Network *network;
     Shoot *shoot;
@@ -56,7 +59,9 @@ private:
     int width;
     int height;
     bool bmessage;
+    bool killMessage;
     QVector <QString> messageText;
+    QVector <QString> killMessageText;
     bool contains(QString data, QString c);
 protected:
     void paintEvent(QPaintEvent *e) override;
