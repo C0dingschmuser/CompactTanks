@@ -40,6 +40,7 @@ private slots:
     void on_tmessage();
     void on_killMessage(QString message);
     void on_tkillMessage();
+    void on_kick();
 private:
     Ui::FrmMain *ui;
     Tank *ownTank;

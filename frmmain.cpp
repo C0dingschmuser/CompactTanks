@@ -9,7 +9,7 @@ FrmMain::FrmMain(QWidget *parent) :
     //setUpdateBehavior(UpdateBehavior(PartialUpdate));
     initializeGL();
     QString name = QInputDialog::getText(this,"Name","Name:");
-    if(contains(name,"|#äöü.,-_<>")&&name.length()>8) {
+    if(contains(name,"|#äöü.,-_<>")||name.length()>8||name=="") {
         QMessageBox box;
         box.setText("Falsche Eingabe!");
         QApplication::exit();
@@ -178,6 +178,11 @@ void FrmMain::on_tdraw()
     update();
 }
 
+void FrmMain::on_kick()
+{
+    QApplication::exit();
+}
+
 bool FrmMain::contains(QString data,QString c)
 {
     bool ok = false;
@@ -223,8 +228,12 @@ void FrmMain::paintEvent(QPaintEvent *e)
     //painter.setPen(QColor(185,122,87));
     ownTank->drawTank(painter,true);
     for(int i=0;i<tanks.size();i++) {
-        tanks[i]->move();
-        tanks[i]->drawTank(painter);
+        if(tanks[i]->getRect().intersects(viewRect)) {
+            tanks[i]->move();
+            tanks[i]->drawTank(painter);
+        } else {
+            tanks[i]->teleport(-200,-200);
+        }
     }
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);

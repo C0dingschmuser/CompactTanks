@@ -95,6 +95,9 @@ void Network::fetchTCP(QString data)
     if(list.size()>1) {
         if(list.at(1)!=ownTank->getName()) {
             switch(m) {
+                case -4: //kick
+                    emit kick();
+                break;
                 case -3: //pos
                     {
                         if(list.size()>3) {
@@ -181,7 +184,7 @@ void Network::fetchTCP(QString data)
                 case 8: //otherdeath
                     if(list.size()>2) {
                         Tank *tmp = sucheTank(list.at(1));
-                        tmp->teleport(list.at(2).toInt(),list.at(3).toInt());
+                        tmp->teleport(-200,-200);
                         emit killMessage(list.at(4)+" killed "+list.at(1));
                     }
                 break;

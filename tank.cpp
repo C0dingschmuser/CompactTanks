@@ -198,8 +198,14 @@ void Tank::teleport(int x, int y)
 
 void Tank::setAll(int x, int y, int dir)
 {
-    targetPos = QPoint(x,y);
-    this->dir = dir;
+    if((rect.x()==-200&&rect.y()==-200)||(x==-200&&y==-200)) {
+        this->dir = 1;
+        rect.moveTo(x,y);
+        targetPos = QPoint(x,y);
+    } else {
+        targetPos = QPoint(x,y);
+        this->dir = dir;
+    }
     //this->rect.moveTo(x,y);
 }
 

@@ -48,6 +48,7 @@ signals:
     void playerDeath();
     void message(QString messageText,int length);
     void killMessage(QString messageText);
+    void kick();
 public slots:
 };
 
