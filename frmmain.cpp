@@ -307,7 +307,7 @@ void FrmMain::on_death()
 
 void FrmMain::leaveEvent(QEvent *event)
 {
-    //QCursor::setPos(mapToGlobal(QPoint(1280/2,720/2)));
+    QCursor::setPos(mapToGlobal(QPoint(1280/2,720/2)));
 }
 
 void FrmMain::keyPressEvent(QKeyEvent *e)
