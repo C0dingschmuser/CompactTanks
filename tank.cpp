@@ -145,7 +145,7 @@ void Tank::drawTank(QPainter &p, bool barrel)
     }
     p.setBrush(rcolor);
     p.setPen(rcolor);
-    p.drawRect(r);
+    //drawRect(r);
     p.drawPixmap(rect,imgs[dir-1]);
     p.drawRect(rect.x(),rect.y()+rect.height()+1,9*name.length(),10);
     p.setPen(Qt::black);
@@ -193,12 +193,17 @@ QPixmap Tank::getIMG()
 void Tank::teleport(int x, int y)
 {
     this->dir = 1;
+    this->targetPos = QPoint(x,y);
     rect.moveTo(x,y);
 }
 
 void Tank::setAll(int x, int y, int dir)
 {
+    if(!dir) {
+        dir = 1;
+    }
     if((rect.x()==-200&&rect.y()==-200)||(x==-200&&y==-200)) {
+        //qDebug()<<"a";
         this->dir = 1;
         rect.moveTo(x,y);
         targetPos = QPoint(x,y);

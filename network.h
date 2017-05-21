@@ -22,6 +22,7 @@ private:
     QUdpSocket *udpSocketListen;
     QUdpSocket *udpSocket;
     QVector <Tank*> players;
+    QByteArray buffer;
     Tank *ownTank;
     Tank *sucheTank(QString name);
     int getArrayPos(QString name);

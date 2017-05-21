@@ -17,6 +17,9 @@ FrmMain::FrmMain(QWidget *parent) :
     bmessage = false;
     width = 2880;
     height = 1440;
+    scaleX = 1.0;
+    scaleY = 1.0;
+    fullscreen = false;
     aim = new QPoint();
     mpos = new QPoint();
     ownTank = new Tank(QRect(-200,-200,40,40),name);
@@ -41,6 +44,7 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(network,SIGNAL(disconnect()),this,SLOT(on_disconnect()));
     connect(network,SIGNAL(message(QString,int)),this,SLOT(on_message(QString,int)));
     connect(network,SIGNAL(killMessage(QString)),this,SLOT(on_killMessage(QString)));
+    connect(move,SIGNAL(fullscreen()),this,SLOT(on_fullscreen()));
     t_draw->start(10);
     t_bullet->start(10);
 }
@@ -82,7 +86,7 @@ void FrmMain::on_killMessage(QString message)
     this->killMessageText.append(message);
     if(!t_killMessage->isActive()) {
         killMessage = true;
-        t_killMessage->start(3000);
+        t_killMessage->start(1000);
     }
 }
 
@@ -183,6 +187,17 @@ void FrmMain::on_kick()
     QApplication::exit();
 }
 
+void FrmMain::on_fullscreen()
+{
+    if(!fullscreen) {
+        fullscreen = true;
+        this->showFullScreen();
+    } else {
+        fullscreen = false;
+        this->showNormal();
+    }
+}
+
 bool FrmMain::contains(QString data,QString c)
 {
     bool ok = false;
@@ -196,13 +211,22 @@ bool FrmMain::contains(QString data,QString c)
 
 void FrmMain::paintEvent(QPaintEvent *e)
 {
+    Q_UNUSED(e)
+    scaleX = this->geometry().width()/double(1280);
+    scaleY = this->geometry().height()/double(720);
+    //qDebug()<<this->geometry().width();
     QRect viewRect = QRect(ownTank->getRect().center().x()-620,
                            ownTank->getRect().center().y()-420,1280,720);
     QPainter painter(this);
-    //painter.setRenderHint(QPainter::HighQualityAntialiasing);
+    //painter.setRasssssssssssaaaaaenderHint(QPainter::HighQualityAntialiasing);
+    painter.scale(scaleX,scaleY);
     painter.translate((ownTank->getRect().x()-600)*-1,(ownTank->getRect().y()-400)*-1);
-    this->mpos->setX(this->mapFromGlobal(QCursor::pos()).x());
-    this->mpos->setY(this->mapFromGlobal(QCursor::pos()).y());
+    QPoint m;
+    m.setX(this->mapFromGlobal(QCursor::pos()).x()/scaleX);
+    m.setY(this->mapFromGlobal(QCursor::pos()).y()/scaleY);
+    //m = painter.transform().map(m);
+    mpos->setX(m.x());
+    mpos->setY(m.y());
     this->aim->setX(ownTank->getRect().x()+mpos->x()-600);
     this->aim->setY(ownTank->getRect().y()+mpos->y()-400);
     //QFont f = QFont("Fixedsys");
@@ -266,8 +290,9 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawRect(-10,-10,10,height+10);
     painter.drawRect(width,-10,10,height+10);
     painter.setBrush(QColor(25,25,112,200));
-    painter.drawRect(ownTank->getRect().center().x()-620,ownTank->getRect().center().y()-420,1280,720);
+    painter.drawRect(ownTank->getRect().center().x()-620,ownTank->getRect().center().y()-420,1282,722);
     painter.resetTransform();
+    painter.scale(scaleX,scaleY);
     if(bmessage) {
         QFont f = painter.font();
         f.setPointSize(32);
@@ -307,7 +332,8 @@ void FrmMain::on_death()
 
 void FrmMain::leaveEvent(QEvent *event)
 {
-    QCursor::setPos(mapToGlobal(QPoint(1280/2,720/2)));
+    Q_UNUSED(event);
+    //QCursor::setPos(mapToGlobal(QPoint(1280/2,720/2)));
 }
 
 void FrmMain::keyPressEvent(QKeyEvent *e)

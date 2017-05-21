@@ -33,7 +33,7 @@ public:
 
 
 signals:
-
+    void fullscreen();
 public slots:
 };
 

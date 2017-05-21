@@ -41,6 +41,7 @@ private slots:
     void on_killMessage(QString message);
     void on_tkillMessage();
     void on_kick();
+    void on_fullscreen();
 private:
     Ui::FrmMain *ui;
     Tank *ownTank;
@@ -59,8 +60,11 @@ private:
     int messageLength;
     int width;
     int height;
+    double scaleX;
+    double scaleY;
     bool bmessage;
     bool killMessage;
+    bool fullscreen;
     QVector <QString> messageText;
     QVector <QString> killMessageText;
     bool contains(QString data, QString c);

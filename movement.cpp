@@ -128,6 +128,9 @@ void Movement::keyReleaseEvent(QKeyEvent *e)
     if(e->key()==Qt::Key_Tab) {
         //tab = false;
     }
+    if(e->key()==Qt::Key_F11) {
+        emit fullscreen();
+    }
 }
 
 void Movement::stop()

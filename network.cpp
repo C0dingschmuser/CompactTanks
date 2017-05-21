@@ -31,14 +31,18 @@ Network::~Network()
 
 void Network::on_tcpRecv()
 {
-    QString input = tcpSocket->readAll();
-    if(input.contains("|")) {
-        QStringList p = input.split("|");
-        for(int i=1;i<p.size();i++) {
-            fetchTCP(p.at(i));
+    buffer += tcpSocket->readAll();
+    if(buffer.size()>29) {
+        QString input = buffer;
+        buffer.clear();
+        if(input.contains("|")) {
+            QStringList p = input.split("|");
+            for(int i=1;i<p.size();i++) {
+                fetchTCP(p.at(i));
+            }
+        } else {
+            fetchTCP(input);
         }
-    } else {
-        fetchTCP(input);
     }
 }
 
@@ -86,111 +90,117 @@ int Network::getDistance(QPoint p1, QPoint p2)
 bool Network::check(QStringList l, int anz)
 {
     //spaeter
+    Q_UNUSED(l);
+    Q_UNUSED(anz);
+    return true;
 }
 
 void Network::fetchTCP(QString data)
 {
+    qDebug()<<data;
     QStringList list = data.split("#");
-    int m = list.at(0).toInt();
-    if(list.size()>1) {
-        if(list.at(1)!=ownTank->getName()) {
-            switch(m) {
-                case -4: //kick
-                    emit kick();
-                break;
-                case -3: //pos
-                    {
-                        if(list.size()>3) {
-                            Tank *tmp = sucheTank(list.at(1));
-                            tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+    if(list.at(0)!="") {
+        int m = list.at(0).toInt();
+        if(list.size()>1) {
+            if(list.at(1)!=ownTank->getName()) {
+                switch(m) {
+                    case -4: //kick
+                        emit kick();
+                    break;
+                    case -3: //pos
+                        {
+                            if(list.size()>4) {
+                                Tank *tmp = sucheTank(list.at(1));
+                                tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                            }
                         }
-                    }
-                break;
-                case -2: //bulletsync
-                    if(list.size()>3) {
-                        emit syncBullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
-                    }
-                break;
-                case -1: //viewRange
-                    if(list.size()>0) {
-                        ownTank->setViewRange(list.at(1).toInt());
-                    }
-                break;
-                case 0: //farbe setzen
-                    if(list.size()>2) {
-                        ownTank->setColor(list.at(1).toInt());
-                        ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());
-                        t_main->start(10);
-                    }
-                break;
-                case 1: //spieler hinzufügen
-                    {
-                        if(list.size()>2) {
-                            qDebug()<<list;
-                            Tank *t = new Tank(QRect(list.at(2).toInt(),list.at(3).toInt(),40,40),list.at(1));
-                            t->setColor(list.at(5).toInt());
-                            t->teleport(list.at(2).toInt(),list.at(3).toInt());
-                            players.append(t);
-                            emit newPlayer(t);
-                            emit message(list.at(1)+" joined",5);
-                        }
-                    }
-                break;
-                case 2: //spieler entfernen
-                    {
-                        if(list.size()>0) {
-                            Tank *t = sucheTank(list.at(1));
-                            int pos = getArrayPos(t->getName());
-                            delete t;
-                            players.removeAt(pos);
-                            emit delPlayer(pos);
-                        }
-                    }
-                break;
-                case 3: //lvlobj
-                    {
+                    break;
+                    case -2: //bulletsync
                         if(list.size()>4) {
-                            emit newlvlObj(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt());
+                            emit syncBullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
                         }
-                    }
-                break;
-                case 4: //add bullet
-                    {
-                        if(list.size()>5) {
-                            Bullet *b = new Bullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toDouble(),list.at(4).toDouble(),list.at(5).toInt(),list.at(6));
-                            emit newBullet(b);
-                        }
-                    }
-                break;
-                case 5: //del bullet
-                    {
+                    break;
+                    case -1: //viewRange
                         if(list.size()>0) {
-                            emit delBullet(list.at(1).toInt());
+                            ownTank->setViewRange(list.at(1).toInt());
                         }
-                    }
-                break;
-                case 6: //del all objs
-                    {
-                        emit delObjs();
-                    }
-                break;
-                case 7: //ownplayerdeath
-                    if(list.size()>2) {
-                        ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());
-                        emit killMessage(list.at(1)+" killed "+ownTank->getName());
-                        emit playerDeath();
-                    }
-                break;
-                case 8: //otherdeath
-                    if(list.size()>2) {
-                        Tank *tmp = sucheTank(list.at(1));
-                        tmp->teleport(-200,-200);
-                        emit killMessage(list.at(4)+" killed "+list.at(1));
-                    }
-                break;
-                case 9: //message
-                    emit message(list.at(1),list.at(2).toInt());
-                break;
+                    break;
+                    case 0: //farbe setzen
+                        if(list.size()>2) {
+                            ownTank->setColor(list.at(1).toInt());
+                            ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());
+                            t_main->start(10);
+                        }
+                    break;
+                    case 1: //spieler hinzufügen
+                        {
+                            if(list.size()>4) {
+                                Tank *t = new Tank(QRect(list.at(2).toInt(),list.at(3).toInt(),40,40),list.at(1));
+                                t->setColor(list.at(5).toInt());
+                                t->teleport(list.at(2).toInt(),list.at(3).toInt());
+                                players.append(t);
+                                emit newPlayer(t);
+                                emit message(list.at(1)+" joined",5);
+                            }
+                        }
+                    break;
+                    case 2: //spieler entfernen
+                        {
+                            if(list.size()>0) {
+                                Tank *t = sucheTank(list.at(1));
+                                int pos = getArrayPos(t->getName());
+                                delete t;
+                                players.removeAt(pos);
+                                emit delPlayer(pos);
+                            }
+                        }
+                    break;
+                    case 3: //lvlobj
+                        {
+                            if(list.size()>4) {
+                                emit newlvlObj(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt());
+                            }
+                        }
+                    break;
+                    case 4: //add bullet
+                        {
+                            if(list.size()>5) {
+                                Bullet *b = new Bullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toDouble(),list.at(4).toDouble(),list.at(5).toInt(),list.at(6));
+                                emit newBullet(b);
+                            }
+                        }
+                    break;
+                    case 5: //del bullet
+                        {
+                            if(list.size()>0) {
+                                emit delBullet(list.at(1).toInt());
+                            }
+                        }
+                    break;
+                    case 6: //del all objs
+                        {
+                            emit delObjs();
+                        }
+                    break;
+                    case 7: //ownplayerdeath
+                        if(list.size()>2) {
+                            ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());
+                            emit killMessage(list.at(1)+" killed "+ownTank->getName());
+                            emit playerDeath();
+                        }
+                    break;
+                    case 8: //otherdeath
+                        if(list.size()>2) {
+                            //qDebug()<<list.at(1);
+                            Tank *tmp = sucheTank(list.at(1));
+                            tmp->teleport(-200,-200);
+                            emit killMessage(list.at(4)+" killed "+list.at(1));
+                        }
+                    break;
+                    case 9: //message
+                        emit message(list.at(1),list.at(2).toInt());
+                    break;
+                }
             }
         }
     }
