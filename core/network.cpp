@@ -5,14 +5,14 @@ Network::Network(Tank *ownTank, QVector<Tank *> t, QHostAddress ip,QObject *pare
     this->ownTank = ownTank;
     this->players = t;
     this->ip = ip;
-    t_main = new QTimer();
-    tcpSocket = new QTcpSocket();
-    udpSocket = new QUdpSocket();
-    udpSocketListen = new QUdpSocket();
-    udpSocketListen->bind(QHostAddress::AnyIPv4,8889,QUdpSocket::ShareAddress); //client wartet bei 8889 server bei 8890
-    udpSocketListen->joinMulticastGroup(ip);
+    t_main = new QTimer(this);
+    tcpSocket = new QTcpSocket(this);
+    udpSocket = new QUdpSocket(this);
+    udpSocketListen = new QUdpSocket(this);
+    //udpSocketListen->bind(QHostAddress::AnyIPv4,8889,QUdpSocket::ShareAddress); //client wartet bei 8889 server bei 8890
+    //udpSocketListen->joinMulticastGroup(ip);
     tcpSocket->connectToHost(ip,8888);
-    tcpSocket->waitForConnected();
+    tcpSocket->waitForConnected(4000);
     tcpSocket->write(QString("|0#"+ownTank->getName()+"#").toLatin1());
     tcpSocket->flush();
     connect(udpSocketListen,SIGNAL(readyRead()),this,SLOT(on_udpRecv()));
@@ -97,7 +97,6 @@ bool Network::check(QStringList l, int anz)
 
 void Network::fetchTCP(QString data)
 {
-    qDebug()<<data;
     QStringList list = data.split("#");
     if(list.at(0)!="") {
         int m = list.at(0).toInt();
@@ -140,7 +139,7 @@ void Network::fetchTCP(QString data)
                                 t->teleport(list.at(2).toInt(),list.at(3).toInt());
                                 players.append(t);
                                 emit newPlayer(t);
-                                emit message(list.at(1)+" joined",5);
+                                emit killMessage(list.at(1)+" joined");
                             }
                         }
                     break;

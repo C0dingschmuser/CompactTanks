@@ -12,26 +12,26 @@ TARGET = CompactTanks
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        frmmain.cpp \
-    tank.cpp \
-    movement.cpp \
-    network.cpp \
-    terrain.cpp \
-    bullet.cpp \
-    shoot.cpp \
-    weapon.cpp
+SOURCES += ui/main.cpp\
+        ui/frmmain.cpp \
+    core/tank.cpp \
+    core/movement.cpp \
+    core/network.cpp \
+    core/terrain.cpp \
+    core/bullet.cpp \
+    core/shoot.cpp \
+    core/weapon.cpp
 
-HEADERS  += frmmain.h \
-    tank.h \
-    movement.h \
-    network.h \
-    terrain.h \
-    bullet.h \
-    shoot.h \
-    weapon.h
+HEADERS  += ui/frmmain.h \
+    core/tank.h \
+    core/movement.h \
+    core/network.h \
+    core/terrain.h \
+    core/bullet.h \
+    core/shoot.h \
+    core/weapon.h
 
-FORMS    += frmmain.ui
+FORMS    += ui/frmmain.ui
 
 RESOURCES += \
     resources.qrc

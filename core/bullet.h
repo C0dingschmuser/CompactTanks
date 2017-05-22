@@ -3,6 +3,7 @@
 #include <QtMath>
 #include <QRect>
 #include <QColor>
+#include <QDebug>
 class Bullet
 {
 public:
@@ -30,6 +31,7 @@ private:
     QString shooter;
     int elapsed;
     bool coll;
+    double getDistance(QPoint p1,QPoint p2);
 };
 
 #endif // BULLET_H

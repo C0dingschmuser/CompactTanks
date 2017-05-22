@@ -5,13 +5,14 @@
 #include <QKeyEvent>
 #include <QInputDialog>
 #include <QTimer>
+#include <QThread>
 #include <QMessageBox>
-#include "bullet.h"
-#include "tank.h"
-#include "movement.h"
-#include "network.h"
-#include "terrain.h"
-#include "shoot.h"
+#include "core/bullet.h"
+#include "core/tank.h"
+#include "core/movement.h"
+#include "core/network.h"
+#include "core/terrain.h"
+#include "core/shoot.h"
 
 namespace Ui {
 class FrmMain;

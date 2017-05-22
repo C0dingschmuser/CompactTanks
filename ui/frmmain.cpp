@@ -30,10 +30,13 @@ FrmMain::FrmMain(QWidget *parent) :
     t_bullet = new QTimer();
     t_message = new QTimer();
     t_killMessage = new QTimer();
+    //QThread *networkThread = new QThread();
+    //network->moveToThread(networkThread);
     connect(t_draw,SIGNAL(timeout()),this,SLOT(on_tdraw()));
     connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
     connect(t_message,SIGNAL(timeout()),this,SLOT(on_tmessage()));
     connect(t_killMessage,SIGNAL(timeout()),this,SLOT(on_tkillMessage()));
+    connect(shoot,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(network,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*))); //bei neuem spieler aufrufen
     connect(network,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
     connect(network,SIGNAL(newlvlObj(int,int,int,int,int)),this,SLOT(on_newlvlObj(int,int,int,int,int)));
@@ -45,6 +48,7 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(network,SIGNAL(message(QString,int)),this,SLOT(on_message(QString,int)));
     connect(network,SIGNAL(killMessage(QString)),this,SLOT(on_killMessage(QString)));
     connect(move,SIGNAL(fullscreen()),this,SLOT(on_fullscreen()));
+    //networkThread->start();
     t_draw->start(10);
     t_bullet->start(10);
 }
