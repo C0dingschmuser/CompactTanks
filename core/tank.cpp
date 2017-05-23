@@ -134,22 +134,27 @@ void Tank::drawTank(QPainter &p, bool barrel)
             r = QRect(rect.x()+5,rect.y()+4,30,34);
         break;
         case 2:
-            r = QRect(rect.x()+5,rect.y()+4,34,30);
+            r = QRect(rect.x()+4,rect.y()+4,34,30);
         break;
         case 3:
             r = QRect(rect.x()+5,rect.y()+2,30,34);
         break;
         case 4:
-            r = QRect(rect.x()+2,rect.y()+5,34,30);
+            r = QRect(rect.x()+2,rect.y()+6,34,29);
         break;
     }
     p.setBrush(rcolor);
     p.setPen(rcolor);
-    //drawRect(r);
+    p.drawRect(r);
     p.drawPixmap(rect,imgs[dir-1]);
-    p.drawRect(rect.x(),rect.y()+rect.height()+1,9*name.length(),10);
+    QFont f("Times");
+    f.setPointSize(12);
+    p.setFont(f);
+    QFontMetrics m(QFont("Times",12));
+    QRect br = m.boundingRect(name);
+    p.drawRect(rect.x(),rect.y()+rect.height()+1,br.width(),br.height());
     p.setPen(Qt::black);
-    p.drawText(QPoint(rect.x(),rect.y()+rect.height()+8),name);
+    p.drawText(QPoint(rect.x(),rect.y()+rect.height()+12),name);
     if(barrel) {
         QPen pen;
         pen.setColor(Qt::black);

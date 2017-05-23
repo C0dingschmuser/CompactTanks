@@ -47,8 +47,14 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(network,SIGNAL(disconnect()),this,SLOT(on_disconnect()));
     connect(network,SIGNAL(message(QString,int)),this,SLOT(on_message(QString,int)));
     connect(network,SIGNAL(killMessage(QString)),this,SLOT(on_killMessage(QString)));
+    connect(network,SIGNAL(kick()),this,SLOT(on_kick()));
     connect(move,SIGNAL(fullscreen()),this,SLOT(on_fullscreen()));
+    this->setCursor(QPixmap(":/images/tank/cursor.png"));
     //networkThread->start();
+    if(!network->connectToServer()) {
+        QMessageBox::critical(this,"FEHLER","Keine Verbindung möglich!");
+        exit(1);
+    }
     t_draw->start(10);
     t_bullet->start(10);
 }
@@ -61,6 +67,7 @@ FrmMain::~FrmMain()
     for(int i=0;i<lvlObjs.size();i++) {
         delete lvlObjs[i];
     }
+    disconnect(network,SIGNAL(disconnect()),this,SLOT(on_disconnect()));
     delete t_draw;
     delete ownTank;
     delete move;
@@ -68,10 +75,12 @@ FrmMain::~FrmMain()
     delete aim;
     delete mpos;
     delete ui;
+    QApplication::exit();
 }
 
 void FrmMain::on_disconnect()
 {
+    QMessageBox::information(this,"FEHLER","Verbindung zum Server getrennt!");
     QApplication::exit();
 }
 
@@ -87,7 +96,7 @@ void FrmMain::on_message(QString message, int length)
 
 void FrmMain::on_killMessage(QString message)
 {
-    this->killMessageText.append(message);
+    ui->lwInfo->addItem(message);
     if(!t_killMessage->isActive()) {
         killMessage = true;
         t_killMessage->start(1000);
@@ -96,12 +105,12 @@ void FrmMain::on_killMessage(QString message)
 
 void FrmMain::on_tkillMessage()
 {
-    if(killMessageText.size()==0) {
+    if(ui->lwInfo->count()==0) {
         killMessage = false;
         t_killMessage->stop();
     } else {
-        killMessageText.removeFirst();
-            if(killMessageText.size()==0) {
+        delete ui->lwInfo->takeItem(0);
+            if(ui->lwInfo->count()==0) {
                 killMessage = false;
                 t_killMessage->stop();
             }
@@ -115,8 +124,8 @@ void FrmMain::on_tmessage()
         bmessage = false;
         t_message->stop();
     } else {
-        messageText.removeLast();
-            if(messageText.size()==0) {
+        delete ui->lwInfo->item(0);
+            if(ui->lwInfo->count()==0) {
                 bmessage = false;
                 t_message->stop();
             }
@@ -188,7 +197,9 @@ void FrmMain::on_tdraw()
 
 void FrmMain::on_kick()
 {
-    QApplication::exit();
+    disconnect(network,SIGNAL(disconnect()),this,SLOT(on_disconnect()));
+    QMessageBox::information(this,"FEHLER","Du wurdest gekickt!");
+    exit(1);
 }
 
 void FrmMain::on_fullscreen()
@@ -256,7 +267,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     //painter.setPen(QColor(185,122,87));
     ownTank->drawTank(painter,true);
     for(int i=0;i<tanks.size();i++) {
-        if(tanks[i]->getRect().intersects(viewRect)) {
+        if(tanks[i]->getRect().intersects(viewRect)&&tanks[i]->getRect().x()>0) {
             tanks[i]->move();
             tanks[i]->drawTank(painter);
         } else {
@@ -293,8 +304,9 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawRect(-10,height,width+20,10);
     painter.drawRect(-10,-10,10,height+10);
     painter.drawRect(width,-10,10,height+10);
-    painter.setBrush(QColor(25,25,112,200));
-    painter.drawRect(ownTank->getRect().center().x()-620,ownTank->getRect().center().y()-420,1282,722);
+    painter.setBrush(QColor(25,25,112,100));
+    //painter.setBrush(QColor(255,255,0,50));
+    painter.drawRect(ownTank->getRect().center().x()-620,ownTank->getRect().center().y()-420,1282,724);
     painter.resetTransform();
     painter.scale(scaleX,scaleY);
     if(bmessage) {
@@ -309,21 +321,6 @@ void FrmMain::paintEvent(QPaintEvent *e)
         painter.drawRect(100,600,br.width()+2,br.height());
         painter.setPen(Qt::black);
         painter.drawText(100,640,messageText.last());
-    }
-    if(killMessage) {
-        QFont f = painter.font();
-        f.setPointSize(16);
-        painter.setFont(f);
-        painter.setPen(Qt::white);
-        painter.setBrush(Qt::white);
-        QFontMetrics m(QFont("Times",16));
-        for(int i=0;i<killMessageText.size();i++) {
-            QRect br = m.boundingRect(killMessageText[i]);
-            //QRect a = QRect(ownTank->getRect().x()-402,ownTank->getRect().y()+278,100,33);
-            painter.drawRect(1100,50+20*i,br.width()+2,br.height());
-            painter.setPen(Qt::black);
-            painter.drawText(1100,70+20*i,killMessageText[i]);
-        }
     }
     //painter.drawRect(QRect(aim->x(),aim->y(),10,10));
 

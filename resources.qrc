@@ -4,8 +4,9 @@
         <file>images/tank/tank2.png</file>
         <file>images/tank/tank3.png</file>
         <file>images/tank/tank4.png</file>
-		<file>images/area/trees1.png</file>
+        <file>images/area/trees1.png</file>
         <file>images/area/trees2.png</file>
-		<file>images/area/trees3.png</file>
+        <file>images/area/trees3.png</file>
+        <file>images/tank/cursor.png</file>
     </qresource>
 </RCC>

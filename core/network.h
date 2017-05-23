@@ -14,10 +14,13 @@ class Network : public QObject
 private slots:
     void on_tcpRecv();
     void on_udpRecv();
+    void on_disconnect();
     void on_tmain();
+    void on_tdisconnect();
 private:
     QHostAddress ip;
     QTimer *t_main;
+    QTimer *t_disconnect;
     QTcpSocket *tcpSocket;
     QUdpSocket *udpSocketListen;
     QUdpSocket *udpSocket;
@@ -33,6 +36,7 @@ private:
 public:
     explicit Network(Tank *ownTank, QVector<Tank*> t, QHostAddress ip, QObject *parent = 0);
     ~Network();
+    bool connectToServer();
     void send(QString data);
     int getDistance(QPoint p1,QPoint p2);
 

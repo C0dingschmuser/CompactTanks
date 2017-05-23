@@ -6,27 +6,37 @@ Network::Network(Tank *ownTank, QVector<Tank *> t, QHostAddress ip,QObject *pare
     this->players = t;
     this->ip = ip;
     t_main = new QTimer(this);
+    t_disconnect = new QTimer(this);
     tcpSocket = new QTcpSocket(this);
     udpSocket = new QUdpSocket(this);
     udpSocketListen = new QUdpSocket(this);
     //udpSocketListen->bind(QHostAddress::AnyIPv4,8889,QUdpSocket::ShareAddress); //client wartet bei 8889 server bei 8890
     //udpSocketListen->joinMulticastGroup(ip);
-    tcpSocket->connectToHost(ip,8888);
-    tcpSocket->waitForConnected(4000);
-    tcpSocket->write(QString("|0#"+ownTank->getName()+"#").toLatin1());
-    tcpSocket->flush();
     connect(udpSocketListen,SIGNAL(readyRead()),this,SLOT(on_udpRecv()));
     connect(tcpSocket,SIGNAL(readyRead()),this,SLOT(on_tcpRecv()));
-    connect(tcpSocket,SIGNAL(disconnected()),this,SIGNAL(disconnect()));
+    connect(tcpSocket,SIGNAL(disconnected()),this,SLOT(on_disconnect()));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
+    connect(t_disconnect,SIGNAL(timeout()),this,SLOT(on_tdisconnect()));
     //t_main->start(10);
 }
 
 Network::~Network()
 {
+    tcpSocket->disconnectFromHost();
     delete udpSocket;
     delete udpSocketListen;
     delete tcpSocket;
+}
+
+bool Network::connectToServer()
+{
+    bool ok;
+    tcpSocket->connectToHost(ip,8888);
+    ok = tcpSocket->waitForConnected(3000);
+    if(ok) {
+        send("|0#"+ownTank->getName()+"#");
+    }
+    return ok;
 }
 
 void Network::on_tcpRecv()
@@ -46,6 +56,17 @@ void Network::on_tcpRecv()
     }
 }
 
+void Network::on_disconnect()
+{
+    t_disconnect->start(200);
+}
+
+void Network::on_tdisconnect()
+{
+    emit disconnect();
+    t_disconnect->stop();
+}
+
 void Network::on_tmain()
 {
     /*
@@ -56,7 +77,7 @@ void Network::on_tmain()
     }*/
     QByteArray data;
     data.append(QString("|0#"+ownTank->toString()).toUtf8());
-    udpSocket->writeDatagram(data,ip,8890);
+    udpSocket->writeDatagram(data,ip,8889);
 }
 
 void Network::on_udpRecv()
@@ -104,6 +125,7 @@ void Network::fetchTCP(QString data)
             if(list.at(1)!=ownTank->getName()) {
                 switch(m) {
                     case -4: //kick
+                        t_main->stop();
                         emit kick();
                     break;
                     case -3: //pos
@@ -148,6 +170,7 @@ void Network::fetchTCP(QString data)
                             if(list.size()>0) {
                                 Tank *t = sucheTank(list.at(1));
                                 int pos = getArrayPos(t->getName());
+                                emit killMessage(t->getName()+" left");
                                 delete t;
                                 players.removeAt(pos);
                                 emit delPlayer(pos);

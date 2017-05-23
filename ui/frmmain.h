@@ -5,7 +5,9 @@
 #include <QKeyEvent>
 #include <QInputDialog>
 #include <QTimer>
+#include <QKeyEvent>
 #include <QThread>
+#include <QApplication>
 #include <QMessageBox>
 #include "core/bullet.h"
 #include "core/tank.h"
@@ -43,6 +45,7 @@ private slots:
     void on_tkillMessage();
     void on_kick();
     void on_fullscreen();
+
 private:
     Ui::FrmMain *ui;
     Tank *ownTank;
