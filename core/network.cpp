@@ -222,6 +222,9 @@ void Network::fetchTCP(QString data)
                     case 9: //message
                         emit message(list.at(1),list.at(2).toInt());
                     break;
+                    case 10: //visible
+                        emit visible(list.at(1).toInt());
+                    break;
                 }
             }
         }

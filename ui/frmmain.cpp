@@ -48,6 +48,7 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(network,SIGNAL(message(QString,int)),this,SLOT(on_message(QString,int)));
     connect(network,SIGNAL(killMessage(QString)),this,SLOT(on_killMessage(QString)));
     connect(network,SIGNAL(kick()),this,SLOT(on_kick()));
+    connect(network,SIGNAL(visible(int)),this,SLOT(on_visible(int)));
     connect(move,SIGNAL(fullscreen()),this,SLOT(on_fullscreen()));
     this->setCursor(QPixmap(":/images/tank/cursor.png"));
     //networkThread->start();
@@ -210,6 +211,24 @@ void FrmMain::on_fullscreen()
     } else {
         fullscreen = false;
         this->showNormal();
+    }
+    ui->lwInfo->setGeometry(this->geometry().width()*0.8,20,256,391);
+}
+
+void FrmMain::on_visible(int visible)
+{
+    bool ok=false;
+    for(int i=0;i<lvlObjs.size();i++) {
+        if(ownTank->getRect().intersects(lvlObjs[i]->getRect())&&
+                lvlObjs[i]->getType()) {
+            ok = true;
+            break;
+        }
+    }
+    if(visible||ok) {
+        ui->lblStatus->setText("Status: Offen");
+    } else {
+        ui->lblStatus->setText("Status: Versteckt");
     }
 }
 

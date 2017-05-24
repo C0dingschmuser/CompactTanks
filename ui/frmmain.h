@@ -45,6 +45,7 @@ private slots:
     void on_tkillMessage();
     void on_kick();
     void on_fullscreen();
+    void on_visible(int visible);
 
 private:
     Ui::FrmMain *ui;
