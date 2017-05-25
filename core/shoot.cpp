@@ -33,11 +33,14 @@ void Shoot::on_tmain()
         } else {
             v = w->getVel();
         }
+        int dmg = 20;
         network->send("|1#"+t->getName()+"#"+QString::number(mpos->x(),'f',0)+
                       "#"+QString::number(mpos->y(),'f',0)+"#"+
-                      QString::number(v,'f',0)+"#");
+                      QString::number(v,'f',0)+"#"+
+                      QString::number(dmg,'f',0)+"#");
         Bullet *b = new Bullet(t->getRect().center().x(),t->getRect().center().y()+2,
                                (double)mpos->x(),(double)mpos->y(),v,t->getName());
+        b->setDmg(dmg);
         emit newBullet(b);
     }
 }

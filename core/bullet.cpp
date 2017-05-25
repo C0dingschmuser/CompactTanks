@@ -25,6 +25,7 @@ Bullet::Bullet(int x, int y, double x2, double y2, int vel, QString shooter, QCo
     this->vel = vel;
     this->shooter = shooter;
     this->onImpact = onImpact;
+    this->dmg = 20;
 }
 
 void Bullet::setColl(bool coll)
@@ -46,6 +47,11 @@ void Bullet::sync(int x, int y,int elapsed)
     }
     this->x = x;
     this->y = y;
+}
+
+void Bullet::setDmg(int dmg)
+{
+    this->dmg = dmg;
 }
 
 double Bullet::getDistance(QPoint p1, QPoint p2)
@@ -86,4 +92,9 @@ int Bullet::getElapsed()
 int Bullet::getVel()
 {
     return this->vel*0.1;
+}
+
+int Bullet::getDmg()
+{
+    return this->dmg;
 }

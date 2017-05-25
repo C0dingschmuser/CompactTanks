@@ -13,6 +13,7 @@ public:
     void setColl(bool coll);
     void update();
     void sync(int x, int y, int elapsed=-1);
+    void setDmg(int dmg);
     bool getColl();
     QString getShooter();
     QRect get();
@@ -20,6 +21,7 @@ public:
     int getImpactID();
     int getElapsed();
     int getVel();
+    int getDmg();
 private:
     QColor color;
     double x;
@@ -30,6 +32,7 @@ private:
     int onImpact;
     QString shooter;
     int elapsed;
+    int dmg;
     bool coll;
     double getDistance(QPoint p1,QPoint p2);
 };

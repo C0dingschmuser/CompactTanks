@@ -42,10 +42,10 @@ bool Network::connectToServer()
 void Network::on_tcpRecv()
 {
     buffer += tcpSocket->readAll();
-    if(buffer.size()>29) {
+    if(buffer.size()>39) {
         QString input = buffer;
         buffer.clear();
-        if(input.contains("|")&&input.at(input.size()-1)=="a") {
+        if(input.contains("|")&&input.at(input.size()-1)=="~") {
             QStringList p = input.split("|");
             for(int i=1;i<p.size();i++) {
                 fetchTCP(p.at(i));
@@ -118,7 +118,7 @@ bool Network::check(QStringList l, int anz)
 
 void Network::fetchTCP(QString data)
 {
-    qDebug()<<data;
+    //qDebug()<<data;
     QStringList list = data.split("#");
     if(list.at(0)!="") {
         int m = list.at(0).toInt();
