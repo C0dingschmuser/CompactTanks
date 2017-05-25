@@ -20,6 +20,8 @@ Bullet::Bullet(int x, int y, double x2, double y2, int vel, QString shooter, QCo
     double distance = qSqrt(qPow(qFabs(x2-x),2)+qPow(qFabs(y2-y),2));
     this->x2 = (x2-x)/distance;
     this->y2 = (y2-y)/distance;
+    //this->x += x2*5;
+    //this->y += y2*5;
     this->vel = vel;
     this->shooter = shooter;
     this->onImpact = onImpact;

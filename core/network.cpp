@@ -45,7 +45,7 @@ void Network::on_tcpRecv()
     if(buffer.size()>29) {
         QString input = buffer;
         buffer.clear();
-        if(input.contains("|")) {
+        if(input.contains("|")&&input.at(input.size()-1)=="a") {
             QStringList p = input.split("|");
             for(int i=1;i<p.size();i++) {
                 fetchTCP(p.at(i));
@@ -118,6 +118,7 @@ bool Network::check(QStringList l, int anz)
 
 void Network::fetchTCP(QString data)
 {
+    qDebug()<<data;
     QStringList list = data.split("#");
     if(list.at(0)!="") {
         int m = list.at(0).toInt();

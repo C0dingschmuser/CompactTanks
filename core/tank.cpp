@@ -94,10 +94,12 @@ void Tank::setDK(int kills, int deaths)
     this->deaths = deaths;
 }
 
-void Tank::drawTank(QPainter &p, bool barrel)
+void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
 {
     QColor rcolor;
     QRect r;
+    int xt = rect.x();
+    int yt = rect.y();
     switch(color) {
         case 0:
             rcolor = QColor(160,0,94);
@@ -132,36 +134,49 @@ void Tank::drawTank(QPainter &p, bool barrel)
     }
     switch(dir) {
         case 1:
-            r = QRect(rect.x()+5,rect.y()+4,30,34);
+            r = QRect(xt+5,yt+4,30,34);
         break;
         case 2:
-            r = QRect(rect.x()+4,rect.y()+4,34,30);
+            r = QRect(xt+4,yt+4,34,30);
         break;
         case 3:
-            r = QRect(rect.x()+5,rect.y()+2,30,34);
+            r = QRect(xt+5,yt+2,30,34);
         break;
         case 4:
-            r = QRect(rect.x()+2,rect.y()+6,34,29);
+            r = QRect(xt+2,yt+6,34,29);
         break;
     }
     p.setBrush(rcolor);
-    p.setPen(rcolor);
+    p.setPen(Qt::NoPen);
     p.drawRect(r);
-    p.drawPixmap(rect,imgs[dir-1]);
+    p.drawPixmap(xt,yt,40,40,imgs[dir-1]);
     QFont f("Times");
     f.setPointSize(12);
     p.setFont(f);
     QFontMetrics m(QFont("Times",12));
     QRect br = m.boundingRect(name);
-    p.drawRect(rect.x(),rect.y()+rect.height()+1,br.width()*((double)health/100),br.height());
+    p.setPen(Qt::NoPen);
+    p.drawRect(xt,yt-br.height()*0.7-2,br.width(),br.height()*0.7);
+    if(health>80) {
+        p.setBrush(QColor(34,177,76));
+    } else if(health>60) {
+        p.setBrush(QColor(181,230,29));
+    } else if(health>40) {
+        p.setBrush(QColor(255,242,0));
+    } else if(health>20) {
+        p.setBrush(QColor(223,89,0));
+    } else if(health>0) {
+        p.setBrush(QColor(237,28,36));
+    }
+    p.drawRect(xt,yt+rect.height()+2,40*((double)health/100),10);
     p.setPen(Qt::black);
-    p.drawText(QPoint(rect.x(),rect.y()+rect.height()+12),name);
+    p.drawText(QPoint(xt,yt-br.height()*0.7+11),name);
     if(barrel) {
         QPen pen;
         pen.setColor(Qt::black);
         pen.setWidth(5);
         p.setPen(pen);
-        p.drawLine(getBarrel());
+        p.drawLine(getBarrel(xt,yt));
         p.setPen(Qt::black);
     }
 }
@@ -281,11 +296,11 @@ void Tank::setHealth(int health)
     this->health = health;
 }
 
-QLineF Tank::getBarrel()
+QLineF Tank::getBarrel(int xt, int yt)
 {
     QLineF barrel;
-    barrel.setP1(QPoint(rect.center().x(),rect.center().y()));
-    barrel.setP2(QPoint(rect.center().x(),rect.center().y()-15));
+    barrel.setP1(QPoint(xt+20,yt+20));
+    barrel.setP2(QPoint(xt+20,yt+5));
     barrel.setAngle(angle);
     return barrel;
 }

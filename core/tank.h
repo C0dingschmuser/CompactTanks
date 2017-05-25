@@ -56,13 +56,13 @@ public:
     void setAll(int x, int y, int dir, int health);
     void setMoved(bool m);
     void setHealth(int health);
-    void drawTank(QPainter &p,bool barrel=false);
+    void drawTank(QPainter &p, Tank *own, bool barrel=false);
     void move();
     bool getVisible();
     QString getName();
     QString toString();
     QPixmap getIMG();
-    QLineF getBarrel();
+    QLineF getBarrel(int xt, int yt);
 };
 
 #endif // TANK_H

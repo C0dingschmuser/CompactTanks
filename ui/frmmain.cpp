@@ -284,11 +284,11 @@ void FrmMain::paintEvent(QPaintEvent *e)
     }
     //painter.setPen(QColor(185,122,87));
     //painter.setPen(QColor(185,122,87));
-    ownTank->drawTank(painter,true);
+    ownTank->drawTank(painter,ownTank,true);
     for(int i=0;i<tanks.size();i++) {
         if(tanks[i]->getRect().intersects(viewRect)&&tanks[i]->getRect().x()>0) {
             tanks[i]->move();
-            tanks[i]->drawTank(painter);
+            tanks[i]->drawTank(painter,ownTank,false);
         } else {
             tanks[i]->teleport(-200,-200);
         }
