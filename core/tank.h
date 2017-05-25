@@ -23,6 +23,7 @@ private:
     int dir;
     int viewRange;
     int angle;
+    int health;
     bool moved;
     bool visible;
     QVector <QPixmap> imgs;
@@ -48,13 +49,13 @@ public:
     int getKills();
     int getDeaths();
     int getDir();
-    int getViewRange();
+    int getHealth();
     int getAngle();
     void setVisible(bool visible);
     void teleport(int x,int y);
-    void setAll(int x, int y, int dir);
+    void setAll(int x, int y, int dir, int health);
     void setMoved(bool m);
-    void setViewRange(int vr);
+    void setHealth(int health);
     void drawTank(QPainter &p,bool barrel=false);
     void move();
     bool getVisible();

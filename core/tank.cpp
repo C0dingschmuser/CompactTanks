@@ -17,6 +17,7 @@ Tank::Tank(QRect rect, QString name)
     moved = true;
     visible = true;
     viewRange = 120;
+    health = 100;
     for(int i=0;i<4;i++) {
         QPixmap p = QPixmap(":/images/tank/tank"+QString::number(i+1,'f',0)+".png");
         imgs.append(p);
@@ -152,7 +153,7 @@ void Tank::drawTank(QPainter &p, bool barrel)
     p.setFont(f);
     QFontMetrics m(QFont("Times",12));
     QRect br = m.boundingRect(name);
-    p.drawRect(rect.x(),rect.y()+rect.height()+1,br.width(),br.height());
+    p.drawRect(rect.x(),rect.y()+rect.height()+1,br.width()*((double)health/100),br.height());
     p.setPen(Qt::black);
     p.drawText(QPoint(rect.x(),rect.y()+rect.height()+12),name);
     if(barrel) {
@@ -202,8 +203,9 @@ void Tank::teleport(int x, int y)
     rect.moveTo(x,y);
 }
 
-void Tank::setAll(int x, int y, int dir)
+void Tank::setAll(int x, int y, int dir, int health)
 {
+    this->health = health;
     if(!dir) {
         dir = 1;
     }
@@ -269,14 +271,14 @@ int Tank::getDir()
     return this->dir;
 }
 
-int Tank::getViewRange()
+int Tank::getHealth()
 {
-    return this->viewRange;
+    return this->health;
 }
 
-void Tank::setViewRange(int vr)
+void Tank::setHealth(int health)
 {
-    this->viewRange = vr;
+    this->health = health;
 }
 
 QLineF Tank::getBarrel()

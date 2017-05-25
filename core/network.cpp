@@ -130,9 +130,9 @@ void Network::fetchTCP(QString data)
                     break;
                     case -3: //pos
                         {
-                            if(list.size()>4) {
+                            if(list.size()>5) {
                                 Tank *tmp = sucheTank(list.at(1));
-                                tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                                tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(6).toInt());
                             }
                         }
                     break;
@@ -141,9 +141,9 @@ void Network::fetchTCP(QString data)
                             emit syncBullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
                         }
                     break;
-                    case -1: //viewRange
+                    case -1: //health
                         if(list.size()>0) {
-                            ownTank->setViewRange(list.at(1).toInt());
+                            ownTank->setHealth(list.at(1).toInt());
                         }
                     break;
                     case 0: //farbe setzen
@@ -243,7 +243,7 @@ void Network::fetchUDP(QString data)
                     if(tmp->getRect().x()==-200) {
                         tmp->teleport(list.at(3).toInt(),list.at(4).toInt());
                     } else {
-                        tmp->setAll(list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt());
+                        //tmp->setAll(list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt());
                     }
                 }
             break;
@@ -251,7 +251,7 @@ void Network::fetchUDP(QString data)
                 emit syncBullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
             break;
             case 2: //viewRange
-                ownTank->setViewRange(list.at(2).toInt());
+                //ownTank->setViewRange(list.at(2).toInt());
             break;
         }
     }
