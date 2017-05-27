@@ -24,7 +24,7 @@ FrmMain::FrmMain(QWidget *parent) :
     mpos = new QPoint();
     ownTank = new Tank(QRect(-200,-200,40,40),name);
     move = new Movement(ownTank,width,height);
-    network = new Network(ownTank,tanks,QHostAddress("ctanks.ddns.net")); //ip noch ändern!
+    network = new Network(ownTank,tanks,QHostAddress("94.114.254.180")); //ip noch ändern!
     shoot = new Shoot(ownTank,network,aim);
     t_draw = new QTimer();
     t_bullet = new QTimer();
