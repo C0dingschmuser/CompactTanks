@@ -323,11 +323,12 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawRect(-10,height,width+20,10);
     painter.drawRect(-10,-10,10,height+10);
     painter.drawRect(width,-10,10,height+10);
-    painter.setBrush(QColor(25,25,112,100));
-    //painter.setBrush(QColor(255,255,0,50));
-    painter.drawRect(ownTank->getRect().center().x()-620,ownTank->getRect().center().y()-420,1282,724);
+    //painter.setBrush(QColor(25,25,112,100));
+    painter.setBrush(QColor(255,255,0,50));
     painter.resetTransform();
     painter.scale(scaleX,scaleY);
+    painter.setPen(Qt::NoPen);
+    painter.drawRect(0,0,1280,725);
     if(bmessage) {
         QFont f = painter.font();
         f.setPointSize(32);
