@@ -46,6 +46,7 @@ private slots:
     void on_kick();
     void on_fullscreen();
     void on_visible(int visible);
+    void on_tab();
 
 private:
     Ui::FrmMain *ui;
@@ -70,6 +71,7 @@ private:
     bool bmessage;
     bool killMessage;
     bool fullscreen;
+    bool tab;
     QVector <QString> messageText;
     QVector <QString> killMessageText;
     bool contains(QString data, QString c);

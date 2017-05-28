@@ -2,6 +2,7 @@
 #define TERRAIN_H
 #include <QString>
 #include <QRect>
+#include <QDebug>
 #include <QPixmap>
 
 class Terrain

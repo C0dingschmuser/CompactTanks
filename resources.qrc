@@ -4,9 +4,18 @@
         <file>images/tank/tank2.png</file>
         <file>images/tank/tank3.png</file>
         <file>images/tank/tank4.png</file>
-        <file>images/area/trees1.png</file>
-        <file>images/area/trees2.png</file>
-        <file>images/area/trees3.png</file>
+		<file>images/area/obj0.png</file>
+		<file>images/area/obj1.png</file>
+		<file>images/area/obj2.png</file>
+		<file>images/area/obj3.png</file>
+		<file>images/area/obj4.png</file>
+		<file>images/area/obj5.png</file>
+		<file>images/area/obj6.png</file>
+		<file>images/area/obj9.png</file>
+		<file>images/area/obj10.png</file>
+		<file>images/area/obj11.png</file>
+		<file>images/area/obj12.png</file>
+		<file>images/area/obj13.png</file>
         <file>images/tank/cursor.png</file>
     </qresource>
 </RCC>

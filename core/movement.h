@@ -34,6 +34,7 @@ public:
 
 signals:
     void fullscreen();
+    void tab();
 public slots:
 };
 

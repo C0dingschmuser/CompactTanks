@@ -15,8 +15,9 @@ FrmMain::FrmMain(QWidget *parent) :
         QApplication::exit();
     }
     bmessage = false;
+    tab = false;
     width = 2880;
-    height = 1440;
+    height = 2160;
     scaleX = 1.0;
     scaleY = 1.0;
     fullscreen = false;
@@ -50,6 +51,7 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(network,SIGNAL(kick()),this,SLOT(on_kick()));
     connect(network,SIGNAL(visible(int)),this,SLOT(on_visible(int)));
     connect(move,SIGNAL(fullscreen()),this,SLOT(on_fullscreen()));
+    connect(move,SIGNAL(tab()),this,SLOT(on_tab()));
     this->setCursor(QPixmap(":/images/tank/cursor.png"));
     //networkThread->start();
     if(!network->connectToServer()) {
@@ -215,12 +217,21 @@ void FrmMain::on_fullscreen()
     ui->lwInfo->setGeometry(this->geometry().width()*0.8,20,256,391);
 }
 
+void FrmMain::on_tab()
+{
+    if(tab) {
+        tab = false;
+    } else {
+        tab = true;
+    }
+}
+
 void FrmMain::on_visible(int visible)
 {
     bool ok=false;
     for(int i=0;i<lvlObjs.size();i++) {
         if(ownTank->getRect().intersects(lvlObjs[i]->getRect())&&
-                lvlObjs[i]->getType()) {
+                lvlObjs[i]->getType()>0&&lvlObjs[i]->getType()<3) {
             ok = true;
             break;
         }
@@ -273,17 +284,13 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.setPen(QColor(0,110,0));
     painter.setBrush(QColor(0,110,0));
     painter.drawRect(0,0,width,height);
-    painter.setPen(QColor(205,133,63));
-    painter.setBrush(QColor(205,133,63));
     for(int i=0;i<lvlObjs.size();i++) {
         if(lvlObjs[i]->getRect().intersects(viewRect)) {
-            if(lvlObjs[i]->getType()) {
-                painter.drawRect(lvlObjs[i]->getRect());
+            if(lvlObjs[i]->getType()>0&&lvlObjs[i]->getType()<14) {
+                painter.drawPixmap(lvlObjs[i]->getRect(),lvlObjs[i]->getPixmap());
             }
         }
     }
-    //painter.setPen(QColor(185,122,87));
-    //painter.setPen(QColor(185,122,87));
     ownTank->drawTank(painter,ownTank,true);
     for(int i=0;i<tanks.size();i++) {
         if(tanks[i]->getRect().intersects(viewRect)&&tanks[i]->getRect().x()>0) {
@@ -323,8 +330,8 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawRect(-10,height,width+20,10);
     painter.drawRect(-10,-10,10,height+10);
     painter.drawRect(width,-10,10,height+10);
-    //painter.setBrush(QColor(25,25,112,100));
-    painter.setBrush(QColor(255,255,0,50));
+    painter.setBrush(QColor(25,25,112,100));
+    //painter.setBrush(QColor(255,255,0,50));
     painter.resetTransform();
     painter.scale(scaleX,scaleY);
     painter.setPen(Qt::NoPen);
@@ -341,6 +348,19 @@ void FrmMain::paintEvent(QPaintEvent *e)
         painter.drawRect(100,600,br.width()+2,br.height());
         painter.setPen(Qt::black);
         painter.drawText(100,640,messageText.last());
+    }
+    if(tab) {
+        int offset = 350;
+        painter.setPen(Qt::red);
+        painter.drawText(0+offset,48,"Name");
+        painter.drawText(402+offset,48,"Kills");
+        painter.drawText(462+offset,48,"Tode");
+        painter.drawLine(QPoint(0+offset,50),QPoint(520+offset,50));
+        painter.drawLine(QPoint(400+offset,30),QPoint(400+offset,210));
+        painter.drawLine(QPoint(460+offset,30),QPoint(460+offset,210));
+        painter.drawText(0+offset,64,ownTank->getName());
+        painter.drawText(402+offset,64,QString::number(ownTank->getKills(),'f',0));
+        painter.drawText(462+offset,64,QString::number(ownTank->getDeaths(),'f',0));
     }
     //painter.drawRect(QRect(aim->x(),aim->y(),10,10));
 

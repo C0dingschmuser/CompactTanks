@@ -184,14 +184,18 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
 void Tank::move()
 {
     if(rect.x()<targetPos.x()-speed-1) {
-        rect.moveTo(rect.x()+speed,rect.y());
+        rect.moveTo(rect.x()+speed*2,rect.y());
+        targetPos.setX(targetPos.x()+1);
     } else if(rect.x()>targetPos.x()+speed-1) {
-        rect.moveTo(rect.x()-speed,rect.y());
+        rect.moveTo(rect.x()-speed*2,rect.y());
+        targetPos.setX(targetPos.x()-1);
     }
     if(rect.y()<targetPos.y()-speed-1) {
-        rect.moveTo(rect.x(),rect.y()+speed);
+        rect.moveTo(rect.x(),rect.y()+speed*2);
+        targetPos.setY(targetPos.y()+1);
     } else if(rect.y()>targetPos.y()+speed-1) {
-        rect.moveTo(rect.x(),rect.y()-speed);
+        rect.moveTo(rect.x(),rect.y()-speed*2);
+        targetPos.setY(targetPos.y()-1);
     }
 }
 

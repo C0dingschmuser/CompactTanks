@@ -224,6 +224,7 @@ void Network::fetchTCP(QString data)
                         emit message(list.at(1),list.at(2).toInt());
                     break;
                     case 10: //visible
+                        //qDebug()<<list;
                         emit visible(list.at(1).toInt());
                     break;
                 }

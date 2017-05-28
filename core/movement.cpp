@@ -103,7 +103,7 @@ void Movement::keyPressEvent(QKeyEvent *e)
         }
     }
     if(e->key()==Qt::Key_Tab) {
-        //tab = true;
+        emit tab();
     }
 }
 
@@ -126,7 +126,7 @@ void Movement::keyReleaseEvent(QKeyEvent *e)
         ownTank->setMoved(false);
     }
     if(e->key()==Qt::Key_Tab) {
-        //tab = false;
+        emit tab();
     }
     if(e->key()==Qt::Key_F11) {
         emit fullscreen();
