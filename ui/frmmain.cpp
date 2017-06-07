@@ -14,6 +14,7 @@ FrmMain::FrmMain(QWidget *parent) :
         box.setText("Falsche Eingabe!");
         QApplication::exit();
     }
+    ui->lwInfo->setGeometry(this->geometry().width()*0.8,20,256,391);
     bmessage = false;
     tab = false;
     width = 2880;
@@ -58,8 +59,8 @@ FrmMain::FrmMain(QWidget *parent) :
         QMessageBox::critical(this,"FEHLER","Keine Verbindung möglich!");
         exit(1);
     }
-    t_draw->start(10);
-    t_bullet->start(10);
+    t_draw->start(5);
+    t_bullet->start(5);
 }
 
 FrmMain::~FrmMain()
@@ -162,6 +163,11 @@ void FrmMain::on_delBullet(int pos)
 void FrmMain::on_syncBullet(int pos, int x, int y, int elapsed)
 {
     if(bullets.size()-1>=pos) {
+        if(!bullets[pos]->getEnabled()) {
+            if(viewRect.intersects(QRect(x,y,10,10))) {
+                bullets[pos]->setEnabled(true);
+            }
+        }
         bullets[pos]->sync(x,y,elapsed);
     }
 }
@@ -183,7 +189,9 @@ void FrmMain::on_tbullet()
 {
     if(bullets.size()>0) {
         for(int i=0;i<bullets.size();i++) {
-            bullets[i]->update();
+            if(bullets[i]->getEnabled()) {
+                bullets[i]->update();
+            }
         }
     }
 }
@@ -257,29 +265,29 @@ bool FrmMain::contains(QString data,QString c)
 void FrmMain::paintEvent(QPaintEvent *e)
 {
     Q_UNUSED(e)
-    scaleX = this->geometry().width()/double(1280);
-    scaleY = this->geometry().height()/double(720);
+    scaleX = this->geometry().width()/double(1920);
+    scaleY = this->geometry().height()/double(1080);
     //qDebug()<<this->geometry().width();
-    QRect viewRect = QRect(ownTank->getRect().center().x()-620,
-                           ownTank->getRect().center().y()-420,1280,720);
+    viewRect = QRect(ownTank->getRect().center().x()-930,
+                           ownTank->getRect().center().y()-621,2000,1100);
     QPainter painter(this);
     //painter.setRasssssssssssaaaaaenderHint(QPainter::HighQualityAntialiasing);
     painter.scale(scaleX,scaleY);
-    painter.translate((ownTank->getRect().x()-600)*-1,(ownTank->getRect().y()-400)*-1);
+    painter.translate((ownTank->getRect().x()-900)*-1,(ownTank->getRect().y()-600)*-1);
     QPoint m;
     m.setX(this->mapFromGlobal(QCursor::pos()).x()/scaleX);
     m.setY(this->mapFromGlobal(QCursor::pos()).y()/scaleY);
     //m = painter.transform().map(m);
     mpos->setX(m.x());
     mpos->setY(m.y());
-    this->aim->setX(ownTank->getRect().x()+mpos->x()-600);
-    this->aim->setY(ownTank->getRect().y()+mpos->y()-400);
+    this->aim->setX(ownTank->getRect().x()+mpos->x()-900);
+    this->aim->setY(ownTank->getRect().y()+mpos->y()-590);
     //QFont f = QFont("Fixedsys");
     //painter.setFont(f);
     painter.setFont(QFont("Times"));
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
-    painter.drawRect(ownTank->getRect().center().x()-620,ownTank->getRect().center().y()-420,1281,720);
+    painter.drawRect(viewRect.x(),viewRect.y(),2000,1100);
     //painter.drawRect(-600,-500,6000,3000);
     painter.setPen(QColor(0,110,0));
     painter.setBrush(QColor(0,110,0));
@@ -288,6 +296,9 @@ void FrmMain::paintEvent(QPaintEvent *e)
         if(lvlObjs[i]->getRect().intersects(viewRect)) {
             if(lvlObjs[i]->getType()>0&&lvlObjs[i]->getType()<14) {
                 painter.drawPixmap(lvlObjs[i]->getRect(),lvlObjs[i]->getPixmap());
+            }
+            if(!lvlObjs[i]->getType()) {
+                painter.drawPixmap(lvlObjs[i]->getRect(),lvlObjs[i]->getGrassPixmap());
             }
         }
     }
@@ -303,7 +314,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
     for(int i=0;i<bullets.size();i++) {
-        if(bullets[i]->get().intersects(viewRect)) {
+        if(bullets[i]->getEnabled()) {
             painter.drawEllipse(bullets[i]->get().center(),5,5);
         }
     }
@@ -335,7 +346,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.resetTransform();
     painter.scale(scaleX,scaleY);
     painter.setPen(Qt::NoPen);
-    painter.drawRect(0,0,1280,725);
+    painter.drawRect(0,0,1920,1110);
     if(bmessage) {
         QFont f = painter.font();
         f.setPointSize(32);

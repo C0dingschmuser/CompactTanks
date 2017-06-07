@@ -14,6 +14,7 @@ private:
     int h;
     int type;
     QPixmap p;
+    QPixmap grass;
 public:
     Terrain();
     Terrain(int x, int y, int w, int h, int type=0);
@@ -23,6 +24,7 @@ public:
     QString toString();
     int getType();
     QPixmap getPixmap();
+    QPixmap getGrassPixmap();
 };
 
 #endif // TERRAIN_H

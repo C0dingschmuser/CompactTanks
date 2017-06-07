@@ -13,6 +13,7 @@ Terrain::Terrain(int x, int y, int w, int h, int type)
     this->h = h;
     this->type = type;
     this->p = QPixmap(":/images/area/obj"+QString::number(type,'f',0)+".png");
+    this->grass = QPixmap(":/images/area/obj9.png");
 }
 
 
@@ -35,4 +36,9 @@ int Terrain::getType()
 QPixmap Terrain::getPixmap()
 {
     return this->p;
+}
+
+QPixmap Terrain::getGrassPixmap()
+{
+    return this->grass;
 }

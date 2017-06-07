@@ -9,12 +9,14 @@ class Bullet
 public:
     Bullet();
     ~Bullet();
-    Bullet(int x, int y, double x2, double y2, int vel, QString shooter, QColor color = Qt::black,int onImpact = 0);
+    Bullet(int x, int y, double x2, double y2, int vel, QString shooter, QColor color = Qt::black, int onImpact = 0);
     void setColl(bool coll);
     void update();
     void sync(int x, int y, int elapsed=-1);
     void setDmg(int dmg);
+    void setEnabled(bool enabled);
     bool getColl();
+    bool getEnabled();
     QString getShooter();
     QRect get();
     QColor getColor();
@@ -34,6 +36,7 @@ private:
     int elapsed;
     int dmg;
     bool coll;
+    bool enabled;
     double getDistance(QPoint p1,QPoint p2);
 };
 

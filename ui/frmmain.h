@@ -63,6 +63,7 @@ private:
     Shoot *shoot;
     QPoint *aim;
     QPoint *mpos;
+    QRect viewRect;
     int messageLength;
     int width;
     int height;

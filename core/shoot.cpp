@@ -8,7 +8,7 @@ Shoot::Shoot(Tank *t, Network *n, QPoint *aim, QObject *parent) : QObject(parent
     mpos = aim;
     this->t = t;
     this->network = n;
-    w = new Weapon(75,500);
+    w = new Weapon(150,750);
     connect(t_cool,SIGNAL(timeout()),this,SLOT(on_tcool()));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
     t_main->start(50);

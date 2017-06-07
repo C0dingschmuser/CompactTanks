@@ -22,10 +22,15 @@ Bullet::Bullet(int x, int y, double x2, double y2, int vel, QString shooter, QCo
     this->y2 = (y2-y)/distance;
     //this->x += x2*5;
     //this->y += y2*5;
-    this->vel = vel;
+    this->vel = vel/2;
     this->shooter = shooter;
     this->onImpact = onImpact;
     this->dmg = 20;
+}
+
+void Bullet::setEnabled(bool enabled)
+{
+    this->enabled = enabled;
 }
 
 void Bullet::setColl(bool coll)
@@ -45,8 +50,10 @@ void Bullet::sync(int x, int y,int elapsed)
     if(elapsed!=-1) {
         this->elapsed = elapsed;
     }
-    this->x = x;
-    this->y = y;
+    if(getDistance(QPoint(this->x,this->y),QPoint(x,y))>20) {
+        this->x = x;
+        this->y = y;
+    }
 }
 
 void Bullet::setDmg(int dmg)
@@ -57,6 +64,11 @@ void Bullet::setDmg(int dmg)
 double Bullet::getDistance(QPoint p1, QPoint p2)
 {
     return (double)sqrt(pow(p1.x()-p2.x(),2)+pow(p1.y()-p2.y(),2));
+}
+
+bool Bullet::getEnabled()
+{
+    return this->enabled;
 }
 
 bool Bullet::getColl()

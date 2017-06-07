@@ -189,6 +189,11 @@ void Network::fetchTCP(QString data)
                         {
                             if(list.size()>5) {
                                 Bullet *b = new Bullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toDouble(),list.at(4).toDouble(),list.at(5).toInt(),list.at(6));
+                                bool enabled = true;
+                                if(!ownTank->getRect().intersects(b->get())) {
+                                    enabled = false;
+                                }
+                                b->setEnabled(enabled);
                                 emit newBullet(b);
                             }
                         }
