@@ -232,7 +232,7 @@ void Network::fetchTCP(QString data)
                         if(list.size()>2) {
                             //qDebug()<<list.at(1);
                             Tank *tmp = sucheTank(list.at(1));
-                            tmp->teleport(-200,-200);
+                            tmp->teleport(list.at(2).toInt(),list.at(3).toInt());
                             emit killMessage(list.at(4)+" killed "+list.at(1));
                         }
                     break;

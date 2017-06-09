@@ -312,7 +312,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
                     } else {
                         painter.setBrush(QColor(255,0,0));
                     }
-                    painter.drawEllipse(lvlObjs[i]->getRect().center(),cp/3,cp/3);
+                    painter.drawEllipse(QPoint(lvlObjs[i]->getRect().center().x()+1,lvlObjs[i]->getRect().center().y()+1),cp/3,cp/3);
                 }
             }
             if(lvlObjs[i]->getType()>0&&lvlObjs[i]->getType()<14) {
