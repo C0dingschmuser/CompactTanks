@@ -296,9 +296,9 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.setBrush(Qt::black);
     painter.drawRect(viewRect.x(),viewRect.y(),2000,1100);
     //painter.drawRect(-600,-500,6000,3000);
-    painter.setPen(QColor(0,110,0));
+    /*painter.setPen(QColor(0,110,0));
     painter.setBrush(QColor(0,110,0));
-    painter.drawRect(0,0,width,height);
+    painter.drawRect(0,0,width,height);*/
     for(int i=0;i<lvlObjs.size();i++) {
         if(lvlObjs[i]->getRect().intersects(viewRect)) {
             if(lvlObjs[i]->getType()==2) {
@@ -316,7 +316,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
                 }
             }
             if(lvlObjs[i]->getType()>0&&lvlObjs[i]->getType()<14) {
-                painter.drawPixmap(lvlObjs[i]->getRect(),lvlObjs[i]->getPixmap());
+                painter.drawPixmap(lvlObjs[i]->getRect().x(),lvlObjs[i]->getRect().y(),72,72,lvlObjs[i]->getPixmap());
             }
             if(!lvlObjs[i]->getType()) {
                 painter.drawPixmap(lvlObjs[i]->getRect(),lvlObjs[i]->getGrassPixmap());
@@ -346,6 +346,11 @@ void FrmMain::paintEvent(QPaintEvent *e)
             }
         }
     }
+    //-------------DEBUG----------------
+    //for(int i=0;i<lvlObjs.size();i++) {
+    //    painter.drawPixmap(lvlObjs[i]->getRect(),QPixmap(":/images/area/grid.png"));
+    //}
+    //-------------/DEBUG----------------
     //painter.setBrush(Qt::transparent);
     //painter.drawRect(viewRect);
     /*QPainterPath path;
