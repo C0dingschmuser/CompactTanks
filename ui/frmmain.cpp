@@ -51,6 +51,7 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(network,SIGNAL(killMessage(QString)),this,SLOT(on_killMessage(QString)));
     connect(network,SIGNAL(kick()),this,SLOT(on_kick()));
     connect(network,SIGNAL(visible(int)),this,SLOT(on_visible(int)));
+    connect(network,SIGNAL(capobj(int,int,int)),this,SLOT(on_capobj(int,int,int)));
     connect(move,SIGNAL(fullscreen()),this,SLOT(on_fullscreen()));
     connect(move,SIGNAL(tab()),this,SLOT(on_tab()));
     this->setCursor(QPixmap(":/images/tank/cursor.png"));
@@ -251,6 +252,12 @@ void FrmMain::on_visible(int visible)
     }
 }
 
+void FrmMain::on_capobj(int num, int owner, int cp)
+{
+    lvlObjs[num]->setOwner(owner);
+    lvlObjs[num]->setAmount(cp);
+}
+
 bool FrmMain::contains(QString data,QString c)
 {
     bool ok = false;
@@ -294,6 +301,20 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawRect(0,0,width,height);
     for(int i=0;i<lvlObjs.size();i++) {
         if(lvlObjs[i]->getRect().intersects(viewRect)) {
+            if(lvlObjs[i]->getType()==2) {
+                int owner = lvlObjs[i]->getOwner();
+                int cp = lvlObjs[i]->getAmount();
+                painter.setBrush(QColor(255,255,255));
+                painter.drawRect(lvlObjs[i]->getRect());
+                if(cp) {
+                    if(owner==ownTank->getTeam()) {
+                        painter.setBrush(QColor(0,255,0));
+                    } else {
+                        painter.setBrush(QColor(255,0,0));
+                    }
+                    painter.drawEllipse(lvlObjs[i]->getRect().center(),cp/3,cp/3);
+                }
+            }
             if(lvlObjs[i]->getType()>0&&lvlObjs[i]->getType()<14) {
                 painter.drawPixmap(lvlObjs[i]->getRect(),lvlObjs[i]->getPixmap());
             }

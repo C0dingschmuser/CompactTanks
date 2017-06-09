@@ -47,6 +47,7 @@ private slots:
     void on_fullscreen();
     void on_visible(int visible);
     void on_tab();
+    void on_capobj(int num,int owner,int cp);
 
 private:
     Ui::FrmMain *ui;

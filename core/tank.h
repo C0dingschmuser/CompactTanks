@@ -24,6 +24,7 @@ private:
     int viewRange;
     int angle;
     int health;
+    int team;
     bool moved;
     bool visible;
     QVector <QPixmap> imgs;
@@ -31,7 +32,7 @@ private:
     QPoint targetPos;
 public:
     Tank();
-    Tank(QRect rect, QString name);
+    Tank(QRect rect, QString name, int team=-1);
     ~Tank();
     bool getMoved();
     QRect getRect();
@@ -51,11 +52,13 @@ public:
     int getDir();
     int getHealth();
     int getAngle();
+    int getTeam();
     void setVisible(bool visible);
     void teleport(int x,int y);
     void setAll(int x, int y, int dir, int health);
     void setMoved(bool m);
     void setHealth(int health);
+    void setTeam(int team);
     void drawTank(QPainter &p, Tank *own, bool barrel=false);
     void move();
     bool getVisible();

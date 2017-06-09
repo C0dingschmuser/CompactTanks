@@ -125,6 +125,11 @@ void Network::fetchTCP(QString data)
         if(list.size()>1) {
             if(list.at(1)!=ownTank->getName()) {
                 switch(m) {
+                    case -5:
+                        if(list.size()>0) {
+                            ownTank->setTeam(list.at(1).toInt());
+                        }
+                    break;
                     case -4: //kick
                         t_main->stop();
                         emit kick();
@@ -149,7 +154,7 @@ void Network::fetchTCP(QString data)
                     break;
                     case 0: //farbe setzen
                         if(list.size()>2) {
-                            ownTank->setColor(list.at(1).toInt());
+                            ownTank->setColor(1);
                             ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());
                             t_main->start(10);
                         }
@@ -157,8 +162,14 @@ void Network::fetchTCP(QString data)
                     case 1: //spieler hinzufügen
                         {
                             if(list.size()>4) {
-                                Tank *t = new Tank(QRect(list.at(2).toInt(),list.at(3).toInt(),40,40),list.at(1));
-                                t->setColor(list.at(5).toInt());
+                                Tank *t = new Tank(QRect(list.at(2).toInt(),list.at(3).toInt(),40,40),list.at(1),list.at(7).toInt());
+                                qDebug()<<ownTank->getTeam();
+                                qDebug()<<t->getTeam();
+                                if(t->getTeam()==ownTank->getTeam()) {
+                                    t->setColor(1);
+                                } else {
+                                    t->setColor(0);
+                                }
                                 t->teleport(list.at(2).toInt(),list.at(3).toInt());
                                 players.append(t);
                                 emit newPlayer(t);
@@ -232,6 +243,9 @@ void Network::fetchTCP(QString data)
                         //qDebug()<<list;
                         emit visible(list.at(1).toInt());
                     break;
+                    case 11: //capobj
+                        emit capobj(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt());
+                    break;
                 }
             }
         }
@@ -266,7 +280,7 @@ void Network::fetchUDP(QString data)
 
 Tank* Network::sucheTank(QString name)
 {
-    Tank *tmp = new Tank();
+    Tank *tmp;
     for(int i=0;i<players.size();i++) {
         if(players[i]->getName()==name) {
             tmp = players[i];

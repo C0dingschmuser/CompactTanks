@@ -55,6 +55,7 @@ signals:
     void killMessage(QString messageText);
     void kick();
     void visible(int visible);
+    void capobj(int num,int owner,int cp);
 public slots:
 };
 

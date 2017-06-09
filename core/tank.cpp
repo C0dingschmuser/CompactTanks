@@ -5,7 +5,7 @@ Tank::Tank()
 
 }
 
-Tank::Tank(QRect rect, QString name)
+Tank::Tank(QRect rect, QString name, int team)
 {
     this->rect = rect;
     this->name = name;
@@ -18,6 +18,7 @@ Tank::Tank(QRect rect, QString name)
     visible = true;
     viewRange = 120;
     health = 100;
+    this->team = team;
     for(int i=0;i<4;i++) {
         QPixmap p = QPixmap(":/images/tank/tank"+QString::number(i+1,'f',0)+".png");
         imgs.append(p);
@@ -101,11 +102,11 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     int xt = rect.x();
     int yt = rect.y();
     switch(color) {
-        case 0:
-            rcolor = QColor(160,0,94);
+        case 0: //rot
+            rcolor = QColor(255,0,0);
         break;
-        case 1:
-            rcolor = QColor(238,205,125);
+        case 1: //grün
+            rcolor = QColor(0,255,0);
         break;
         case 2:
             rcolor = QColor(92,163,99);
@@ -295,9 +296,19 @@ int Tank::getHealth()
     return this->health;
 }
 
+int Tank::getTeam()
+{
+    return this->team;
+}
+
 void Tank::setHealth(int health)
 {
     this->health = health;
+}
+
+void Tank::setTeam(int team)
+{
+    this->team = team;
 }
 
 QLineF Tank::getBarrel(int xt, int yt)
