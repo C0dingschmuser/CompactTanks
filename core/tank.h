@@ -25,6 +25,7 @@ private:
     int angle;
     int health;
     int team;
+    int coins;
     bool moved;
     bool visible;
     QVector <QPixmap> imgs;
@@ -53,12 +54,14 @@ public:
     int getHealth();
     int getAngle();
     int getTeam();
+    int getCoins();
     void setVisible(bool visible);
     void teleport(int x,int y);
     void setAll(int x, int y, int dir, int health);
     void setMoved(bool m);
     void setHealth(int health);
     void setTeam(int team);
+    void setCoins(int coins);
     void drawTank(QPainter &p, Tank *own, bool barrel=false);
     void move();
     bool getVisible();

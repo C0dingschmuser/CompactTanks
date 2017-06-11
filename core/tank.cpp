@@ -18,6 +18,7 @@ Tank::Tank(QRect rect, QString name, int team)
     visible = true;
     viewRange = 120;
     health = 100;
+    coins = 0;
     this->team = team;
     for(int i=0;i<4;i++) {
         QPixmap p = QPixmap(":/images/tank/tank"+QString::number(i+1,'f',0)+".png");
@@ -158,6 +159,9 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     QRect br = m.boundingRect(name);
     p.setPen(Qt::NoPen);
     p.drawRect(xt,yt-br.height()*0.7-2,br.width(),br.height()*0.7);
+    p.setPen(Qt::black);
+    p.drawLine(xt+1,yt+rect.height()+3,xt+40,yt+rect.height()+3);
+    p.setPen(Qt::NoPen);
     if(health>80) {
         p.setBrush(QColor(34,177,76));
     } else if(health>60) {
@@ -169,7 +173,7 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     } else if(health>0) {
         p.setBrush(QColor(237,28,36));
     }
-    p.drawRect(xt,yt+rect.height()+2,40*((double)health/100),10);
+    p.drawRect(xt+1,yt+rect.height()+3,40*((double)health/100),10);
     p.setPen(Qt::black);
     p.drawText(QPoint(xt,yt-br.height()*0.7+11),name);
     if(barrel) {
@@ -266,6 +270,11 @@ void Tank::setAngle(int angle)
     }*/
 }
 
+void Tank::setCoins(int coins)
+{
+    this->coins = coins;
+}
+
 int Tank::getAngle()
 {
     return angle;
@@ -299,6 +308,11 @@ int Tank::getHealth()
 int Tank::getTeam()
 {
     return this->team;
+}
+
+int Tank::getCoins()
+{
+    return this->coins;
 }
 
 void Tank::setHealth(int health)

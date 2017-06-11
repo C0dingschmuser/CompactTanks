@@ -20,7 +20,8 @@ SOURCES += ui/main.cpp\
     core/terrain.cpp \
     core/bullet.cpp \
     core/shoot.cpp \
-    core/weapon.cpp
+    core/weapon.cpp \
+    core/worker.cpp
 
 HEADERS  += ui/frmmain.h \
     core/tank.h \
@@ -29,7 +30,8 @@ HEADERS  += ui/frmmain.h \
     core/terrain.h \
     core/bullet.h \
     core/shoot.h \
-    core/weapon.h
+    core/weapon.h \
+    core/worker.h
 
 FORMS    += ui/frmmain.ui
 

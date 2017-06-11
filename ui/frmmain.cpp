@@ -25,43 +25,35 @@ FrmMain::FrmMain(QWidget *parent) :
     aim = new QPoint();
     mpos = new QPoint();
     ownTank = new Tank(QRect(-200,-200,40,40),name);
-    move = new Movement(ownTank,width,height);
-    network = new Network(ownTank,tanks,QHostAddress("94.114.254.180")); //ip noch ändern!
-    shoot = new Shoot(ownTank,network,aim);
+    worker = new Worker(ownTank,aim,width,height);
     t_draw = new QTimer();
-    t_bullet = new QTimer();
     t_message = new QTimer();
     t_killMessage = new QTimer();
-    //QThread *networkThread = new QThread();
-    //network->moveToThread(networkThread);
+    QThread *workerThread = new QThread();
+    worker->moveToThread(workerThread);
     connect(t_draw,SIGNAL(timeout()),this,SLOT(on_tdraw()));
-    connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
     connect(t_message,SIGNAL(timeout()),this,SLOT(on_tmessage()));
     connect(t_killMessage,SIGNAL(timeout()),this,SLOT(on_tkillMessage()));
-    connect(shoot,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
-    connect(network,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*))); //bei neuem spieler aufrufen
-    connect(network,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
-    connect(network,SIGNAL(newlvlObj(int,int,int,int,int)),this,SLOT(on_newlvlObj(int,int,int,int,int)));
-    connect(network,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
-    connect(network,SIGNAL(delBullet(int)),this,SLOT(on_delBullet(int)));
-    connect(network,SIGNAL(syncBullet(int,int,int,int)),this,SLOT(on_syncBullet(int,int,int,int)));
-    connect(network,SIGNAL(delObjs()),this,SLOT(on_dellObjs()));
-    connect(network,SIGNAL(disconnect()),this,SLOT(on_disconnect()));
-    connect(network,SIGNAL(message(QString,int)),this,SLOT(on_message(QString,int)));
-    connect(network,SIGNAL(killMessage(QString)),this,SLOT(on_killMessage(QString)));
-    connect(network,SIGNAL(kick()),this,SLOT(on_kick()));
-    connect(network,SIGNAL(visible(int)),this,SLOT(on_visible(int)));
-    connect(network,SIGNAL(capobj(int,int,int)),this,SLOT(on_capobj(int,int,int)));
-    connect(move,SIGNAL(fullscreen()),this,SLOT(on_fullscreen()));
-    connect(move,SIGNAL(tab()),this,SLOT(on_tab()));
+    connect(worker,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
+    connect(worker,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*))); //bei neuem spieler aufrufen
+    connect(worker,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
+    connect(worker,SIGNAL(newlvlObj(Terrain*)),this,SLOT(on_newlvlObj(Terrain*)));
+    connect(worker,SIGNAL(delBullet(int)),this,SLOT(on_delBullet(int)));
+    //connect(network,SIGNAL(syncBullet(int,int,int,int)),this,SLOT(on_syncBullet(int,int,int,int)));
+    connect(worker,SIGNAL(delObjs()),this,SLOT(on_delObjs()));
+    connect(worker,SIGNAL(disconnected()),this,SLOT(on_disconnect()));
+    connect(worker,SIGNAL(message(QString,int)),this,SLOT(on_message(QString,int)));
+    connect(worker,SIGNAL(killMessage(QString)),this,SLOT(on_killMessage(QString)));
+    connect(worker,SIGNAL(kick()),this,SLOT(on_kick()));
+    connect(worker,SIGNAL(visible(bool)),this,SLOT(on_visible(bool)));
+    //connect(network,SIGNAL(capobj(int,int,int)),this,SLOT(on_capobj(int,int,int)));
+    connect(worker,SIGNAL(fullscreen()),this,SLOT(on_fullscreen()));
+    connect(worker,SIGNAL(tab()),this,SLOT(on_tab()));
+    connect(worker,SIGNAL(connFail()),this,SLOT(on_connFail()));
     this->setCursor(QPixmap(":/images/tank/cursor.png"));
-    //networkThread->start();
-    if(!network->connectToServer()) {
-        QMessageBox::critical(this,"FEHLER","Keine Verbindung möglich!");
-        exit(1);
-    }
+    workerThread->start();
     t_draw->start(5);
-    t_bullet->start(5);
+    //t_bullet->start(5);
 }
 
 FrmMain::~FrmMain()
@@ -72,15 +64,21 @@ FrmMain::~FrmMain()
     for(int i=0;i<lvlObjs.size();i++) {
         delete lvlObjs[i];
     }
-    disconnect(network,SIGNAL(disconnect()),this,SLOT(on_disconnect()));
+    //disconnect(network,SIGNAL(disconnect()),this,SLOT(on_disconnect()));
     delete t_draw;
     delete ownTank;
-    delete move;
-    delete network;
+    //delete move;
+    //delete network;
     delete aim;
     delete mpos;
     delete ui;
     QApplication::exit();
+}
+
+void FrmMain::on_connFail()
+{
+    QMessageBox::critical(this,"FEHLER","Keine Verbindung möglich!");
+    exit(1);
 }
 
 void FrmMain::on_disconnect()
@@ -143,10 +141,10 @@ void FrmMain::on_newPlayer(Tank *t)
     tanks.append(t);
 }
 
-void FrmMain::on_newlvlObj(int x, int y, int w, int h, int type)
+void FrmMain::on_newlvlObj(Terrain *t)
 {
-    Terrain *t = new Terrain(x,y,w,h,type);
-    lvlObjs.append(t);
+    Terrain *te = t;
+    lvlObjs.append(te);
 }
 
 void FrmMain::on_newBullet(Bullet *b)
@@ -156,21 +154,9 @@ void FrmMain::on_newBullet(Bullet *b)
 
 void FrmMain::on_delBullet(int pos)
 {
-    if(bullets.size()-1>=pos) {
-        bullets.removeAt(pos);
-    }
-}
-
-void FrmMain::on_syncBullet(int pos, int x, int y, int elapsed)
-{
-    if(bullets.size()-1>=pos) {
-        if(!bullets[pos]->getEnabled()) {
-            if(viewRect.intersects(QRect(x,y,10,10))) {
-                bullets[pos]->setEnabled(true);
-            }
-        }
-        bullets[pos]->sync(x,y,elapsed);
-    }
+    //qDebug()<<pos;
+    //qDebug()<<bullets.size();
+    bullets.removeAt(pos);
 }
 
 void FrmMain::on_delPlayer(int pos)
@@ -178,7 +164,7 @@ void FrmMain::on_delPlayer(int pos)
     tanks.removeAt(pos);
 }
 
-void FrmMain::on_dellObjs()
+void FrmMain::on_delObjs()
 {
     for(int i=0;i<lvlObjs.size();i++) {
         delete lvlObjs[i];
@@ -186,21 +172,10 @@ void FrmMain::on_dellObjs()
     lvlObjs.resize(0);
 }
 
-void FrmMain::on_tbullet()
-{
-    if(bullets.size()>0) {
-        for(int i=0;i<bullets.size();i++) {
-            if(bullets[i]->getEnabled()) {
-                bullets[i]->update();
-            }
-        }
-    }
-}
-
 void FrmMain::on_tdraw()
 {
     if(!QApplication::activeWindow()) {
-        move->stop();
+        //worker
     }
     ownTank->setAngle((int)qRadiansToDegrees(atan2(aim->y()-ownTank->getRect().center().y(),
                                  aim->x()-ownTank->getRect().center().x()))*-1);
@@ -209,7 +184,7 @@ void FrmMain::on_tdraw()
 
 void FrmMain::on_kick()
 {
-    disconnect(network,SIGNAL(disconnect()),this,SLOT(on_disconnect()));
+    disconnect(worker,SIGNAL(disconnected()),this,SLOT(on_disconnect()));
     QMessageBox::information(this,"FEHLER","Du wurdest gekickt!");
     exit(1);
 }
@@ -235,27 +210,13 @@ void FrmMain::on_tab()
     }
 }
 
-void FrmMain::on_visible(int visible)
+void FrmMain::on_visible(bool visible)
 {
-    bool ok=false;
-    for(int i=0;i<lvlObjs.size();i++) {
-        if(ownTank->getRect().intersects(lvlObjs[i]->getRect())&&
-                lvlObjs[i]->getType()>0&&lvlObjs[i]->getType()<3) {
-            ok = true;
-            break;
-        }
-    }
-    if(visible||ok) {
+    if(visible) {
         ui->lblStatus->setText("Status: Offen");
     } else {
         ui->lblStatus->setText("Status: Versteckt");
     }
-}
-
-void FrmMain::on_capobj(int num, int owner, int cp)
-{
-    lvlObjs[num]->setOwner(owner);
-    lvlObjs[num]->setAmount(cp);
 }
 
 bool FrmMain::contains(QString data,QString c)
@@ -272,11 +233,15 @@ bool FrmMain::contains(QString data,QString c)
 void FrmMain::paintEvent(QPaintEvent *e)
 {
     Q_UNUSED(e)
+    /*qDebug()<<"--------";
+    qDebug()<<ownTank->getRect().x();
+    qDebug()<<ownTank->getRect().y();*/
     scaleX = this->geometry().width()/double(1920);
     scaleY = this->geometry().height()/double(1080);
     //qDebug()<<this->geometry().width();
     viewRect = QRect(ownTank->getRect().center().x()-930,
                            ownTank->getRect().center().y()-621,2000,1100);
+    worker->setViewRect(viewRect);
     QPainter painter(this);
     //painter.setRasssssssssssaaaaaenderHint(QPainter::HighQualityAntialiasing);
     painter.scale(scaleX,scaleY);
@@ -398,6 +363,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
         painter.drawText(0+offset,64,ownTank->getName());
         painter.drawText(402+offset,64,QString::number(ownTank->getKills(),'f',0));
         painter.drawText(462+offset,64,QString::number(ownTank->getDeaths(),'f',0));
+        painter.drawText(462+offset,128,QString::number(ownTank->getCoins(),'f',0));
     }
     //painter.drawRect(QRect(aim->x(),aim->y(),10,10));
 
@@ -416,20 +382,20 @@ void FrmMain::leaveEvent(QEvent *event)
 
 void FrmMain::keyPressEvent(QKeyEvent *e)
 {
-    move->keyPressEvent(e);
+    worker->keyP(e);
 }
 
 void FrmMain::keyReleaseEvent(QKeyEvent *e)
 {
-    move->keyReleaseEvent(e);
+    worker->keyR(e);
 }
 
 void FrmMain::mousePressEvent(QMouseEvent *e)
 {
-    shoot->MousePressEvent(e);
+    worker->mPrs(e);
 }
 
 void FrmMain::mouseReleaseEvent(QMouseEvent *e)
 {
-    shoot->MouseReleaseEvent(e);
+    worker->mRls(e);
 }

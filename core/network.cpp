@@ -239,8 +239,10 @@ void Network::fetchTCP(QString data)
                     case 9: //message
                         emit message(list.at(1),list.at(2).toInt());
                     break;
-                    case 10: //visible
+                    case 10: //visible + health + coins
                         //qDebug()<<list;
+                        ownTank->setHealth(list.at(2).toInt());
+                        ownTank->setCoins(list.at(3).toInt());
                         emit visible(list.at(1).toInt());
                     break;
                     case 11: //capobj
