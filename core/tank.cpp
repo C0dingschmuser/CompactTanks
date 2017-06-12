@@ -19,6 +19,7 @@ Tank::Tank(QRect rect, QString name, int team)
     viewRange = 120;
     health = 100;
     coins = 0;
+    grid = QPixmap(":/images/area/grid2.png");
     this->team = team;
     for(int i=0;i<4;i++) {
         QPixmap p = QPixmap(":/images/tank/tank"+QString::number(i+1,'f',0)+".png");
@@ -159,8 +160,6 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     QRect br = m.boundingRect(name);
     p.setPen(Qt::NoPen);
     p.drawRect(xt,yt-br.height()*0.7-2,br.width(),br.height()*0.7);
-    p.setPen(Qt::black);
-    p.drawLine(xt+1,yt+rect.height()+3,xt+40,yt+rect.height()+3);
     p.setPen(Qt::NoPen);
     if(health>80) {
         p.setBrush(QColor(34,177,76));
@@ -176,6 +175,7 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     p.drawRect(xt+1,yt+rect.height()+3,40*((double)health/100),10);
     p.setPen(Qt::black);
     p.drawText(QPoint(xt,yt-br.height()*0.7+11),name);
+    p.drawText(xt+8,yt+rect.height()+13,QString::number(health,'f',0));
     if(barrel) {
         QPen pen;
         pen.setColor(Qt::black);

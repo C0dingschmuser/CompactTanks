@@ -24,7 +24,6 @@ class FrmMain;
 class FrmMain : public QOpenGLWidget
 {
     Q_OBJECT
-
 public:
     explicit FrmMain(QWidget *parent = 0);
     ~FrmMain();
@@ -47,6 +46,7 @@ private slots:
     void on_visible(bool visible);
     void on_tab();
     void on_connFail();
+    void on_newMap(QVector<Terrain*> lvlObjs);
 
 private:
     Ui::FrmMain *ui;

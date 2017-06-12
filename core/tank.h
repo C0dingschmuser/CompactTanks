@@ -30,6 +30,7 @@ private:
     bool visible;
     QVector <QPixmap> imgs;
     QPixmap currentImg;
+    QPixmap grid;
     QPoint targetPos;
 public:
     Tank();

@@ -2,6 +2,9 @@
 #define WORKER_H
 
 #include <QObject>
+#include <QFile>
+#include <QStringList>
+#include <QVector>
 #include "core/network.h"
 #include "core/movement.h"
 #include "core/shoot.h"
@@ -37,6 +40,8 @@ private:
     QPoint *aim;
     int width;
     int height;
+    void loadMap();
+    int getType(int type);
 public:
     explicit Worker(Tank *ownTank,QPoint *aim, int width, int height, QObject *parent = 0);
     ~Worker();
@@ -50,6 +55,7 @@ signals:
     void newPlayer(Tank *t);
     void delPlayer(int pos);
     void newlvlObj(Terrain *t);
+    void newMap(QVector<Terrain*> lvlObjs);
     void delObjs();
     void newBullet(Bullet *b);
     void delBullet(int pos);

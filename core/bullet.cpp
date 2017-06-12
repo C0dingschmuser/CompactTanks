@@ -41,8 +41,8 @@ void Bullet::setColl(bool coll)
 void Bullet::update()
 {
     elapsed += 1;
-    this->x += x2*vel*0.1;
-    this->y += y2*vel*0.1;
+    this->x += x2*vel*0.04;
+    this->y += y2*vel*0.04;
 }
 
 void Bullet::sync(int x, int y,int elapsed)

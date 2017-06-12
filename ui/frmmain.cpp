@@ -30,7 +30,6 @@ FrmMain::FrmMain(QWidget *parent) :
     t_message = new QTimer();
     t_killMessage = new QTimer();
     QThread *workerThread = new QThread();
-    worker->moveToThread(workerThread);
     connect(t_draw,SIGNAL(timeout()),this,SLOT(on_tdraw()));
     connect(t_message,SIGNAL(timeout()),this,SLOT(on_tmessage()));
     connect(t_killMessage,SIGNAL(timeout()),this,SLOT(on_tkillMessage()));
@@ -50,8 +49,10 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(worker,SIGNAL(fullscreen()),this,SLOT(on_fullscreen()));
     connect(worker,SIGNAL(tab()),this,SLOT(on_tab()));
     connect(worker,SIGNAL(connFail()),this,SLOT(on_connFail()));
-    this->setCursor(QPixmap(":/images/tank/cursor.png"));
+    connect(worker,SIGNAL(newMap(QVector<Terrain*>)),this,SLOT(on_newMap(QVector<Terrain*>)));
+    worker->moveToThread(workerThread);
     workerThread->start();
+    this->setCursor(QPixmap(":/images/tank/cursor.png"));
     t_draw->start(5);
     //t_bullet->start(5);
 }
@@ -175,7 +176,7 @@ void FrmMain::on_delObjs()
 void FrmMain::on_tdraw()
 {
     if(!QApplication::activeWindow()) {
-        //worker
+        worker->notActive();
     }
     ownTank->setAngle((int)qRadiansToDegrees(atan2(aim->y()-ownTank->getRect().center().y(),
                                  aim->x()-ownTank->getRect().center().x()))*-1);
@@ -191,6 +192,7 @@ void FrmMain::on_kick()
 
 void FrmMain::on_fullscreen()
 {
+
     if(!fullscreen) {
         fullscreen = true;
         this->showFullScreen();
@@ -219,6 +221,12 @@ void FrmMain::on_visible(bool visible)
     }
 }
 
+void FrmMain::on_newMap(QVector<Terrain*> lvlObjs)
+{
+    qDebug()<<"load";
+    this->lvlObjs = lvlObjs;
+}
+
 bool FrmMain::contains(QString data,QString c)
 {
     bool ok = false;
@@ -239,21 +247,21 @@ void FrmMain::paintEvent(QPaintEvent *e)
     scaleX = this->geometry().width()/double(1920);
     scaleY = this->geometry().height()/double(1080);
     //qDebug()<<this->geometry().width();
-    viewRect = QRect(ownTank->getRect().center().x()-930,
-                           ownTank->getRect().center().y()-621,2000,1100);
+    viewRect = QRect(ownTank->getRect().center().x()-960,
+                           ownTank->getRect().center().y()-540,2100,1250);
     worker->setViewRect(viewRect);
     QPainter painter(this);
     //painter.setRasssssssssssaaaaaenderHint(QPainter::HighQualityAntialiasing);
     painter.scale(scaleX,scaleY);
-    painter.translate((ownTank->getRect().x()-900)*-1,(ownTank->getRect().y()-600)*-1);
+    painter.translate((ownTank->getRect().x()-940)*-1,(ownTank->getRect().y()-520)*-1);
     QPoint m;
     m.setX(this->mapFromGlobal(QCursor::pos()).x()/scaleX);
     m.setY(this->mapFromGlobal(QCursor::pos()).y()/scaleY);
     //m = painter.transform().map(m);
     mpos->setX(m.x());
     mpos->setY(m.y());
-    this->aim->setX(ownTank->getRect().x()+mpos->x()-900);
-    this->aim->setY(ownTank->getRect().y()+mpos->y()-590);
+    this->aim->setX(ownTank->getRect().x()+mpos->x()-940);
+    this->aim->setY(ownTank->getRect().y()+mpos->y()-520);
     //QFont f = QFont("Fixedsys");
     //painter.setFont(f);
     painter.setFont(QFont("Times"));
@@ -335,6 +343,9 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.setBrush(QColor(25,25,112,100));
     //painter.setBrush(QColor(255,255,0,50));
     painter.resetTransform();
+    /*painter.setPen(Qt::red);
+    painter.drawLine(0,540,1920,540);
+    painter.drawLine(960,0,960,1080);*/
     painter.scale(scaleX,scaleY);
     painter.setPen(Qt::NoPen);
     painter.drawRect(0,0,1920,1110);

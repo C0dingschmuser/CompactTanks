@@ -27,10 +27,11 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     connect(move,SIGNAL(fullscreen()),this,SIGNAL(fullscreen()));
     connect(move,SIGNAL(tab()),this,SIGNAL(tab()));
     connect(shoot,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
+    //loadMap();
     if(!network->connectToServer()) {
         emit connFail();
     }
-    t_bullet->start(5);
+    t_bullet->start(2);
 }
 
 Worker::~Worker()
@@ -54,9 +55,7 @@ void Worker::on_delPlayer(int pos)
 
 void Worker::on_newlvlObj(int x, int y, int w, int h, int type)
 {
-    Terrain *t = new Terrain(x,y,w,h,type);
-    lvlObjs.append(t);
-    emit newlvlObj(t);
+    loadMap();
 }
 
 void Worker::on_delObjs()
@@ -102,6 +101,13 @@ void Worker::on_tbullet()
             if(bullets[i]->getEnabled()) {
                 bullets[i]->update();
             }
+            for(int a=0;a<tanks.size();a++) {
+                if(bullets[i]->getShooter()!=tanks[a]->getName()) {
+                    if(bullets[i]->get().intersects(tanks[a]->getRect())) {
+                        bullets[i]->setEnabled(false);
+                    }
+                }
+            }
         }
     }
 }
@@ -128,6 +134,35 @@ void Worker::on_capobj(int num, int owner, int cp)
 {
     lvlObjs[num]->setOwner(owner);
     lvlObjs[num]->setAmount(cp);
+}
+
+void Worker::loadMap()
+{
+    QFile file(":/map/map.dat");
+    file.open(QIODevice::ReadOnly);
+    QTextStream in(&file);
+    QString line;
+    while(!in.atEnd()) {
+        line += in.readLine();
+    }
+    QStringList basic = line.split(",");
+    int max2 = width/72;
+    int max1 = height/72;
+    for(int i=0;i<max1;i++) {
+        for(int a=0;a<max2;a++) {
+            Terrain *obj = new Terrain(1+(72*a),1+(72*i),72,72,getType(basic.at(lvlObjs.size()).toInt()));
+            lvlObjs.append(obj);
+        }
+    }
+    for(int i=0;i<lvlObjs.size();i++) {
+        emit newlvlObj(lvlObjs[i]);
+    }
+    //emit newMap(lvlObjs);
+}
+
+int Worker::getType(int type) {
+    int t = type-1;
+    return t;
 }
 
 void Worker::keyP(QKeyEvent *e)

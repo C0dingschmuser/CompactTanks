@@ -202,7 +202,7 @@ void Network::fetchTCP(QString data)
                                 Bullet *b = new Bullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toDouble(),list.at(4).toDouble(),list.at(5).toInt(),list.at(6));
                                 bool enabled = true;
                                 if(!ownTank->getRect().intersects(b->get())) {
-                                    enabled = false;
+                                    //enabled = false;
                                 }
                                 b->setEnabled(enabled);
                                 emit newBullet(b);

@@ -4,6 +4,7 @@ Shoot::Shoot(Tank *t, Network *n, QPoint *aim, QObject *parent) : QObject(parent
 {
     t_cool = new QTimer();
     t_main = new QTimer();
+    isCool = false;
     click = false;
     mpos = aim;
     this->t = t;
@@ -41,6 +42,11 @@ void Shoot::on_tmain()
         Bullet *b = new Bullet(t->getRect().center().x(),t->getRect().center().y()+2,
                                (double)mpos->x(),(double)mpos->y(),v,t->getName());
         b->setDmg(dmg);
+        bool enabled = true;
+        if(!t->getRect().intersects(b->get())) {
+            enabled = false;
+        }
+        b->setEnabled(enabled);
         emit newBullet(b);
     }
 }
