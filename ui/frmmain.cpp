@@ -29,6 +29,7 @@ FrmMain::FrmMain(QWidget *parent) :
     t_draw = new QTimer();
     t_message = new QTimer();
     t_killMessage = new QTimer();
+    t_draw->setTimerType(Qt::PreciseTimer);
     QThread *workerThread = new QThread();
     connect(t_draw,SIGNAL(timeout()),this,SLOT(on_tdraw()));
     connect(t_message,SIGNAL(timeout()),this,SLOT(on_tmessage()));
@@ -300,7 +301,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     for(int i=0;i<tanks.size();i++) {
         if(tanks[i]->getRect().intersects(viewRect)&&tanks[i]->getRect().x()>0) {
             tanks[i]->move();
-            tanks[i]->drawTank(painter,ownTank,false);
+            tanks[i]->drawTank(painter,ownTank,true);
         } else {
             tanks[i]->teleport(-200,-200);
         }
@@ -348,7 +349,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawLine(960,0,960,1080);*/
     painter.scale(scaleX,scaleY);
     painter.setPen(Qt::NoPen);
-    painter.drawRect(0,0,1920,1110);
+    //painter.drawRect(0,0,1920,1110);
     if(bmessage) {
         QFont f = painter.font();
         f.setPointSize(32);

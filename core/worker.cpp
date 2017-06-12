@@ -150,7 +150,7 @@ void Worker::loadMap()
     int max1 = height/72;
     for(int i=0;i<max1;i++) {
         for(int a=0;a<max2;a++) {
-            Terrain *obj = new Terrain(1+(72*a),1+(72*i),72,72,getType(basic.at(lvlObjs.size()).toInt()));
+            Terrain *obj = new Terrain(0+(72*a),0+(72*i),72,72,getType(basic.at(lvlObjs.size()).toInt()));
             lvlObjs.append(obj);
         }
     }

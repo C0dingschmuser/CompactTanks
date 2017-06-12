@@ -139,6 +139,7 @@ void Network::fetchTCP(QString data)
                             if(list.size()>5) {
                                 Tank *tmp = sucheTank(list.at(1));
                                 tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(6).toInt());
+                                tmp->setAngle(list.at(8).toInt());
                             }
                         }
                     break;
@@ -199,7 +200,9 @@ void Network::fetchTCP(QString data)
                     case 4: //add bullet
                         {
                             if(list.size()>5) {
-                                Bullet *b = new Bullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toDouble(),list.at(4).toDouble(),list.at(5).toInt(),list.at(6));
+                                //bullet dmg noch einbauen
+                                Bullet *b = new Bullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toDouble(),list.at(4).toDouble(),list.at(5).toInt(),list.at(7));
+                                b->setDmg(list.at(6).toInt());
                                 bool enabled = true;
                                 if(!ownTank->getRect().intersects(b->get())) {
                                     //enabled = false;

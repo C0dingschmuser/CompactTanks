@@ -23,7 +23,7 @@ void Shoot::on_tcool()
 
 void Shoot::on_tmain()
 {
-    if(click&&!isCool) {
+    if(click&!isCool) {
         if(!t_cool->isActive()) {
             isCool = true;
             t_cool->start(w->getCoolDown());
@@ -36,9 +36,7 @@ void Shoot::on_tmain()
         }
         int dmg = 20;
         network->send("|1#"+t->getName()+"#"+QString::number(mpos->x(),'f',0)+
-                      "#"+QString::number(mpos->y(),'f',0)+"#"+
-                      QString::number(v,'f',0)+"#"+
-                      QString::number(dmg,'f',0)+"#");
+                      "#"+QString::number(mpos->y(),'f',0)+"#1#~");
         Bullet *b = new Bullet(t->getRect().center().x(),t->getRect().center().y()+2,
                                (double)mpos->x(),(double)mpos->y(),v,t->getName());
         b->setDmg(dmg);

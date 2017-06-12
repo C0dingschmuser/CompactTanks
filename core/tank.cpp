@@ -212,7 +212,7 @@ QString Tank::getName()
 QString Tank::toString()
 {
     return this->name + "#" + QString::number(rect.x(),'f',0)+"#"+QString::number(rect.y(),'f',0)+"#"+
-            QString::number(dir,'f',0)+"#";
+            QString::number(dir,'f',0)+"#"+QString::number(angle,'f',0)+"#";
 }
 
 QPixmap Tank::getIMG()
