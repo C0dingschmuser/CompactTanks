@@ -41,6 +41,7 @@ public:
     int getDistance(QPoint p1,QPoint p2);
 
 signals:
+    void pos(Tank *p,int x,int y,int dir,int health, int angle,int spotted,int stimer);
     void newPlayer(Tank *t);
     void newlvlObj(int x,int y,int w,int h,int type);
     void delPlayer(int i);
@@ -56,6 +57,7 @@ signals:
     void kick();
     void visible(int visible);
     void capobj(int num,int owner,int cp);
+    void setT(int timer);
 public slots:
 };
 

@@ -22,14 +22,18 @@ private slots:
     void on_syncBullet(int pos,int x,int y, int elapsed);
     void on_delObjs();
     void on_tbullet();
+    void on_tmain();
     //void on_death();
     //void on_kick(); dl
     //void on_fullscreen(); //dl braucht connect mit move
     void on_visible(int v);
     void on_capobj(int num,int owner,int cp);
+    void on_setT(int timer);
+    void on_pos(Tank *p,int x,int y,int dir,int health, int angle,int spotted,int stimer);
 private:
     QRect viewRect;
     QTimer *t_bullet;
+    QTimer *t_main;
     Tank *ownTank;
     QVector <Tank*> tanks;
     QVector <Terrain*> lvlObjs;
@@ -40,8 +44,10 @@ private:
     QPoint *aim;
     int width;
     int height;
+    int timer;
     void loadMap();
     int getType(int type);
+    int getDifference(int v1,int v2);
 public:
     explicit Worker(Tank *ownTank,QPoint *aim, int width, int height, QObject *parent = 0);
     ~Worker();

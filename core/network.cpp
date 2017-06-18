@@ -42,7 +42,7 @@ bool Network::connectToServer()
 void Network::on_tcpRecv()
 {
     buffer += tcpSocket->readAll();
-    if(buffer.size()>39) {
+    if(buffer.size()>44) {
         QString input = buffer;
         buffer.clear();
         if(input.contains("|")&&input.at(input.size()-1)=="~") {
@@ -125,6 +125,9 @@ void Network::fetchTCP(QString data)
         if(list.size()>1) {
             if(list.at(1)!=ownTank->getName()) {
                 switch(m) {
+                    case -6:
+                        emit setT(list.at(1).toInt());
+                    break;
                     case -5:
                         if(list.size()>0) {
                             ownTank->setTeam(list.at(1).toInt());
@@ -136,10 +139,14 @@ void Network::fetchTCP(QString data)
                     break;
                     case -3: //pos
                         {
-                            if(list.size()>5) {
+                            if(list.size()>8) {
+                                //9 = timer
+                                qDebug()<<data;
                                 Tank *tmp = sucheTank(list.at(1));
-                                tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(6).toInt());
+                                emit pos(tmp,list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(6).toInt(),list.at(8).toInt(),list.at(5).toInt(),list.at(9).toInt());
+                                /*tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(6).toInt());
                                 tmp->setAngle(list.at(8).toInt());
+                                tmp->setSpotted(list.at(5).toInt());*/
                             }
                         }
                     break;

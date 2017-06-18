@@ -252,7 +252,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
                            ownTank->getRect().center().y()-540,2100,1250);
     worker->setViewRect(viewRect);
     QPainter painter(this);
-    //painter.setRasssssssssssaaaaaenderHint(QPainter::HighQualityAntialiasing);
+    painter.setRenderHint(QPainter::HighQualityAntialiasing);
     painter.scale(scaleX,scaleY);
     painter.translate((ownTank->getRect().x()-940)*-1,(ownTank->getRect().y()-520)*-1);
     QPoint m;
@@ -300,10 +300,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     ownTank->drawTank(painter,ownTank,true);
     for(int i=0;i<tanks.size();i++) {
         if(tanks[i]->getRect().intersects(viewRect)&&tanks[i]->getRect().x()>0) {
-            tanks[i]->move();
             tanks[i]->drawTank(painter,ownTank,true);
-        } else {
-            tanks[i]->teleport(-200,-200);
         }
     }
     painter.setPen(Qt::black);

@@ -7,6 +7,8 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     this->ownTank = ownTank;
     this->aim = aim;
     t_bullet = new QTimer(this);
+    t_main = new QTimer(this);
+    t_main->setTimerType(Qt::PreciseTimer);
     move = new Movement(this->ownTank,this->width,this->height);
     network = new Network(this->ownTank,tanks,QHostAddress("94.114.254.180"));
     shoot = new Shoot(this->ownTank,network,this->aim);
@@ -24,14 +26,18 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     connect(network,SIGNAL(killMessage(QString)),this,SIGNAL(killMessage(QString)));
     connect(network,SIGNAL(kick()),this,SIGNAL(kick()));
     connect(network,SIGNAL(capobj(int,int,int)),this,SLOT(on_capobj(int,int,int)));
+    connect(network,SIGNAL(setT(int)),this,SLOT(on_setT(int)));
+    connect(network,SIGNAL(pos(Tank*,int,int,int,int,int,int,int)),this,SLOT(on_pos(Tank*,int,int,int,int,int,int,int)));
     connect(move,SIGNAL(fullscreen()),this,SIGNAL(fullscreen()));
     connect(move,SIGNAL(tab()),this,SIGNAL(tab()));
     connect(shoot,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
+    connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
     //loadMap();
     if(!network->connectToServer()) {
         emit connFail();
     }
     t_bullet->start(2);
+    t_main->start(5);
 }
 
 Worker::~Worker()
@@ -39,6 +45,17 @@ Worker::~Worker()
     disconnect(network,SIGNAL(disconnect()),this,SIGNAL(disconnected()));
     delete move;
     delete network;
+}
+
+void Worker::on_pos(Tank *p, int x, int y, int dir, int health, int angle, int spotted, int stimer)
+{
+    int diff = getDifference(stimer,timer);
+    p->setAll(x,y,dir,health,diff/11);
+    p->setAngle(angle);
+    p->setSpotted(spotted);
+    /*qDebug()<<"--------";
+    qDebug()<<timer;
+    qDebug()<<stimer;*/
 }
 
 void Worker::on_newPlayer(Tank *t)
@@ -123,9 +140,32 @@ void Worker::on_visible(int v)
         }
     }
     if(v||ok) {
+        ownTank->setVisible(true);
         ok = true;
     } else {
         ok = false;
+        ownTank->setVisible(false);
+    }
+    for(int i=0;i<tanks.size();i++) {
+        bool ok=false;
+        for(int a=0;a<lvlObjs.size();a++) {
+            if(tanks[i]->getTeam()==ownTank->getTeam()) {
+                if(tanks[i]->getRect().intersects(lvlObjs[a]->getRect())&&
+                        lvlObjs[a]->getType()>0&&lvlObjs[a]->getType()<3) {
+                    ok = true;
+                    break;
+                }
+            } else {
+                ok = true;
+            }
+        }
+        if(ok||tanks[i]->getSpotted()) {
+            tanks[i]->setVisible(true);
+            ok = true;
+        } else {
+            ok = false;
+            tanks[i]->setVisible(false);
+        }
     }
     emit visible(ok);
 }
@@ -134,6 +174,26 @@ void Worker::on_capobj(int num, int owner, int cp)
 {
     lvlObjs[num]->setOwner(owner);
     lvlObjs[num]->setAmount(cp);
+}
+
+void Worker::on_setT(int timer)
+{
+    this->timer = timer;
+}
+
+void Worker::on_tmain()
+{
+    timer+= 5;
+    if(timer>5000) {
+        timer = 0;
+    }
+    for(int i=0;i<tanks.size();i++) {
+        if(tanks[i]->getRect().intersects(viewRect)&&tanks[i]->getRect().x()>0) {
+            tanks[i]->move();
+        } else {
+            tanks[i]->teleport(-200,-200);
+        }
+    }
 }
 
 void Worker::loadMap()
@@ -163,6 +223,17 @@ void Worker::loadMap()
 int Worker::getType(int type) {
     int t = type-1;
     return t;
+}
+
+int Worker::getDifference(int v1, int v2)
+{
+    int diff = 0;
+    if(v1>v2) {
+        diff = v1-v2;
+    } else if(v2>v1) {
+        diff = v2-v1;
+    }
+    return diff;
 }
 
 void Worker::keyP(QKeyEvent *e)

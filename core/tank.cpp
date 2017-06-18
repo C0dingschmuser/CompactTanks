@@ -18,6 +18,7 @@ Tank::Tank(QRect rect, QString name, int team)
     visible = true;
     viewRange = 120;
     health = 100;
+    spotted = 1;
     coins = 0;
     grid = QPixmap(":/images/area/grid2.png");
     this->team = team;
@@ -97,12 +98,25 @@ void Tank::setDK(int kills, int deaths)
     this->deaths = deaths;
 }
 
+void Tank::setSpotted(int spotted)
+{
+    this->spotted = spotted;
+}
+
+int Tank::getSpotted()
+{
+    return this->spotted;
+}
+
 void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
 {
     QColor rcolor;
     QRect r;
     int xt = rect.x();
     int yt = rect.y();
+    if(!visible) {
+        p.setOpacity(0.5);
+    }
     switch(color) {
         case 0: //rot
             rcolor = QColor(255,0,0);
@@ -184,23 +198,26 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
         p.drawLine(getBarrel(xt,yt));
         p.setPen(Qt::black);
     }
+    p.setOpacity(1.0);
 }
 
 void Tank::move()
 {
+    //rect.moveTo(targetPos.x(),targetPos.y());
+    int speed = this->speed/2;
     if(rect.x()<targetPos.x()-speed-1) {
         rect.moveTo(rect.x()+speed,rect.y());
-        targetPos.setX(targetPos.x()+1);
+        //targetPos.setX(targetPos.x()+1);
     } else if(rect.x()>targetPos.x()+speed-1) {
         rect.moveTo(rect.x()-speed,rect.y());
-        targetPos.setX(targetPos.x()-1);
+        //targetPos.setX(targetPos.x()-1);
     }
     if(rect.y()<targetPos.y()-speed-1) {
         rect.moveTo(rect.x(),rect.y()+speed);
-        targetPos.setY(targetPos.y()+1);
+        //targetPos.setY(targetPos.y()+1);
     } else if(rect.y()>targetPos.y()+speed-1) {
         rect.moveTo(rect.x(),rect.y()-speed);
-        targetPos.setY(targetPos.y()-1);
+        //targetPos.setY(targetPos.y()-1);
     }
 }
 
@@ -227,7 +244,7 @@ void Tank::teleport(int x, int y)
     rect.moveTo(x,y);
 }
 
-void Tank::setAll(int x, int y, int dir, int health)
+void Tank::setAll(int x, int y, int dir, int health, int diff)
 {
     this->health = health;
     if(!dir) {
@@ -239,6 +256,29 @@ void Tank::setAll(int x, int y, int dir, int health)
         rect.moveTo(x,y);
         targetPos = QPoint(x,y);
     } else {
+        int s = (speed*diff);
+        switch(dir) {
+            case 1:
+                if(getDifference(y,y-s)>s) {
+                    y-=s;
+                }
+            break;
+            case 2:
+                if(getDifference(x,x-s)>s) {
+                    x-=s;
+                }
+            break;
+            case 3:
+                if(getDifference(y,y+s)>s) {
+                    y+=s;
+                }
+            break;
+            case 4:
+                if(getDifference(x,x+s)>s) {
+                    x+=s;
+                }
+            break;
+        }
         targetPos = QPoint(x,y);
         this->dir = dir;
     }
@@ -273,6 +313,17 @@ void Tank::setAngle(int angle)
 void Tank::setCoins(int coins)
 {
     this->coins = coins;
+}
+
+int Tank::getDifference(int v1, int v2)
+{
+    int diff = 0;
+    if(v1>v2) {
+        diff = v1-v2;
+    } else if(v2>v1) {
+        diff = v2-v1;
+    }
+    return diff;
 }
 
 int Tank::getAngle()
