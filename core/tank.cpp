@@ -9,7 +9,7 @@ Tank::Tank(QRect rect, QString name, int team)
 {
     this->rect = rect;
     this->name = name;
-    speed = 3;
+    speed = 2;
     dir = 1;
     angle = 0;
     kills = 0;

@@ -141,7 +141,7 @@ void Network::fetchTCP(QString data)
                         {
                             if(list.size()>8) {
                                 //9 = timer
-                                qDebug()<<data;
+                                //qDebug()<<data;
                                 Tank *tmp = sucheTank(list.at(1));
                                 emit pos(tmp,list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(6).toInt(),list.at(8).toInt(),list.at(5).toInt(),list.at(9).toInt());
                                 /*tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(6).toInt());

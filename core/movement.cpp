@@ -84,22 +84,22 @@ void Movement::keyPressEvent(QKeyEvent *e)
     int s = ownTank->getSpeed();
     if(e->key()==Qt::Key_W) {
         if(r.y()>=0+s) {
-            t_moveW->start(10);
+            t_moveW->start(8);
         }
     }
     if(e->key()==Qt::Key_A) {
         if(r.x()>=0+s) {
-            t_moveA->start(10);
+            t_moveA->start(8);
         }
     }
     if(e->key()==Qt::Key_S) {
         if(r.bottom()<=height-s) {
-            t_moveS->start(10);
+            t_moveS->start(8);
         }
     }
     if(e->key()==Qt::Key_D) {
         if(r.right()<=width-s) {
-            t_moveD->start(10);
+            t_moveD->start(8);
         }
     }
     if(e->key()==Qt::Key_Tab) {

@@ -7,6 +7,10 @@ FrmMain::FrmMain(QWidget *parent) :
 {
     ui->setupUi(this);
     //setUpdateBehavior(UpdateBehavior(PartialUpdate));
+    /*QSurfaceFormat f;
+    f.setSwapBehavior(QSurfaceFormat::SingleBuffer);
+    f.setSwapInterval(1000);
+    setFormat(f);*/
     initializeGL();
     QString name = QInputDialog::getText(this,"Name","Name:");
     if(contains(name,"|#äöü.,-_<>")||name.length()>8||name=="") {
@@ -245,8 +249,8 @@ void FrmMain::paintEvent(QPaintEvent *e)
     /*qDebug()<<"--------";
     qDebug()<<ownTank->getRect().x();
     qDebug()<<ownTank->getRect().y();*/
-    scaleX = this->geometry().width()/double(1920);
-    scaleY = this->geometry().height()/double(1080);
+    scaleX = double(this->geometry().width()/double(1920));
+    scaleY = double(this->geometry().height()/double(1080));
     //qDebug()<<this->geometry().width();
     viewRect = QRect(ownTank->getRect().center().x()-960,
                            ownTank->getRect().center().y()-540,2100,1250);
@@ -273,6 +277,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     /*painter.setPen(QColor(0,110,0));
     painter.setBrush(QColor(0,110,0));
     painter.drawRect(0,0,width,height);*/
+    painter.setPen(Qt::NoPen);
     for(int i=0;i<lvlObjs.size();i++) {
         if(lvlObjs[i]->getRect().intersects(viewRect)) {
             if(lvlObjs[i]->getType()==2) {

@@ -10,7 +10,7 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     t_main = new QTimer(this);
     t_main->setTimerType(Qt::PreciseTimer);
     move = new Movement(this->ownTank,this->width,this->height);
-    network = new Network(this->ownTank,tanks,QHostAddress("94.114.254.180"));
+    network = new Network(this->ownTank,tanks,QHostAddress("127.0.0.1")); //ändern
     shoot = new Shoot(this->ownTank,network,this->aim);
     connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
     connect(network,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*)));
@@ -37,7 +37,7 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
         emit connFail();
     }
     t_bullet->start(2);
-    t_main->start(5);
+    t_main->start(4);
 }
 
 Worker::~Worker()
@@ -50,7 +50,7 @@ Worker::~Worker()
 void Worker::on_pos(Tank *p, int x, int y, int dir, int health, int angle, int spotted, int stimer)
 {
     int diff = getDifference(stimer,timer);
-    p->setAll(x,y,dir,health,diff/11);
+    p->setAll(x,y,dir,health,diff/8);
     p->setAngle(angle);
     p->setSpotted(spotted);
     /*qDebug()<<"--------";
@@ -183,7 +183,7 @@ void Worker::on_setT(int timer)
 
 void Worker::on_tmain()
 {
-    timer+= 5;
+    timer+= 4;
     if(timer>5000) {
         timer = 0;
     }

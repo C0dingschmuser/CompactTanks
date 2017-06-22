@@ -33,11 +33,14 @@ private:
     void fetchTCP(QString data);
     bool check(QStringList l,int anz);
     quint16 udpPort;
+    int timer;
 public:
     explicit Network(Tank *ownTank, QVector<Tank*> t, QHostAddress ip, QObject *parent = 0);
     ~Network();
     bool connectToServer();
     void send(QString data);
+    void sendPos();
+    void setTimer(int timer);
     int getDistance(QPoint p1,QPoint p2);
 
 signals:
