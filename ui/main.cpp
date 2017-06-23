@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QSurfaceFormat f;
-    //f.setSwapBehavior(QSurfaceFormat::SingleBuffer);
+    //f.setSwapBehavior(QSurfaceFormat::TripleBuffer);
     f.setSwapInterval(0);
     QSurfaceFormat::setDefaultFormat(f);
     FrmMain w;

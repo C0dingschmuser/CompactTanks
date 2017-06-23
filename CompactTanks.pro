@@ -21,7 +21,8 @@ SOURCES += ui/main.cpp\
     core/bullet.cpp \
     core/shoot.cpp \
     core/weapon.cpp \
-    core/worker.cpp
+    core/worker.cpp \
+    ui/frmlogin.cpp
 
 HEADERS  += ui/frmmain.h \
     core/tank.h \
@@ -31,9 +32,11 @@ HEADERS  += ui/frmmain.h \
     core/bullet.h \
     core/shoot.h \
     core/weapon.h \
-    core/worker.h
+    core/worker.h \
+    ui/frmlogin.h
 
-FORMS    += ui/frmmain.ui
+FORMS    += ui/frmmain.ui \
+    ui/frmlogin.ui
 
 RESOURCES += \
     resources.qrc

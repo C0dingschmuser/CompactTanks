@@ -19,7 +19,7 @@ private:
     QPixmap grass;
 public:
     Terrain();
-    Terrain(int x, int y, int w, int h, int type=0);
+    Terrain(int x, int y, int w, int h, int type=0,int itype=0);
     //void setPixmap(QPixmap p);
     void setType(int type);
     void setOwner(int owner);

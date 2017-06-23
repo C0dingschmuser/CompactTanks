@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QKeyEvent>
 #include <QThread>
+#include <QFontDatabase>
 #include <QApplication>
 #include <QMessageBox>
 #include "core/bullet.h"
@@ -61,6 +62,7 @@ private:
     QPoint *aim;
     QPoint *mpos;
     QRect viewRect;
+    QFont font;
     int messageLength;
     int width;
     int height;
@@ -72,6 +74,8 @@ private:
     bool tab;
     QVector <QString> messageText;
     QVector <QString> killMessageText;
+    QPixmap tree;
+    QPixmap grass;
     bool contains(QString data, QString c);
 protected:
     void paintEvent(QPaintEvent *e) override;

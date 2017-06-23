@@ -8,6 +8,7 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     this->aim = aim;
     t_bullet = new QTimer(this);
     t_main = new QTimer(this);
+    t_conn = new QTimer(this);
     t_main->setTimerType(Qt::PreciseTimer);
     move = new Movement(this->ownTank,this->width,this->height);
     network = new Network(this->ownTank,tanks,QHostAddress("127.0.0.1")); //ändern
@@ -32,12 +33,14 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     connect(move,SIGNAL(tab()),this,SIGNAL(tab()));
     connect(shoot,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
+    connect(t_conn,SIGNAL(timeout()),this,SLOT(on_tconn()));
     //loadMap();
-    if(!network->connectToServer()) {
-        emit connFail();
+    t_conn->start(100);
+    if(network->connectToServer()) {
+        t_conn->stop();
+        t_bullet->start(2);
+        t_main->start(4);
     }
-    t_bullet->start(2);
-    t_main->start(4);
 }
 
 Worker::~Worker()
@@ -56,6 +59,12 @@ void Worker::on_pos(Tank *p, int x, int y, int dir, int health, int angle, int s
     /*qDebug()<<"--------";
     qDebug()<<timer;
     qDebug()<<stimer;*/
+}
+
+void Worker::on_tconn()
+{
+    t_conn->stop();
+    emit connFail();
 }
 
 void Worker::on_newPlayer(Tank *t)
@@ -210,7 +219,7 @@ void Worker::loadMap()
     int max1 = height/72;
     for(int i=0;i<max1;i++) {
         for(int a=0;a<max2;a++) {
-            Terrain *obj = new Terrain(0+(72*a),0+(72*i),72,72,getType(basic.at(lvlObjs.size()).toInt()));
+            Terrain *obj = new Terrain(0+(72*a),0+(72*i),72,72,getType(basic.at(lvlObjs.size()).toInt()),getType(basic.at(lvlObjs.size()+(max1*max2)).toInt()));
             lvlObjs.append(obj);
         }
     }

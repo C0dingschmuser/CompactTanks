@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
+		<file>font/Pixeled.ttf</file>
         <file>images/tank/tank1.png</file>
         <file>images/tank/tank2.png</file>
         <file>images/tank/tank3.png</file>

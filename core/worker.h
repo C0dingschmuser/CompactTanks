@@ -23,6 +23,7 @@ private slots:
     void on_delObjs();
     void on_tbullet();
     void on_tmain();
+    void on_tconn();
     //void on_death();
     //void on_kick(); dl
     //void on_fullscreen(); //dl braucht connect mit move
@@ -34,6 +35,7 @@ private:
     QRect viewRect;
     QTimer *t_bullet;
     QTimer *t_main;
+    QTimer *t_conn;
     Tank *ownTank;
     QVector <Tank*> tanks;
     QVector <Terrain*> lvlObjs;

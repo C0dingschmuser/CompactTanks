@@ -167,10 +167,10 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     p.setPen(Qt::NoPen);
     p.drawRect(r);
     p.drawPixmap(xt,yt,40,40,imgs[dir-1]);
-    QFont f("Times");
-    f.setPointSize(12);
+    QFont f = p.font();
+    f.setPointSize(6);
     p.setFont(f);
-    QFontMetrics m(QFont("Times",12));
+    QFontMetrics m(f);
     QRect br = m.boundingRect(name);
     p.setPen(Qt::NoPen);
     p.drawRect(xt,yt-br.height()*0.7-2,br.width(),br.height()*0.7);

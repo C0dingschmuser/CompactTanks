@@ -58,6 +58,11 @@ FrmMain::FrmMain(QWidget *parent) :
     worker->moveToThread(workerThread);
     workerThread->start();
     this->setCursor(QPixmap(":/images/tank/cursor.png"));
+    tree = QPixmap(":/images/area/obj0.png");
+    grass = QPixmap(":/images/area/obj9.png");
+    QFontDatabase d;
+    d.addApplicationFont(":/font/Pixeled.ttf");
+    font = d.font("Pixeled","Normal",12);
     t_draw->start(5);
     //t_bullet->start(5);
 }
@@ -83,6 +88,7 @@ FrmMain::~FrmMain()
 
 void FrmMain::on_connFail()
 {
+    qDebug()<<"a";
     QMessageBox::critical(this,"FEHLER","Keine Verbindung möglich!");
     exit(1);
 }
@@ -256,7 +262,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
                            ownTank->getRect().center().y()-540,2100,1250);
     worker->setViewRect(viewRect);
     QPainter painter(this);
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
     painter.scale(scaleX,scaleY);
     painter.translate((ownTank->getRect().x()-940)*-1,(ownTank->getRect().y()-520)*-1);
     QPoint m;
@@ -269,10 +275,18 @@ void FrmMain::paintEvent(QPaintEvent *e)
     this->aim->setY(ownTank->getRect().y()+mpos->y()-520);
     //QFont f = QFont("Fixedsys");
     //painter.setFont(f);
-    painter.setFont(QFont("Times"));
+    painter.setFont(font);
     painter.setPen(Qt::black);
     painter.setBrush(Qt::black);
-    painter.drawRect(viewRect.x(),viewRect.y(),2000,1100);
+    for(int i=2160+576;i>viewRect.y()-72;i-=72) {
+        for(int a=2880+936;a>viewRect.x()-72;a-=72) {
+            if(QRect(a,i,72,72).intersects(viewRect)) {
+                painter.drawPixmap(a,i,72,72,grass);
+                painter.drawPixmap(a,i,72,72,tree);
+            }
+        }
+    }
+    //painter.drawRect(viewRect.x(),viewRect.y(),2000,1100);
     //painter.drawRect(-600,-500,6000,3000);
     /*painter.setPen(QColor(0,110,0));
     painter.setBrush(QColor(0,110,0));
@@ -337,6 +351,8 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.fillPath(path,QBrush(QColor(100,100,100,200)));
     painter.setBrush(Qt::transparent);
     painter.drawEllipse(ownTank->getRect().center(),viewRange,viewRange);*/
+
+    /*
     painter.setPen(Qt::darkGray);
     painter.setBrush(Qt::darkGray);
     painter.drawRect(-10,-10,width+20,10);
@@ -344,6 +360,8 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawRect(-10,-10,10,height+10);
     painter.drawRect(width,-10,10,height+10);
     painter.setBrush(QColor(25,25,112,100));
+    */
+
     //painter.setBrush(QColor(255,255,0,50));
     painter.resetTransform();
     /*painter.setPen(Qt::red);
@@ -358,7 +376,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
         painter.setFont(f);
         painter.setPen(Qt::white);
         painter.setBrush(Qt::white);
-        QFontMetrics m(QFont("Times",32));
+        QFontMetrics m(f);
         QRect br = m.boundingRect(messageText.last());
         //QRect a = QRect(ownTank->getRect().x()-402,ownTank->getRect().y()+278,100,33);
         painter.drawRect(100,600,br.width()+2,br.height());
