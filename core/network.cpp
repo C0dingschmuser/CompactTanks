@@ -31,7 +31,7 @@ Network::~Network()
 bool Network::connectToServer()
 {
     bool ok;
-    tcpSocket->connectToHost(ip,8888);
+    tcpSocket->connectToHost(ip,38888);
     ok = tcpSocket->waitForConnected(3000);
     if(ok) {
         send("|0#"+ownTank->getName()+"#");
@@ -77,7 +77,7 @@ void Network::on_tmain()
     }*/
     QByteArray data;
     data.append(QString("|0#"+ownTank->toString()).toUtf8());
-    udpSocket->writeDatagram(data,ip,8889);
+    udpSocket->writeDatagram(data,ip,38889);
 }
 
 void Network::on_udpRecv()

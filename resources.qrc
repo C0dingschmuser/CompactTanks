@@ -14,11 +14,15 @@
 		<file>images/area/obj4.png</file>
 		<file>images/area/obj5.png</file>
 		<file>images/area/obj6.png</file>
+		<file>images/area/obj7.png</file>
+		<file>images/area/obj8.png</file>
 		<file>images/area/obj9.png</file>
 		<file>images/area/obj10.png</file>
 		<file>images/area/obj11.png</file>
 		<file>images/area/obj12.png</file>
 		<file>images/area/obj13.png</file>
+		<file>images/area/obj14.png</file>
+		<file>images/area/obj15.png</file>
         <file>images/tank/cursor.png</file>
 		<file>map/map.dat</file>
     </qresource>

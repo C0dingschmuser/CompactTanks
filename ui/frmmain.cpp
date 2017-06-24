@@ -276,12 +276,22 @@ void FrmMain::paintEvent(QPaintEvent *e)
     //QFont f = QFont("Fixedsys");
     //painter.setFont(f);
     painter.setFont(font);
-    painter.setPen(Qt::black);
-    painter.setBrush(Qt::black);
     for(int i=2160+576;i>viewRect.y()-72;i-=72) {
         for(int a=2880+936;a>viewRect.x()-72;a-=72) {
             if(QRect(a,i,72,72).intersects(viewRect)) {
                 painter.drawPixmap(a,i,72,72,grass);
+            }
+        }
+    }
+    painter.setPen(Qt::darkGray);
+    painter.setBrush(Qt::darkGray);
+    painter.drawRect(-10,-10,width+20,10);
+    painter.drawRect(-10,height,width+20,10);
+    painter.drawRect(-10,-10,10,height+10);
+    painter.drawRect(width,-10,10,height+10);
+    for(int i=2160+576;i>viewRect.y()-72;i-=72) {
+        for(int a=2880+936;a>viewRect.x()-72;a-=72) {
+            if(QRect(a,i,72,72).intersects(viewRect)) {
                 painter.drawPixmap(a,i,72,72,tree);
             }
         }
@@ -308,7 +318,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
                     painter.drawEllipse(QPoint(lvlObjs[i]->getRect().center().x()+1,lvlObjs[i]->getRect().center().y()+1),cp/3,cp/3);
                 }
             }
-            if(lvlObjs[i]->getType()>0&&lvlObjs[i]->getType()<14) {
+            if(lvlObjs[i]->getType()>0&&lvlObjs[i]->getType()<4) {
                 painter.drawPixmap(lvlObjs[i]->getRect().x(),lvlObjs[i]->getRect().y(),72,72,lvlObjs[i]->getPixmap());
             }
             if(!lvlObjs[i]->getType()) {
@@ -351,16 +361,6 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.fillPath(path,QBrush(QColor(100,100,100,200)));
     painter.setBrush(Qt::transparent);
     painter.drawEllipse(ownTank->getRect().center(),viewRange,viewRange);*/
-
-    /*
-    painter.setPen(Qt::darkGray);
-    painter.setBrush(Qt::darkGray);
-    painter.drawRect(-10,-10,width+20,10);
-    painter.drawRect(-10,height,width+20,10);
-    painter.drawRect(-10,-10,10,height+10);
-    painter.drawRect(width,-10,10,height+10);
-    painter.setBrush(QColor(25,25,112,100));
-    */
 
     //painter.setBrush(QColor(255,255,0,50));
     painter.resetTransform();
