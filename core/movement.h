@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QKeyEvent>
 #include "tank.h"
+#include "terrain.h"
 
 class Movement : public QObject
 {
@@ -22,12 +23,13 @@ private:
     QTimer *t_moveA;
     QTimer *t_moveS;
     QTimer *t_moveD;
+    QVector<Terrain*>lvlObjs;
     int width;
     int height;
 public:
     explicit Movement(Tank *t,int width,int height,QObject *parent = 0);
     ~Movement();
-    void keyPressEvent(QKeyEvent *e);
+    void keyPressEvent(QKeyEvent *e,QVector<Terrain*>lvlObjs);
     void keyReleaseEvent(QKeyEvent *e);
     void stop();
 

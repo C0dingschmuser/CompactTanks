@@ -11,7 +11,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = CompactTanks
 TEMPLATE = app
 
-
 SOURCES += ui/main.cpp\
         ui/frmmain.cpp \
     core/tank.cpp \

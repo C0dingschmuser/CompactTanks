@@ -39,7 +39,18 @@ void Movement::on_tmoveW() {
     int s = ownTank->getSpeed();
     if(!t_moveA->isActive()&&!t_moveD->isActive()) {
         if(r.y()>=0+s) {
-            ownTank->w();
+            bool ok=false;
+            for(int i=0;i<lvlObjs.size();i++) {
+                if(QRect(r.x(),r.y()-s,40,40).intersects(lvlObjs[i]->getRect())) {
+                    if(!lvlObjs[i]->getType()) {
+                        ok = true;
+                        break;
+                    }
+                }
+            }
+            if(!ok) {
+                ownTank->w();
+            }
         }
         ownTank->setMoved(true);
     }
@@ -50,7 +61,18 @@ void Movement::on_tmoveA() {
     int s = ownTank->getSpeed();
     if(!t_moveW->isActive()&&!t_moveS->isActive()) {
         if(r.x()>=0+s) {
-            ownTank->a();
+            bool ok=false;
+            for(int i=0;i<lvlObjs.size();i++) {
+                if(QRect(r.x()-s,r.y(),40,40).intersects(lvlObjs[i]->getRect())) {
+                    if(!lvlObjs[i]->getType()) {
+                        ok = true;
+                        break;
+                    }
+                }
+            }
+            if(!ok) {
+                ownTank->a();
+            }
         }
         ownTank->setMoved(true);
     }
@@ -61,7 +83,18 @@ void Movement::on_tmoveS() {
     int s = ownTank->getSpeed();
     if(!t_moveA->isActive()&&!t_moveD->isActive()) {
         if(r.bottom()<=height-s*2) {
-            ownTank->s();
+            bool ok=false;
+            for(int i=0;i<lvlObjs.size();i++) {
+                if(QRect(r.x(),r.y()+s,40,40).intersects(lvlObjs[i]->getRect())) {
+                    if(!lvlObjs[i]->getType()) {
+                        ok = true;
+                        break;
+                    }
+                }
+            }
+            if(!ok) {
+                ownTank->s();
+            }
         }
         ownTank->setMoved(true);
     }
@@ -72,14 +105,26 @@ void Movement::on_tmoveD() {
     int s = ownTank->getSpeed();
     if(!t_moveW->isActive()&&!t_moveS->isActive()) {
         if(r.right()<=width-s*2) {
-            ownTank->d();
+            bool ok=false;
+            for(int i=0;i<lvlObjs.size();i++) {
+                if(QRect(r.x()+s,r.y(),40,40).intersects(lvlObjs[i]->getRect())) {
+                    if(!lvlObjs[i]->getType()) {
+                        ok = true;
+                        break;
+                    }
+                }
+            }
+            if(!ok) {
+                ownTank->d();
+            }
         }
         ownTank->setMoved(true);
     }
 }
 
-void Movement::keyPressEvent(QKeyEvent *e)
+void Movement::keyPressEvent(QKeyEvent *e, QVector<Terrain *> lvlObjs)
 {
+    this->lvlObjs = lvlObjs;
     QRect r = ownTank->getRect();
     int s = ownTank->getSpeed();
     if(e->key()==Qt::Key_W) {

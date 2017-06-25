@@ -88,9 +88,9 @@ FrmMain::~FrmMain()
 
 void FrmMain::on_connFail()
 {
-    qDebug()<<"a";
+    disconnect(worker,SIGNAL(disconnected()),this,SLOT(on_disconnect()));
     QMessageBox::critical(this,"FEHLER","Keine Verbindung möglich!");
-    exit(1);
+    QApplication::exit();
 }
 
 void FrmMain::on_disconnect()
@@ -225,11 +225,7 @@ void FrmMain::on_tab()
 
 void FrmMain::on_visible(bool visible)
 {
-    if(visible) {
-        ui->lblStatus->setText("Status: Offen");
-    } else {
-        ui->lblStatus->setText("Status: Versteckt");
-    }
+
 }
 
 void FrmMain::on_newMap(QVector<Terrain*> lvlObjs)
@@ -318,10 +314,13 @@ void FrmMain::paintEvent(QPaintEvent *e)
                     painter.drawEllipse(QPoint(lvlObjs[i]->getRect().center().x()+1,lvlObjs[i]->getRect().center().y()+1),cp/3,cp/3);
                 }
             }
-            if(lvlObjs[i]->getType()>0&&lvlObjs[i]->getType()<4) {
-                painter.drawPixmap(lvlObjs[i]->getRect().x(),lvlObjs[i]->getRect().y(),72,72,lvlObjs[i]->getPixmap());
-            }
-            if(!lvlObjs[i]->getType()) {
+            if(lvlObjs[i]->getType()>0) {
+                painter.drawPixmap(lvlObjs[i]->getRect(),lvlObjs[i]->getPixmap());
+                if(lvlObjs[i]->getType()==4) {
+                    painter.setBrush(QColor(255,0,0,150));
+                    painter.drawRect(lvlObjs[i]->getRect());
+                }
+            } else {
                 painter.drawPixmap(lvlObjs[i]->getRect(),lvlObjs[i]->getGrassPixmap());
             }
         }

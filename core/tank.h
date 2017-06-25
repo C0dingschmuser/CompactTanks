@@ -39,10 +39,10 @@ public:
     ~Tank();
     bool getMoved();
     QRect getRect();
-    void w();
-    void a();
-    void s();
-    void d();
+    void w(bool a=false);
+    void a(bool a=false);
+    void s(bool a=false);
+    void d(bool a=false);
     void kill();
     void death();
     void setDK(int kills,int deaths);
@@ -63,6 +63,7 @@ public:
     void setVisible(bool visible);
     void teleport(int x,int y);
     void setAll(int x, int y, int dir, int health, int diff);
+    void setAll(int x,int y);
     void setMoved(bool m);
     void setHealth(int health);
     void setTeam(int team);

@@ -125,10 +125,13 @@ void Network::fetchTCP(QString data)
         if(list.size()>1) {
             if(list.at(1)!=ownTank->getName()) {
                 switch(m) {
-                    case -6:
+                    case -7: //setownpos
+                        ownTank->setAll(list.at(1).toInt(),list.at(2).toInt());
+                    break;
+                    case -6: //settimer
                         emit setT(list.at(1).toInt());
                     break;
-                    case -5:
+                    case -5: //setteam
                         if(list.size()>0) {
                             ownTank->setTeam(list.at(1).toInt());
                         }
@@ -207,7 +210,6 @@ void Network::fetchTCP(QString data)
                     case 4: //add bullet
                         {
                             if(list.size()>5) {
-                                //bullet dmg noch einbauen
                                 Bullet *b = new Bullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toDouble(),list.at(4).toDouble(),list.at(5).toInt(),list.at(7));
                                 b->setDmg(list.at(6).toInt());
                                 bool enabled = true;

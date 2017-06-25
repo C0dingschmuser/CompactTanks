@@ -54,31 +54,39 @@ void Tank::setVisible(bool visible)
     this->visible = visible;
 }
 
-void Tank::w()
+void Tank::w(bool a)
 {
     //currentImg = imgs[0];
-    this->dir = 1;
+    if(!a) {
+        this->dir = 1;
+    }
     this->rect.moveTo(rect.x(),rect.y()-speed);
 }
 
-void Tank::a()
+void Tank::a(bool a)
 {
     //currentImg = imgs[1];
-    this->dir = 2;
+    if(!a) {
+        this->dir = 2;
+    }
     this->rect.moveTo(rect.x()-speed,rect.y());
 }
 
-void Tank::s()
+void Tank::s(bool a)
 {
     //currentImg = imgs[2];
-    this->dir = 3;
+    if(!a) {
+        this->dir = 3;
+    }
     this->rect.moveTo(rect.x(),rect.y()+speed);
 }
 
-void Tank::d()
+void Tank::d(bool a)
 {
     //currentImg = imgs[3];
-    this->dir = 4;
+    if(!a) {
+        this->dir = 4;
+    }
     this->rect.moveTo(rect.x()+speed,rect.y());
 }
 
@@ -283,6 +291,11 @@ void Tank::setAll(int x, int y, int dir, int health, int diff)
         this->dir = dir;
     }
     //this->rect.moveTo(x,y);
+}
+
+void Tank::setAll(int x, int y)
+{
+    rect.moveTo(x,y);
 }
 
 void Tank::setMoved(bool m)

@@ -1,1 +1,27 @@
 IDI_ICON1               ICON    DISCARDABLE     "icon.ico"
+#include <windows.h>
+
+VS_VERSION_INFO VERSIONINFO
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "CompanyName",        "Bruh Games"
+            VALUE "FileDescription",    "CompactTanks"
+            VALUE "FileVersion",        "0.0.4.10"
+            VALUE "InternalName",       "CompactTanks"
+            VALUE "LegalCopyright",     "Copyright Bruh Games"
+            VALUE "LegalTrademarks1",   ""
+            VALUE "LegalTrademarks2",   ""
+            VALUE "OriginalFilename",   "CompactTanks.exe"
+            VALUE "ProductName",        "CompactTanks"
+            VALUE "ProductVersion",     "0.0.4.10"
+        END
+    END
+
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x407, 1252
+    END
+END

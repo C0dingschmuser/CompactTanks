@@ -247,7 +247,7 @@ int Worker::getDifference(int v1, int v2)
 
 void Worker::keyP(QKeyEvent *e)
 {
-    move->keyPressEvent(e);
+    move->keyPressEvent(e,lvlObjs);
 }
 
 void Worker::keyR(QKeyEvent *e)
