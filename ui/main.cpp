@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     f.setSwapInterval(0);
     QSurfaceFormat::setDefaultFormat(f);
     FrmMain w;
-    w.show();
+    w.hide();
     //w.showFullScreen();
 
     return a.exec();

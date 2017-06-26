@@ -50,6 +50,7 @@ public:
     void setColor(int color);
     void setAngle(int angle);
     void setSpotted(int spotted);
+    void setName(QString name);
     int getSpeed();
     int getKills();
     int getDeaths();

@@ -37,7 +37,7 @@ private:
 public:
     explicit Network(Tank *ownTank, QVector<Tank*> t, QHostAddress ip, QObject *parent = 0);
     ~Network();
-    bool connectToServer();
+    bool connectToServer(QString username,QString password);
     void send(QString data);
     void sendPos();
     void setTimer(int timer);
@@ -61,6 +61,7 @@ signals:
     void visible(int visible);
     void capobj(int num,int owner,int cp);
     void setT(int timer);
+    void conn(bool success);
 public slots:
 };
 

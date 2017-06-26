@@ -319,8 +319,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Times New Roman</family>
-     <pointsize>11</pointsize>
+     <family>Pixeled</family>
+     <pointsize>8</pointsize>
     </font>
    </property>
    <property name="mouseTracking">

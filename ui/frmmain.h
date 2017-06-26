@@ -17,6 +17,7 @@
 #include "core/terrain.h"
 #include "core/shoot.h"
 #include "core/worker.h"
+#include "ui/frmlogin.h"
 
 namespace Ui {
 class FrmMain;
@@ -48,6 +49,9 @@ private slots:
     void on_tab();
     void on_connFail();
     void on_newMap(QVector<Terrain*> lvlObjs);
+    void on_connectData(QString username,QString pw);
+    void on_connSuccess();
+    void on_wrongData();
 
 private:
     Ui::FrmMain *ui;
@@ -72,11 +76,13 @@ private:
     bool killMessage;
     bool fullscreen;
     bool tab;
+    bool isConnected;
     QVector <QString> messageText;
     QVector <QString> killMessageText;
     QPixmap tree;
     QPixmap grass;
     bool contains(QString data, QString c);
+    FrmLogin *login;
 protected:
     void paintEvent(QPaintEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;

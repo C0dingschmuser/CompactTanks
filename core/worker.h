@@ -31,6 +31,7 @@ private slots:
     void on_capobj(int num,int owner,int cp);
     void on_setT(int timer);
     void on_pos(Tank *p,int x,int y,int dir,int health, int angle,int spotted,int stimer);
+    void on_conn(bool success);
 private:
     QRect viewRect;
     QTimer *t_bullet;
@@ -44,6 +45,7 @@ private:
     Network *network;
     Shoot *shoot;
     QPoint *aim;
+    QString username;
     int width;
     int height;
     int timer;
@@ -59,6 +61,7 @@ public:
     void mRls(QMouseEvent *e);
     void notActive();
     void setViewRect(QRect viewRect);
+    void connectToServer(QString username,QString password);
 signals:
     void newPlayer(Tank *t);
     void delPlayer(int pos);
@@ -75,6 +78,8 @@ signals:
     void visible(bool visible);
     void tab();
     void connFail();
+    void connSuccess();
+    void wrongData();
 };
 
 #endif // WORKER_H

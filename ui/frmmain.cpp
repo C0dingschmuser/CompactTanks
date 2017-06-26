@@ -11,30 +11,26 @@ FrmMain::FrmMain(QWidget *parent) :
     f.setSwapBehavior(QSurfaceFormat::SingleBuffer);
     f.setSwapInterval(1000);
     setFormat(f);*/
-    initializeGL();
-    QString name = QInputDialog::getText(this,"Name","Name:");
-    if(contains(name,"|#äöü.,-_<>")||name.length()>8||name=="") {
-        QMessageBox box;
-        box.setText("Falsche Eingabe!");
-        QApplication::exit();
-    }
     ui->lwInfo->setGeometry(this->geometry().width()*0.8,20,256,391);
     bmessage = false;
     tab = false;
+    login = new FrmLogin();
+    login->show();
+    this->hide();
     width = 2880;
     height = 2160;
     scaleX = 1.0;
     scaleY = 1.0;
+    isConnected=true;
     fullscreen = false;
     aim = new QPoint();
     mpos = new QPoint();
-    ownTank = new Tank(QRect(-200,-200,40,40),name);
+    ownTank = new Tank(QRect(-200,-200,40,40),"");
     worker = new Worker(ownTank,aim,width,height);
     t_draw = new QTimer();
     t_message = new QTimer();
     t_killMessage = new QTimer();
     t_draw->setTimerType(Qt::PreciseTimer);
-    QThread *workerThread = new QThread();
     connect(t_draw,SIGNAL(timeout()),this,SLOT(on_tdraw()));
     connect(t_message,SIGNAL(timeout()),this,SLOT(on_tmessage()));
     connect(t_killMessage,SIGNAL(timeout()),this,SLOT(on_tkillMessage()));
@@ -55,8 +51,9 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(worker,SIGNAL(tab()),this,SLOT(on_tab()));
     connect(worker,SIGNAL(connFail()),this,SLOT(on_connFail()));
     connect(worker,SIGNAL(newMap(QVector<Terrain*>)),this,SLOT(on_newMap(QVector<Terrain*>)));
-    worker->moveToThread(workerThread);
-    workerThread->start();
+    connect(worker,SIGNAL(connSuccess()),this,SLOT(on_connSuccess()));
+    connect(worker,SIGNAL(wrongData()),this,SLOT(on_wrongData()));
+    connect(login,SIGNAL(connectWithData(QString,QString)),this,SLOT(on_connectData(QString,QString)));
     this->setCursor(QPixmap(":/images/tank/cursor.png"));
     tree = QPixmap(":/images/area/obj0.png");
     grass = QPixmap(":/images/area/obj9.png");
@@ -84,6 +81,27 @@ FrmMain::~FrmMain()
     delete mpos;
     delete ui;
     QApplication::exit();
+}
+
+void FrmMain::on_connectData(QString username, QString pw)
+{
+    worker->connectToServer(username,pw);
+}
+
+void FrmMain::on_connSuccess()
+{
+    isConnected = false;
+    QThread *workerThread = new QThread();
+    worker->moveToThread(workerThread);
+    workerThread->start();
+    initializeGL();
+    login->hide();
+    this->show();
+}
+
+void FrmMain::on_wrongData()
+{
+    QMessageBox::information(login,"FEHLER","Falscher Benutzername und/oder Passwort");
 }
 
 void FrmMain::on_connFail()
@@ -230,7 +248,6 @@ void FrmMain::on_visible(bool visible)
 
 void FrmMain::on_newMap(QVector<Terrain*> lvlObjs)
 {
-    qDebug()<<"load";
     this->lvlObjs = lvlObjs;
 }
 
@@ -248,6 +265,9 @@ bool FrmMain::contains(QString data,QString c)
 void FrmMain::paintEvent(QPaintEvent *e)
 {
     Q_UNUSED(e)
+    if(isConnected) {
+        return;
+    }
     /*qDebug()<<"--------";
     qDebug()<<ownTank->getRect().x();
     qDebug()<<ownTank->getRect().y();*/

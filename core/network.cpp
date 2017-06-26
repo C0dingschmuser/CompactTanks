@@ -28,13 +28,14 @@ Network::~Network()
     delete tcpSocket;
 }
 
-bool Network::connectToServer()
+bool Network::connectToServer(QString username, QString password)
 {
     bool ok;
     tcpSocket->connectToHost(ip,38888);
     ok = tcpSocket->waitForConnected(3000);
     if(ok) {
-        send("|0#"+ownTank->getName()+"#");
+        ownTank->setName(username);
+        send("|0#"+username+"#"+password+"#~");
     }
     return ok;
 }
@@ -125,6 +126,12 @@ void Network::fetchTCP(QString data)
         if(list.size()>1) {
             if(list.at(1)!=ownTank->getName()) {
                 switch(m) {
+                    case -8:
+                        if(list.at(1).toInt()) {
+                            emit conn(true);
+                        } else {
+                            emit conn(false);
+                        }
                     case -7: //setownpos
                         ownTank->setAll(list.at(1).toInt(),list.at(2).toInt());
                     break;
@@ -174,8 +181,6 @@ void Network::fetchTCP(QString data)
                         {
                             if(list.size()>4) {
                                 Tank *t = new Tank(QRect(list.at(2).toInt(),list.at(3).toInt(),40,40),list.at(1),list.at(7).toInt());
-                                qDebug()<<ownTank->getTeam();
-                                qDebug()<<t->getTeam();
                                 if(t->getTeam()==ownTank->getTeam()) {
                                     t->setColor(1);
                                 } else {

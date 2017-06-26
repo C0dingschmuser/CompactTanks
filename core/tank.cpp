@@ -328,6 +328,11 @@ void Tank::setCoins(int coins)
     this->coins = coins;
 }
 
+void Tank::setName(QString name)
+{
+    this->name = name;
+}
+
 int Tank::getDifference(int v1, int v2)
 {
     int diff = 0;

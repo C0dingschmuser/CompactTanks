@@ -29,18 +29,15 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     connect(network,SIGNAL(capobj(int,int,int)),this,SLOT(on_capobj(int,int,int)));
     connect(network,SIGNAL(setT(int)),this,SLOT(on_setT(int)));
     connect(network,SIGNAL(pos(Tank*,int,int,int,int,int,int,int)),this,SLOT(on_pos(Tank*,int,int,int,int,int,int,int)));
+    connect(network,SIGNAL(conn(bool)),this,SLOT(on_conn(bool)));
     connect(move,SIGNAL(fullscreen()),this,SIGNAL(fullscreen()));
     connect(move,SIGNAL(tab()),this,SIGNAL(tab()));
     connect(shoot,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
     connect(t_conn,SIGNAL(timeout()),this,SLOT(on_tconn()));
+    t_bullet->start(2);
+    t_main->start(4);
     //loadMap();
-    t_conn->start(100);
-    if(network->connectToServer()) {
-        t_conn->stop();
-        t_bullet->start(2);
-        t_main->start(4);
-    }
 }
 
 Worker::~Worker()
@@ -48,6 +45,27 @@ Worker::~Worker()
     disconnect(network,SIGNAL(disconnect()),this,SIGNAL(disconnected()));
     delete move;
     delete network;
+}
+
+void Worker::connectToServer(QString username, QString password)
+{
+    //t_conn->start(200);
+    if(network->connectToServer(username,password)) {
+        this->username = username;
+        t_conn->stop();
+    } else {
+        emit connFail();
+    }
+}
+
+void Worker::on_conn(bool success)
+{
+    if(success) {
+        ownTank->setName(username);
+        emit connSuccess();
+    } else {
+        emit wrongData();
+    }
 }
 
 void Worker::on_pos(Tank *p, int x, int y, int dir, int health, int angle, int spotted, int stimer)
@@ -64,7 +82,7 @@ void Worker::on_pos(Tank *p, int x, int y, int dir, int health, int angle, int s
 void Worker::on_tconn()
 {
     t_conn->stop();
-    emit connFail();
+    //emit connFail();
 }
 
 void Worker::on_newPlayer(Tank *t)
