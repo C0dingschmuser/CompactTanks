@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QMessageBox>
+#include <QFile>
+#include <QTextStream>
 
 namespace Ui {
 class FrmLogin;
@@ -22,6 +24,7 @@ private slots:
 private:
     Ui::FrmLogin *ui;
     bool contains(QString data, QString c);
+    QFile file;
 signals:
     void connectWithData(QString username,QString pw);
 };

@@ -9,6 +9,7 @@
 #include "core/movement.h"
 #include "core/shoot.h"
 #include "core/terrain.h"
+#include "core/sound.h"
 
 class Worker : public QObject
 {
@@ -45,6 +46,7 @@ private:
     Network *network;
     Shoot *shoot;
     QPoint *aim;
+    Sound *sound;
     QString username;
     int width;
     int height;

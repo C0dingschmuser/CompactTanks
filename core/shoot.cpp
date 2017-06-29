@@ -1,7 +1,8 @@
 #include "shoot.h"
 
-Shoot::Shoot(Tank *t, Network *n, QPoint *aim, QObject *parent) : QObject(parent)
+Shoot::Shoot(Tank *t, Network *n, QPoint *aim, Sound *sound, QObject *parent) : QObject(parent)
 {
+    this->sound = sound;
     t_cool = new QTimer();
     t_main = new QTimer();
     isCool = false;
@@ -45,6 +46,7 @@ void Shoot::on_tmain()
             enabled = false;
         }
         b->setEnabled(enabled);
+        sound->playShot();
         emit newBullet(b);
     }
 }

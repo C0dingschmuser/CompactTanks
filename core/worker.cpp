@@ -10,9 +10,10 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     t_main = new QTimer(this);
     t_conn = new QTimer(this);
     t_main->setTimerType(Qt::PreciseTimer);
+    sound = new Sound(this);
     move = new Movement(this->ownTank,this->width,this->height);
     network = new Network(this->ownTank,tanks,QHostAddress("127.0.0.1")); //ändern
-    shoot = new Shoot(this->ownTank,network,this->aim);
+    shoot = new Shoot(this->ownTank,network,this->aim,sound);
     connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
     connect(network,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*)));
     connect(network,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
@@ -22,7 +23,6 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     connect(network,SIGNAL(delBullet(int)),this,SLOT(on_delBullet(int)));
     connect(network,SIGNAL(syncBullet(int,int,int,int)),this,SLOT(on_syncBullet(int,int,int,int)));
     connect(network,SIGNAL(visible(int)),this,SLOT(on_visible(int)));
-    connect(network,SIGNAL(disconnect()),this,SIGNAL(disconnected()));
     connect(network,SIGNAL(message(QString,int)),this,SIGNAL(message(QString,int)));
     connect(network,SIGNAL(killMessage(QString)),this,SIGNAL(killMessage(QString)));
     connect(network,SIGNAL(kick()),this,SIGNAL(kick()));
@@ -35,6 +35,7 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     connect(shoot,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
     connect(t_conn,SIGNAL(timeout()),this,SLOT(on_tconn()));
+    sound->setVolume(0.1);
     t_bullet->start(2);
     t_main->start(4);
     //loadMap();
@@ -61,6 +62,7 @@ void Worker::connectToServer(QString username, QString password)
 void Worker::on_conn(bool success)
 {
     if(success) {
+        connect(network,SIGNAL(disconnect()),this,SIGNAL(disconnected()));
         ownTank->setName(username);
         emit connSuccess();
     } else {
@@ -160,10 +162,11 @@ void Worker::on_visible(int v)
 {
     bool ok=false;
     for(int i=0;i<lvlObjs.size();i++) {
-        if(ownTank->getRect().intersects(lvlObjs[i]->getRect())&&
-                lvlObjs[i]->getType()>0&&lvlObjs[i]->getType()<3) {
-            ok = true;
-            break;
+        if(ownTank->getRect().intersects(lvlObjs.at(i)->getRect())) {
+            if(lvlObjs[i]->getType()>0&&lvlObjs[i]->getType()<3) {
+                ok = true;
+                break;
+            }
         }
     }
     if(v||ok) {

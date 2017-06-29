@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui network multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -21,7 +21,8 @@ SOURCES += ui/main.cpp\
     core/shoot.cpp \
     core/weapon.cpp \
     core/worker.cpp \
-    ui/frmlogin.cpp
+    ui/frmlogin.cpp \
+    core/sound.cpp
 
 HEADERS  += ui/frmmain.h \
     core/tank.h \
@@ -32,7 +33,8 @@ HEADERS  += ui/frmmain.h \
     core/shoot.h \
     core/weapon.h \
     core/worker.h \
-    ui/frmlogin.h
+    ui/frmlogin.h \
+    core/sound.h
 
 FORMS    += ui/frmmain.ui \
     ui/frmlogin.ui

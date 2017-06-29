@@ -25,5 +25,6 @@
 		<file>images/area/obj15.png</file>
         <file>images/tank/cursor.png</file>
 		<file>map/map.dat</file>
+		<file>sounds/shot.wav</file>
     </qresource>
 </RCC>

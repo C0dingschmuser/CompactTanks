@@ -9,6 +9,7 @@
 #include "network.h"
 #include "tank.h"
 #include "weapon.h"
+#include "sound.h"
 
 
 class Shoot : public QObject
@@ -26,8 +27,9 @@ private:
     Weapon *w;
     QPoint *mpos;
     Tank *t;
+    Sound *sound;
 public:
-    explicit Shoot(Tank *t, Network *n, QPoint *aim,QObject *parent = 0);
+    explicit Shoot(Tank *t, Network *n, QPoint *aim,Sound *sound,QObject *parent = 0);
     void MousePressEvent(QMouseEvent *e);
     void MouseReleaseEvent(QMouseEvent *e);
     void setMpos(QPoint mpos);
