@@ -11,6 +11,7 @@ Tank::Tank(QRect rect, QString name, int team)
     this->name = name;
     speed = 2;
     dir = 1;
+    this->currentID = 0;
     angle = 0;
     kills = 0;
     deaths = 0;
@@ -111,13 +112,24 @@ void Tank::setSpotted(int spotted)
     this->spotted = spotted;
 }
 
+void Tank::setID(int id)
+{
+    this->currentID = id;
+}
+
 int Tank::getSpotted()
 {
     return this->spotted;
 }
 
+int Tank::getID()
+{
+    return currentID;
+}
+
 void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
 {
+    if(name==NULL) return;
     QColor rcolor;
     QRect r;
     int xt = rect.x();

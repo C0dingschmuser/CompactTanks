@@ -9,6 +9,7 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     t_bullet = new QTimer(this);
     t_main = new QTimer(this);
     t_conn = new QTimer(this);
+    t_id = new QTimer(this);
     t_main->setTimerType(Qt::PreciseTimer);
     sound = new Sound(this);
     move = new Movement(this->ownTank,this->width,this->height);
@@ -21,7 +22,7 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     connect(network,SIGNAL(delObjs()),this,SLOT(on_delObjs()));
     connect(network,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(network,SIGNAL(delBullet(int)),this,SLOT(on_delBullet(int)));
-    connect(network,SIGNAL(syncBullet(int,int,int,int)),this,SLOT(on_syncBullet(int,int,int,int)));
+    connect(network,SIGNAL(syncBullet(int,int)),this,SLOT(on_syncBullet(int,int)));
     connect(network,SIGNAL(visible(int)),this,SLOT(on_visible(int)));
     connect(network,SIGNAL(message(QString,int)),this,SIGNAL(message(QString,int)));
     connect(network,SIGNAL(killMessage(QString)),this,SIGNAL(killMessage(QString)));
@@ -35,6 +36,7 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     connect(shoot,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
     connect(t_conn,SIGNAL(timeout()),this,SLOT(on_tconn()));
+    connect(t_id,SIGNAL(timeout()),this,SLOT(on_tid()));
     sound->setVolume(0.1);
     t_bullet->start(2);
     t_main->start(4);
@@ -64,9 +66,20 @@ void Worker::on_conn(bool success)
     if(success) {
         connect(network,SIGNAL(disconnect()),this,SIGNAL(disconnected()));
         ownTank->setName(username);
+        t_id->start(100);
         emit connSuccess();
     } else {
         emit wrongData();
+    }
+}
+
+void Worker::on_tid()
+{
+    for(int i=0;i<lvlObjs.size();i++) {
+        if(ownTank->getRect().intersects(lvlObjs.at(i)->getRect())) {
+            ownTank->setID(lvlObjs[i]->getType());
+            break;
+        }
     }
 }
 
@@ -116,6 +129,7 @@ void Worker::on_delObjs()
 void Worker::on_newBullet(Bullet *b)
 {
     bullets.append(b);
+    if(b->get().intersects(viewRect)&&b->getShooter()!=ownTank->getName()) sound->playShot();
     emit newBullet(b);
 }
 
@@ -127,16 +141,11 @@ void Worker::on_delBullet(int pos)
     }
 }
 
-void Worker::on_syncBullet(int pos, int x, int y, int elapsed)
+void Worker::on_syncBullet(int pos, int dmg)
 {
     //keine weiterleitung da pointer
     if(bullets.size()-1>=pos) {
-        if(!bullets[pos]->getEnabled()) {
-            if(viewRect.intersects(QRect(x,y,10,10))) {
-                bullets[pos]->setEnabled(true);
-            }
-        }
-        bullets[pos]->sync(x,y,elapsed);
+        bullets[pos-1]->setDmg(dmg);
     }
 }
 
@@ -180,7 +189,7 @@ void Worker::on_visible(int v)
         bool ok=false;
         for(int a=0;a<lvlObjs.size();a++) {
             if(tanks[i]->getTeam()==ownTank->getTeam()) {
-                if(tanks[i]->getRect().intersects(lvlObjs[a]->getRect())&&
+                if(tanks[i]->getRect().intersects(lvlObjs.at(a)->getRect())&&
                         lvlObjs[a]->getType()>0&&lvlObjs[a]->getType()<3) {
                     ok = true;
                     break;
@@ -218,10 +227,8 @@ void Worker::on_tmain()
         timer = 0;
     }
     for(int i=0;i<tanks.size();i++) {
-        if(tanks[i]->getRect().intersects(viewRect)&&tanks[i]->getRect().x()>0) {
+        if(tanks[i]->getRect().x()>0) {
             tanks[i]->move();
-        } else {
-            tanks[i]->teleport(-200,-200);
         }
     }
 }

@@ -20,7 +20,7 @@ private slots:
     void on_newlvlObj(int x,int y,int w,int h,int type);
     void on_newBullet(Bullet *b);
     void on_delBullet(int pos);
-    void on_syncBullet(int pos,int x,int y, int elapsed);
+    void on_syncBullet(int pos,int dmg);
     void on_delObjs();
     void on_tbullet();
     void on_tmain();
@@ -33,11 +33,13 @@ private slots:
     void on_setT(int timer);
     void on_pos(Tank *p,int x,int y,int dir,int health, int angle,int spotted,int stimer);
     void on_conn(bool success);
+    void on_tid();
 private:
     QRect viewRect;
     QTimer *t_bullet;
     QTimer *t_main;
     QTimer *t_conn;
+    QTimer *t_id;
     Tank *ownTank;
     QVector <Tank*> tanks;
     QVector <Terrain*> lvlObjs;

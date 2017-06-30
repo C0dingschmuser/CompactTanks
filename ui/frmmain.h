@@ -81,6 +81,7 @@ private:
     QVector <QString> killMessageText;
     QPixmap tree;
     QPixmap grass;
+    QPixmap minimap;
     bool contains(QString data, QString c);
     FrmLogin *login;
 protected:

@@ -27,6 +27,7 @@ private:
     int team;
     int coins;
     int spotted;
+    int currentID;
     bool moved;
     bool visible;
     QVector <QPixmap> imgs;
@@ -51,6 +52,7 @@ public:
     void setAngle(int angle);
     void setSpotted(int spotted);
     void setName(QString name);
+    void setID(int id);
     int getSpeed();
     int getKills();
     int getDeaths();
@@ -61,6 +63,7 @@ public:
     int getCoins();
     int getSpotted();
     int getDifference(int v1,int v2);
+    int getID();
     void setVisible(bool visible);
     void teleport(int x,int y);
     void setAll(int x, int y, int dir, int health, int diff);

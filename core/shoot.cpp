@@ -25,6 +25,7 @@ void Shoot::on_tcool()
 void Shoot::on_tmain()
 {
     if(click&!isCool) {
+        if(t->getID()==4) return;
         if(!t_cool->isActive()) {
             isCool = true;
             t_cool->start(w->getCoolDown());

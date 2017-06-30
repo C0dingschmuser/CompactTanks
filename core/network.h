@@ -50,7 +50,7 @@ signals:
     void delPlayer(int i);
     void newBullet(Bullet *b);
     void delBullet(int pos);
-    void syncBullet(int pos,int x,int y, int elapsed);
+    void syncBullet(int pos,int dmg);
     void setViewRange(int vr);
     void delObjs();
     void disconnect();

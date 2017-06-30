@@ -57,6 +57,7 @@ FrmMain::FrmMain(QWidget *parent) :
     this->setCursor(QPixmap(":/images/tank/cursor.png"));
     tree = QPixmap(":/images/area/obj0.png");
     grass = QPixmap(":/images/area/obj9.png");
+    minimap = QPixmap(":/images/area/minimap.png");
     QFontDatabase d;
     d.addApplicationFont(":/font/Pixeled.ttf");
     font = d.font("Pixeled","Normal",12);
@@ -388,6 +389,26 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawLine(960,0,960,1080);*/
     painter.scale(scaleX,scaleY);
     painter.setPen(Qt::NoPen);
+    int x = 1920-1920*0.2;
+    int y = 1080-1080*0.25;
+    painter.drawPixmap(x,y,1920*0.2,1080*0.25,minimap);
+    painter.translate(x,y);
+    painter.scale(1920*0.2/width,1080*0.25/height);
+    painter.setBrush(Qt::blue);
+    painter.drawRect(ownTank->getRect());
+    for(int i=0;i<tanks.size();i++) {
+        if(tanks[i]->getTeam()==ownTank->getTeam()) {
+            painter.setBrush(QColor(0,255,0));
+        } else {
+            painter.setBrush(QColor(255,0,0));
+        }
+        QRect rect = tanks[i]->getRect();
+        if(rect.x()!=-200) {
+            painter.drawRect(rect);
+        }
+    }
+    painter.resetTransform();
+    painter.scale(scaleX,scaleY);
     //painter.drawRect(0,0,1920,1110);
     if(bmessage) {
         QFont f = painter.font();
@@ -416,7 +437,6 @@ void FrmMain::paintEvent(QPaintEvent *e)
         painter.drawText(462+offset,64,QString::number(ownTank->getDeaths(),'f',0));
         painter.drawText(462+offset,128,QString::number(ownTank->getCoins(),'f',0));
     }
-    //painter.drawRect(QRect(aim->x(),aim->y(),10,10));
 
 }
 

@@ -23,6 +23,7 @@
 		<file>images/area/obj13.png</file>
 		<file>images/area/obj14.png</file>
 		<file>images/area/obj15.png</file>
+		<file>images/area/minimap.png</file>
         <file>images/tank/cursor.png</file>
 		<file>map/map.dat</file>
 		<file>sounds/shot.wav</file>
