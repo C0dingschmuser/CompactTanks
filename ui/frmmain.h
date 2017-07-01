@@ -17,6 +17,7 @@
 #include "core/terrain.h"
 #include "core/shoot.h"
 #include "core/worker.h"
+#include "core/animation.h"
 #include "ui/frmlogin.h"
 
 namespace Ui {
@@ -52,6 +53,9 @@ private slots:
     void on_connectData(QString username,QString pw);
     void on_connSuccess();
     void on_wrongData();
+    void on_shot();
+    void on_hit(Tank *t, int dmg);
+    void on_thit();
 
 private:
     Ui::FrmMain *ui;
@@ -60,13 +64,17 @@ private:
     QVector <Tank*> tanks;
     QVector <Terrain*> lvlObjs;
     QVector <Bullet*> bullets;
+    QVector <int> capObjs;
+    QVector <Animation> animations;
     QTimer *t_draw;
     QTimer *t_message;
     QTimer *t_killMessage;
+    QTimer *t_hit;
     QPoint *aim;
     QPoint *mpos;
     QRect viewRect;
     QFont font;
+    Sound *sound;
     int messageLength;
     int width;
     int height;

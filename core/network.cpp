@@ -126,7 +126,7 @@ void Network::fetchTCP(QString data)
         if(list.size()>1) {
             if(list.at(1)!=ownTank->getName()) {
                 switch(m) {
-                    case -8:
+                    case -8: //login erfolgreich?
                         if(list.at(1).toInt()) {
                             emit conn(true);
                         } else {
@@ -262,6 +262,10 @@ void Network::fetchTCP(QString data)
                     break;
                     case 11: //capobj
                         emit capobj(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt());
+                    break;
+                    case 12: //hit
+                        Tank *t = sucheTank(list.at(1));
+                        emit hit(t,list.at(2).toInt());
                     break;
                 }
             }

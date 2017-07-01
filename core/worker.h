@@ -48,7 +48,6 @@ private:
     Network *network;
     Shoot *shoot;
     QPoint *aim;
-    Sound *sound;
     QString username;
     int width;
     int height;
@@ -84,6 +83,8 @@ signals:
     void connFail();
     void connSuccess();
     void wrongData();
+    void shot();
+    void hit(Tank *t, int dmg);
 };
 
 #endif // WORKER_H

@@ -1,8 +1,7 @@
 #include "shoot.h"
 
-Shoot::Shoot(Tank *t, Network *n, QPoint *aim, Sound *sound, QObject *parent) : QObject(parent)
+Shoot::Shoot(Tank *t, Network *n, QPoint *aim, QObject *parent) : QObject(parent)
 {
-    this->sound = sound;
     t_cool = new QTimer();
     t_main = new QTimer();
     isCool = false;
@@ -10,7 +9,7 @@ Shoot::Shoot(Tank *t, Network *n, QPoint *aim, Sound *sound, QObject *parent) : 
     mpos = aim;
     this->t = t;
     this->network = n;
-    w = new Weapon(150,750);
+    w = new Weapon(150,1000);
     connect(t_cool,SIGNAL(timeout()),this,SLOT(on_tcool()));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
     t_main->start(50);
@@ -47,7 +46,6 @@ void Shoot::on_tmain()
             enabled = false;
         }
         b->setEnabled(enabled);
-        sound->playShot();
         emit newBullet(b);
     }
 }

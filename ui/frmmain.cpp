@@ -30,10 +30,13 @@ FrmMain::FrmMain(QWidget *parent) :
     t_draw = new QTimer();
     t_message = new QTimer();
     t_killMessage = new QTimer();
+    t_hit = new QTimer();
     t_draw->setTimerType(Qt::PreciseTimer);
+    sound = new Sound();
     connect(t_draw,SIGNAL(timeout()),this,SLOT(on_tdraw()));
     connect(t_message,SIGNAL(timeout()),this,SLOT(on_tmessage()));
     connect(t_killMessage,SIGNAL(timeout()),this,SLOT(on_tkillMessage()));
+    connect(t_hit,SIGNAL(timeout()),this,SLOT(on_thit()));
     connect(worker,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(worker,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*))); //bei neuem spieler aufrufen
     connect(worker,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
@@ -53,8 +56,11 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(worker,SIGNAL(newMap(QVector<Terrain*>)),this,SLOT(on_newMap(QVector<Terrain*>)));
     connect(worker,SIGNAL(connSuccess()),this,SLOT(on_connSuccess()));
     connect(worker,SIGNAL(wrongData()),this,SLOT(on_wrongData()));
+    connect(worker,SIGNAL(shot()),this,SLOT(on_shot()));
+    connect(worker,SIGNAL(hit(Tank*,int)),this,SLOT(on_hit(Tank*,int)));
     connect(login,SIGNAL(connectWithData(QString,QString)),this,SLOT(on_connectData(QString,QString)));
     this->setCursor(QPixmap(":/images/tank/cursor.png"));
+    sound->setVolume(0.1);
     tree = QPixmap(":/images/area/obj0.png");
     grass = QPixmap(":/images/area/obj9.png");
     minimap = QPixmap(":/images/area/minimap.png");
@@ -62,6 +68,7 @@ FrmMain::FrmMain(QWidget *parent) :
     d.addApplicationFont(":/font/Pixeled.ttf");
     font = d.font("Pixeled","Normal",12);
     t_draw->start(5);
+    t_hit->start(10);
     //t_bullet->start(5);
 }
 
@@ -116,6 +123,30 @@ void FrmMain::on_disconnect()
 {
     QMessageBox::information(this,"FEHLER","Verbindung zum Server getrennt!");
     QApplication::exit();
+}
+
+void FrmMain::on_shot()
+{
+    sound->playShot();
+}
+
+void FrmMain::on_hit(Tank *t, int dmg)
+{
+    Q_UNUSED(t);
+    animations.append(Animation("-"+QString::number(dmg,'f',0),aim->x()-5,aim->y()-15));
+}
+
+void FrmMain::on_thit()
+{
+    for(int i=0;i<animations.size();i++) {
+        int x = animations[i].getCoords().x();
+        int y = animations[i].getCoords().y()-1;
+        if(animations[i].getCount()==30) {
+            animations.removeAt(i);
+        } else {
+            animations[i].setCoords(x,y);
+        }
+    }
 }
 
 void FrmMain::on_message(QString message, int length)
@@ -176,6 +207,7 @@ void FrmMain::on_newlvlObj(Terrain *t)
 {
     Terrain *te = t;
     lvlObjs.append(te);
+    if(te->getType()==2) capObjs.append(lvlObjs.size()-1);
 }
 
 void FrmMain::on_newBullet(Bullet *b)
@@ -383,6 +415,13 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawEllipse(ownTank->getRect().center(),viewRange,viewRange);*/
 
     //painter.setBrush(QColor(255,255,0,50));
+    painter.setPen(Qt::blue);
+    QFont f = painter.font();
+    f.setPointSize(15);
+    painter.setFont(f);
+    for(int i=0;i<animations.size();i++) {
+        painter.drawText(QPoint(aim->x()-15,aim->y()-animations[i].getCount()-17),animations[i].getText());
+    }
     painter.resetTransform();
     /*painter.setPen(Qt::red);
     painter.drawLine(0,540,1920,540);
@@ -394,6 +433,17 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawPixmap(x,y,1920*0.2,1080*0.25,minimap);
     painter.translate(x,y);
     painter.scale(1920*0.2/width,1080*0.25/height);
+    for(int i=0;i<capObjs.size();i++) {
+        int num = capObjs[i];
+        if(lvlObjs[num]->getOwner()==0) {
+            painter.setBrush(Qt::white);
+        } else if(lvlObjs[num]->getOwner()==ownTank->getTeam()) {
+            painter.setBrush(QColor(0,255,0));
+        } else {
+            painter.setBrush(QColor(255,0,0));
+        }
+        painter.drawRect(lvlObjs[num]->getRect());
+    }
     painter.setBrush(Qt::blue);
     painter.drawRect(ownTank->getRect());
     for(int i=0;i<tanks.size();i++) {

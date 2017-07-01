@@ -22,7 +22,8 @@ SOURCES += ui/main.cpp\
     core/weapon.cpp \
     core/worker.cpp \
     ui/frmlogin.cpp \
-    core/sound.cpp
+    core/sound.cpp \
+    core/animation.cpp
 
 HEADERS  += ui/frmmain.h \
     core/tank.h \
@@ -34,7 +35,8 @@ HEADERS  += ui/frmmain.h \
     core/weapon.h \
     core/worker.h \
     ui/frmlogin.h \
-    core/sound.h
+    core/sound.h \
+    core/animation.h
 
 FORMS    += ui/frmmain.ui \
     ui/frmlogin.ui

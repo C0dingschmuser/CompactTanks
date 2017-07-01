@@ -11,10 +11,9 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     t_conn = new QTimer(this);
     t_id = new QTimer(this);
     t_main->setTimerType(Qt::PreciseTimer);
-    sound = new Sound(this);
     move = new Movement(this->ownTank,this->width,this->height);
     network = new Network(this->ownTank,tanks,QHostAddress("127.0.0.1")); //ändern
-    shoot = new Shoot(this->ownTank,network,this->aim,sound);
+    shoot = new Shoot(this->ownTank,network,this->aim);
     connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
     connect(network,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*)));
     connect(network,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
@@ -31,13 +30,13 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     connect(network,SIGNAL(setT(int)),this,SLOT(on_setT(int)));
     connect(network,SIGNAL(pos(Tank*,int,int,int,int,int,int,int)),this,SLOT(on_pos(Tank*,int,int,int,int,int,int,int)));
     connect(network,SIGNAL(conn(bool)),this,SLOT(on_conn(bool)));
+    connect(network,SIGNAL(hit(Tank*,int)),this,SIGNAL(hit(Tank*,int)));
     connect(move,SIGNAL(fullscreen()),this,SIGNAL(fullscreen()));
     connect(move,SIGNAL(tab()),this,SIGNAL(tab()));
     connect(shoot,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
     connect(t_conn,SIGNAL(timeout()),this,SLOT(on_tconn()));
     connect(t_id,SIGNAL(timeout()),this,SLOT(on_tid()));
-    sound->setVolume(0.1);
     t_bullet->start(2);
     t_main->start(4);
     //loadMap();
@@ -129,7 +128,7 @@ void Worker::on_delObjs()
 void Worker::on_newBullet(Bullet *b)
 {
     bullets.append(b);
-    if(b->get().intersects(viewRect)&&b->getShooter()!=ownTank->getName()) sound->playShot();
+    if(b->get().intersects(viewRect)) emit shot();
     emit newBullet(b);
 }
 
@@ -163,6 +162,10 @@ void Worker::on_tbullet()
                     }
                 }
             }
+            int x = bullets[i]->get().center().x();
+            int y = bullets[i]->get().center().y();
+            int pos = (x/72+(y/72*40));
+            if(x<0||y<0||x>width||y>height||!lvlObjs[pos]->getType()) bullets[i]->setEnabled(false);
         }
     }
 }

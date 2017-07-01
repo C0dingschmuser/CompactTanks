@@ -62,6 +62,7 @@ signals:
     void capobj(int num,int owner,int cp);
     void setT(int timer);
     void conn(bool success);
+    void hit(Tank *t,int dmg);
 public slots:
 };
 
