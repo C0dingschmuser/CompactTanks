@@ -428,9 +428,40 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawLine(960,0,960,1080);*/
     painter.scale(scaleX,scaleY);
     painter.setPen(Qt::NoPen);
+    painter.setBrush(Qt::black);
+    int health = ownTank->getHealth();
+    int offset = 400;
+    painter.drawRect(18,998,offset+4,2);
+    painter.drawRect(18,998+52,offset+4,2);
+    painter.drawRect(18,998,2,52);
+    painter.drawRect(18+offset+2,998,2,52);
+    //painter.drawRect(18,998,404,54);
+    if(health>80) {
+        painter.setBrush(QColor(34,177,76));
+    } else if(health>60) {
+        painter.setBrush(QColor(181,230,29));
+    } else if(health>40) {
+        painter.setBrush(QColor(255,242,0));
+    } else if(health>20) {
+        painter.setBrush(QColor(223,89,0));
+    } else if(health>0) {
+        painter.setBrush(QColor(237,28,36));
+    }
+    painter.drawRect(20,1000,400*((double)health/100),50);
+    f = painter.font();
+    f.setPointSize(25);
+    painter.setFont(f);
+    painter.setPen(Qt::black);
+    painter.drawText(190,1045,QString::number(health));
+    painter.setPen(Qt::NoPen);
     int x = 1920-1920*0.2;
     int y = 1080-1080*0.25;
+    int w = 1920*0.2;
+    int h = 1080*0.25;
     painter.drawPixmap(x,y,1920*0.2,1080*0.25,minimap);
+    painter.setBrush(Qt::black);
+    painter.drawRect(x-2,y-2,w+2,2);
+    painter.drawRect(x-2,y-2,2,h+2);
     painter.translate(x,y);
     painter.scale(1920*0.2/width,1080*0.25/height);
     for(int i=0;i<capObjs.size();i++) {
