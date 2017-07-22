@@ -17,7 +17,7 @@ Network::Network(Tank *ownTank, QVector<Tank *> t, QHostAddress ip,QObject *pare
     connect(tcpSocket,SIGNAL(disconnected()),this,SLOT(on_disconnect()));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
     connect(t_disconnect,SIGNAL(timeout()),this,SLOT(on_tdisconnect()));
-    //t_main->start(10);
+    t_main->start(10);
 }
 
 Network::~Network()
@@ -76,6 +76,7 @@ void Network::on_tmain()
     } else if(ownTank->getMoved()&&t_main->interval()>10){
         t_main->setInterval(10);
     }*/
+    if(!ownTank->isSpawned()) return;
     QByteArray data;
     data.append(QString("|0#"+ownTank->toString()).toUtf8());
     udpSocket->writeDatagram(data,ip,38889);
@@ -132,8 +133,14 @@ void Network::fetchTCP(QString data)
                         } else {
                             emit conn(false);
                         }
-                    case -7: //setownpos
-                        ownTank->setAll(list.at(1).toInt(),list.at(2).toInt());
+                    break;
+                    case -7: //setownpos spawn
+                        //emit spawn, start animation
+                        ownTank->setAll(list.at(2).toInt(),list.at(3).toInt());
+                        if(list.at(1).toInt()) {
+                            ownTank->setColor(1);
+                            emit spawn();
+                        }
                     break;
                     case -6: //settimer
                         emit setT(list.at(1).toInt());
@@ -178,13 +185,12 @@ void Network::fetchTCP(QString data)
                     case 1: //spieler hinzufügen
                         {
                             if(list.size()>4) {
-                                Tank *t = new Tank(QRect(list.at(2).toInt(),list.at(3).toInt(),40,40),list.at(1),list.at(7).toInt());
+                                Tank *t = new Tank(QRect(-200,-200,40,40),list.at(1),list.at(7).toInt());
                                 if(t->getTeam()==ownTank->getTeam()) {
                                     t->setColor(1);
                                 } else {
                                     t->setColor(0);
                                 }
-                                t->teleport(list.at(2).toInt(),list.at(3).toInt());
                                 players.append(t);
                                 emit newPlayer(t);
                                 emit killMessage(list.at(1)+" joined");
@@ -238,6 +244,8 @@ void Network::fetchTCP(QString data)
                     break;
                     case 7: //ownplayerdeath
                         if(list.size()>2) {
+                            ownTank->setSpawned(false);
+                            ownTank->setDeathPoint(QPoint(ownTank->getRect().x(),ownTank->getRect().y()));
                             ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());
                             emit killMessage(list.at(1)+" killed "+ownTank->getName());
                             emit playerDeath();
@@ -247,6 +255,7 @@ void Network::fetchTCP(QString data)
                         if(list.size()>2) {
                             //qDebug()<<list.at(1);
                             Tank *tmp = sucheTank(list.at(1));
+                            tmp->setSpawned(false);
                             tmp->teleport(-200,-200);
                             emit killMessage(list.at(4)+" killed "+list.at(1));
                         }
@@ -264,8 +273,15 @@ void Network::fetchTCP(QString data)
                         emit capobj(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt());
                     break;
                     case 12: //hit
+                        {
+                            Tank *t = sucheTank(list.at(1));
+                            emit hit(t,list.at(2).toInt());
+                        }
+                    break;
+                    case 13: //spawn other
                         Tank *t = sucheTank(list.at(1));
-                        emit hit(t,list.at(2).toInt());
+                        t->teleport(list.at(2).toInt(),list.at(3).toInt());
+                        t->setSpawned(true);
                     break;
                 }
             }

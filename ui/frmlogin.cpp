@@ -41,7 +41,8 @@ void FrmLogin::on_btnConnect_clicked()
         QTextStream out(&file);
         out << name << endl;
         file.close();
-        emit connectWithData(name,pw);
+        double vol = (double)ui->sliderVolume->value()/100;
+        emit connectWithData(name,pw,vol);
     }
 }
 
@@ -54,4 +55,9 @@ bool FrmLogin::contains(QString data,QString c)
         }
     }
     return ok;
+}
+
+void FrmLogin::on_sliderVolume_sliderMoved(int position)
+{
+    ui->lblVolume->setText(QString::number(position,'f',0)+"%");
 }

@@ -15,6 +15,8 @@ Worker::Worker(Tank *ownTank,QPoint *aim,int width,int height,QObject *parent) :
     network = new Network(this->ownTank,tanks,QHostAddress("127.0.0.1")); //ändern
     shoot = new Shoot(this->ownTank,network,this->aim);
     connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
+    connect(network,SIGNAL(playerDeath()),this,SIGNAL(death()));
+    connect(network,SIGNAL(spawn()),this,SIGNAL(spawn()));
     connect(network,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*)));
     connect(network,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
     connect(network,SIGNAL(newlvlObj(int,int,int,int,int)),this,SLOT(on_newlvlObj(int,int,int,int,int)));
@@ -65,6 +67,7 @@ void Worker::on_conn(bool success)
     if(success) {
         connect(network,SIGNAL(disconnect()),this,SIGNAL(disconnected()));
         ownTank->setName(username);
+        loadMap();
         t_id->start(100);
         emit connSuccess();
     } else {
@@ -113,7 +116,7 @@ void Worker::on_delPlayer(int pos)
 
 void Worker::on_newlvlObj(int x, int y, int w, int h, int type)
 {
-    loadMap();
+    //loadMap();
 }
 
 void Worker::on_delObjs()
@@ -236,6 +239,12 @@ void Worker::on_tmain()
     }
 }
 
+void Worker::spawn(int selected)
+{
+    //ownTank->setSpawned(true);
+    network->send("|0#"+QString::number(selected,'f',0)+"#~");
+}
+
 void Worker::loadMap()
 {
     QFile file(":/map/map.dat");
@@ -257,7 +266,16 @@ void Worker::loadMap()
     for(int i=0;i<lvlObjs.size();i++) {
         emit newlvlObj(lvlObjs[i]);
     }
+    spawns.append(QRect(0,144,144,216)); //links oben
+    spawns.append(QRect(0,1800,144,216)); //links unten
+    spawns.append(QRect(2736,504,144,216)); //rechts oben
+    spawns.append(QRect(2736,1296,144,216)); //rechts unten
     //emit newMap(lvlObjs);
+}
+
+QVector<QRect> Worker::getSpawns()
+{
+    return spawns;
 }
 
 int Worker::getType(int type) {
@@ -276,24 +294,41 @@ int Worker::getDifference(int v1, int v2)
     return diff;
 }
 
+double Worker::getDifference(double v1,double v2)
+{
+    double diff = 0;
+    if(v1>v2) {
+        diff = v1-v2;
+    } else if(v2>v1) {
+        diff = v2-v1;
+    }
+    return diff;
+}
+
 void Worker::keyP(QKeyEvent *e)
 {
+    if(!ownTank->isSpawned()) return;
     move->keyPressEvent(e,lvlObjs);
 }
 
 void Worker::keyR(QKeyEvent *e)
 {
+    if(!ownTank->isSpawned()) return;
     move->keyReleaseEvent(e);
 }
 
 void Worker::mPrs(QMouseEvent *e)
 {
-    shoot->MousePressEvent(e);
+    if(ownTank->isSpawned()) {
+        shoot->MousePressEvent(e);
+    }
 }
 
 void Worker::mRls(QMouseEvent *e)
 {
-    shoot->MouseReleaseEvent(e);
+    if(ownTank->isSpawned()) {
+        shoot->MouseReleaseEvent(e);
+    }
 }
 
 void Worker::notActive()

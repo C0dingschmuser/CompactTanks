@@ -63,6 +63,7 @@ signals:
     void setT(int timer);
     void conn(bool success);
     void hit(Tank *t,int dmg);
+    void spawn();
 public slots:
 };
 

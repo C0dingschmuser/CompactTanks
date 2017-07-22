@@ -20,13 +20,14 @@ public:
 
 private slots:
     void on_btnConnect_clicked();
+    void on_sliderVolume_sliderMoved(int position);
 
 private:
     Ui::FrmLogin *ui;
     bool contains(QString data, QString c);
     QFile file;
 signals:
-    void connectWithData(QString username,QString pw);
+    void connectWithData(QString username,QString pw, double volume);
 };
 
 #endif // FRMLOGIN_H

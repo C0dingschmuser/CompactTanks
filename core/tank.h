@@ -28,8 +28,10 @@ private:
     int coins;
     int spotted;
     int currentID;
+    QPoint deathPoint;
     bool moved;
     bool visible;
+    bool spawned;
     QVector <QPixmap> imgs;
     QPixmap currentImg;
     QPixmap grid;
@@ -53,6 +55,8 @@ public:
     void setSpotted(int spotted);
     void setName(QString name);
     void setID(int id);
+    void setSpawned(bool spawned);
+    void setDeathPoint(QPoint dPoint);
     int getSpeed();
     int getKills();
     int getDeaths();
@@ -64,6 +68,7 @@ public:
     int getSpotted();
     int getDifference(int v1,int v2);
     int getID();
+    QPoint getDeathPoint();
     void setVisible(bool visible);
     void teleport(int x,int y);
     void setAll(int x, int y, int dir, int health, int diff);
@@ -75,6 +80,7 @@ public:
     void drawTank(QPainter &p, Tank *own, bool barrel=false);
     void move();
     bool getVisible();
+    bool isSpawned();
     QString getName();
     QString toString();
     QPixmap getIMG();

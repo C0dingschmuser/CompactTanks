@@ -10,6 +10,7 @@
 		<file>images/area/obj0.png</file>
 		<file>images/area/obj1.png</file>
 		<file>images/area/obj2.png</file>
+		<file>images/area/obj2g.png</file>
 		<file>images/area/obj3.png</file>
 		<file>images/area/obj4.png</file>
 		<file>images/area/obj5.png</file>
@@ -24,6 +25,8 @@
 		<file>images/area/obj14.png</file>
 		<file>images/area/obj15.png</file>
 		<file>images/area/minimap.png</file>
+		<file>images/area/sSpawn.png</file>
+		<file>images/area/sCap.png</file>
         <file>images/tank/cursor.png</file>
 		<file>map/map.dat</file>
 		<file>sounds/shot.wav</file>

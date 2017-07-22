@@ -115,7 +115,7 @@
    <property name="geometry">
     <rect>
      <x>210</x>
-     <y>90</y>
+     <y>70</y>
      <width>171</width>
      <height>81</height>
     </rect>
@@ -183,6 +183,61 @@
    </property>
    <property name="text">
     <string>Verbinden</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>160</y>
+     <width>131</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Pixeled</family>
+    </font>
+   </property>
+   <property name="text">
+    <string>Lautstärke:</string>
+   </property>
+  </widget>
+  <widget class="QSlider" name="sliderVolume">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>180</y>
+     <width>131</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="maximum">
+    <number>100</number>
+   </property>
+   <property name="value">
+    <number>10</number>
+   </property>
+   <property name="orientation">
+    <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lblVolume">
+   <property name="geometry">
+    <rect>
+     <x>150</x>
+     <y>175</y>
+     <width>131</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Pixeled</family>
+    </font>
+   </property>
+   <property name="text">
+    <string>10%</string>
    </property>
   </widget>
  </widget>

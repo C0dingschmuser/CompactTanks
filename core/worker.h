@@ -44,6 +44,7 @@ private:
     QVector <Tank*> tanks;
     QVector <Terrain*> lvlObjs;
     QVector <Bullet*> bullets;
+    QVector <QRect> spawns;
     Movement *move;
     Network *network;
     Shoot *shoot;
@@ -54,7 +55,6 @@ private:
     int timer;
     void loadMap();
     int getType(int type);
-    int getDifference(int v1,int v2);
 public:
     explicit Worker(Tank *ownTank,QPoint *aim, int width, int height, QObject *parent = 0);
     ~Worker();
@@ -65,6 +65,10 @@ public:
     void notActive();
     void setViewRect(QRect viewRect);
     void connectToServer(QString username,QString password);
+    void spawn(int selected);
+    int getDifference(int v1,int v2);
+    double getDifference(double v1, double v2);
+    QVector<QRect> getSpawns();
 signals:
     void newPlayer(Tank *t);
     void delPlayer(int pos);
@@ -85,6 +89,8 @@ signals:
     void wrongData();
     void shot();
     void hit(Tank *t, int dmg);
+    void spawn();
+    void death();
 };
 
 #endif // WORKER_H

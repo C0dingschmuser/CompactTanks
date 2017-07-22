@@ -17,6 +17,7 @@ Tank::Tank(QRect rect, QString name, int team)
     deaths = 0;
     moved = true;
     visible = true;
+    spawned = false;
     viewRange = 120;
     health = 100;
     spotted = 1;
@@ -45,6 +46,11 @@ bool Tank::getMoved()
     return this->moved;
 }
 
+bool Tank::isSpawned()
+{
+    return spawned;
+}
+
 QRect Tank::getRect()
 {
     return this->rect;
@@ -53,6 +59,11 @@ QRect Tank::getRect()
 void Tank::setVisible(bool visible)
 {
     this->visible = visible;
+}
+
+void Tank::setSpawned(bool spawned)
+{
+    this->spawned = spawned;
 }
 
 void Tank::w(bool a)
@@ -101,6 +112,11 @@ void Tank::death()
     deaths++;
 }
 
+void Tank::setDeathPoint(QPoint dPoint)
+{
+    deathPoint = dPoint;
+}
+
 void Tank::setDK(int kills, int deaths)
 {
     this->kills = kills;
@@ -127,9 +143,14 @@ int Tank::getID()
     return currentID;
 }
 
+QPoint Tank::getDeathPoint()
+{
+    return deathPoint;
+}
+
 void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
 {
-    if(name==NULL) return;
+    if(name==NULL||(!spawned&&this!=own)) return;
     QColor rcolor;
     QRect r;
     int xt = rect.x();
@@ -143,30 +164,6 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
         break;
         case 1: //grün
             rcolor = QColor(0,255,0);
-        break;
-        case 2:
-            rcolor = QColor(92,163,99);
-        break;
-        case 3:
-            rcolor = QColor(157,139,126);
-        break;
-        case 4:
-            rcolor = QColor(31,240,127);
-        break;
-        case 5:
-            rcolor = QColor(200,92,112);
-        break;
-        case 6:
-            rcolor = QColor(132,240,109);
-        break;
-        case 7:
-            rcolor = QColor(50,192,122);
-        break;
-        case 8:
-            rcolor = QColor(14,99,128);
-        break;
-        case 9:
-            rcolor = QColor(255,165,0);
         break;
     }
     switch(dir) {

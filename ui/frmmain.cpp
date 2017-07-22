@@ -21,22 +21,32 @@ FrmMain::FrmMain(QWidget *parent) :
     height = 2160;
     scaleX = 1.0;
     scaleY = 1.0;
+    selected = -1;
+    transX = 468;
+    transY = 288;
     isConnected=true;
     fullscreen = false;
     aim = new QPoint();
     mpos = new QPoint();
     ownTank = new Tank(QRect(-200,-200,40,40),"");
     worker = new Worker(ownTank,aim,width,height);
+    t_spawn = new QTimer();
+    t_death = new QTimer();
     t_draw = new QTimer();
     t_message = new QTimer();
     t_killMessage = new QTimer();
     t_hit = new QTimer();
+    t_select = new QTimer();
     t_draw->setTimerType(Qt::PreciseTimer);
     sound = new Sound();
+    connect(t_death,SIGNAL(timeout()),this,SLOT(on_tdeath()));
+    connect(t_select,SIGNAL(timeout()),this,SLOT(on_tselect()));
     connect(t_draw,SIGNAL(timeout()),this,SLOT(on_tdraw()));
     connect(t_message,SIGNAL(timeout()),this,SLOT(on_tmessage()));
     connect(t_killMessage,SIGNAL(timeout()),this,SLOT(on_tkillMessage()));
     connect(t_hit,SIGNAL(timeout()),this,SLOT(on_thit()));
+    connect(t_spawn,SIGNAL(timeout()),this,SLOT(on_tspawn()));
+    connect(worker,SIGNAL(spawn()),this,SLOT(on_spawn()));
     connect(worker,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(worker,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*))); //bei neuem spieler aufrufen
     connect(worker,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
@@ -58,16 +68,19 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(worker,SIGNAL(wrongData()),this,SLOT(on_wrongData()));
     connect(worker,SIGNAL(shot()),this,SLOT(on_shot()));
     connect(worker,SIGNAL(hit(Tank*,int)),this,SLOT(on_hit(Tank*,int)));
-    connect(login,SIGNAL(connectWithData(QString,QString)),this,SLOT(on_connectData(QString,QString)));
+    connect(worker,SIGNAL(death()),this,SLOT(on_death()));
+    connect(login,SIGNAL(connectWithData(QString,QString,double)),this,SLOT(on_connectData(QString,QString,double)));
     this->setCursor(QPixmap(":/images/tank/cursor.png"));
-    sound->setVolume(0.1);
     tree = QPixmap(":/images/area/obj0.png");
     grass = QPixmap(":/images/area/obj9.png");
     minimap = QPixmap(":/images/area/minimap.png");
+    grid = QPixmap(":/images/area/obj2g.png");
+    sSpawn = QPixmap(":/images/area/sSpawn.png");
+    sCap = QPixmap(":/images/area/sCap.png");
     QFontDatabase d;
     d.addApplicationFont(":/font/Pixeled.ttf");
     font = d.font("Pixeled","Normal",12);
-    t_draw->start(5);
+    t_draw->start(10);
     t_hit->start(10);
     //t_bullet->start(5);
 }
@@ -91,8 +104,9 @@ FrmMain::~FrmMain()
     QApplication::exit();
 }
 
-void FrmMain::on_connectData(QString username, QString pw)
+void FrmMain::on_connectData(QString username, QString pw, double volume)
 {
+    sound->setVolume(volume);
     worker->connectToServer(username,pw);
 }
 
@@ -104,6 +118,8 @@ void FrmMain::on_connSuccess()
     workerThread->start();
     initializeGL();
     login->hide();
+    spawns = worker->getSpawns();
+    t_select->start(50);
     this->show();
 }
 
@@ -134,6 +150,118 @@ void FrmMain::on_hit(Tank *t, int dmg)
 {
     Q_UNUSED(t);
     animations.append(Animation("-"+QString::number(dmg,'f',0),aim->x()-5,aim->y()-15));
+}
+
+void FrmMain::on_tselect()
+{
+    if(ownTank->isSpawned()) return;
+    selected = -1;
+    int max,min;
+    if(ownTank->getTeam()==1) {
+        min = 0;
+        max = 2;
+    } else {
+        min = 2;
+        max = 4;
+    }
+    for(int i=min;i<max;i++) {
+        if(spawns[i].intersects(QRect(aim->x(),aim->y(),1,1))) {
+            selected = i;
+            break;
+        }
+    }
+    if(selected==-1) {
+        for(int i=0;i<capObjs.size();i++) {
+            if(lvlObjs[capObjs[i]]->getRect().intersects(QRect(aim->x(),aim->y(),1,1))) {
+                if(lvlObjs[capObjs[i]]->getOwner()==ownTank->getTeam()&&
+                        lvlObjs[capObjs[i]]->getAmount()==100) {
+                    selected = 100+capObjs[i];
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void FrmMain::on_tspawn()
+{
+    sAstep++;
+    if(sAstep>=200) {
+        t_spawn->stop();
+        ownTank->setSpawned(true);
+        transX = (ownTank->getRect().x()-940)*-1;
+        transY = (ownTank->getRect().y()-520)*-1;
+    } else {
+        //transX = (ownTank->getRect().x()-940)*-1;
+        //transY = (ownTank->getRect().y()-520)*-1;
+        viewRect = QRect(-469-504,-288-504,width+936+576+360,height+576+504);
+        //468,288
+        double diffX = (double)worker->getDifference((double)468,(double)(ownTank->getRect().x()-940)*-1)/200;
+        double diffY = (double)worker->getDifference((double)288,(double)(ownTank->getRect().y()-520)*-1)/200;
+        if(ownTank->getRect().x()>468) {
+            transX-=diffX;
+        } else {
+            transX+=diffX;
+        }
+        if(ownTank->getRect().y()>288) {
+            transY-=diffY;
+        } else {
+            transY+=diffY;
+        }
+        diffX = (double)worker->getDifference(1920,width+936)/200;
+        diffY = (double)worker->getDifference(1080,height+576)/200;
+        scaleX = double(this->geometry().width()/(double(width+936)-diffX*sAstep));
+        scaleY = double(this->geometry().height()/(double(height+576)-diffY*sAstep));
+    }
+}
+
+void FrmMain::on_tdeath()
+{
+    sAstep++;
+    if(sAstep>=200) {
+        t_death->stop();
+        //ownTank->setSpawned(true);
+        transX = 468;
+        transY = 288;
+    } else {
+        //transX = (ownTank->getRect().x()-940)*-1;
+        //transY = (ownTank->getRect().y()-520)*-1;
+        viewRect = QRect(-468-504,-288-504,width+936+576+360,height+576+504);
+        //468,288
+        double diffX = (double)worker->getDifference((double)468,(double)(ownTank->getDeathPoint().x()-940)*-1)/200;
+        double diffY = (double)worker->getDifference((double)288,(double)(ownTank->getDeathPoint().y()-520)*-1)/200;
+        if(468>ownTank->getDeathPoint().x()) {
+            transX-=diffX;
+        } else {
+            transX+=diffX;
+        }
+        if(288>ownTank->getDeathPoint().y()) {
+            transY-=diffY;
+        } else {
+            transY+=diffY;
+        }
+
+        diffX = (double)worker->getDifference(1920,width+936)/(double)200;
+        diffY = (double)worker->getDifference(1080,height+576)/(double)200;
+        scaleX = double(this->geometry().width()/(double(1920)+diffX*sAstep));
+        scaleY = double(this->geometry().height()/(double(1080)+diffY*sAstep));
+    }
+}
+
+void FrmMain::on_spawn()
+{
+    sAstep = 0;
+    t_spawn->start(10);
+}
+
+void FrmMain::on_death()
+{
+    sAstep = 0;
+    //scaleX = double(this->geometry().width()/double(width+936));
+    //scaleY = double(this->geometry().height()/double(height+576));
+    t_death->start(10);
+    //transX = 468;
+    //transY = 288;
 }
 
 void FrmMain::on_thit()
@@ -304,24 +432,43 @@ void FrmMain::paintEvent(QPaintEvent *e)
     /*qDebug()<<"--------";
     qDebug()<<ownTank->getRect().x();
     qDebug()<<ownTank->getRect().y();*/
-    scaleX = double(this->geometry().width()/double(1920));
-    scaleY = double(this->geometry().height()/double(1080));
     //qDebug()<<this->geometry().width();
-    viewRect = QRect(ownTank->getRect().center().x()-960,
-                           ownTank->getRect().center().y()-540,2100,1250);
+    if(ownTank->isSpawned()) {
+        viewRect = QRect(ownTank->getRect().center().x()-960,
+                               ownTank->getRect().center().y()-540,2100,1250);
+        scaleX = double(this->geometry().width()/double(1920));
+        scaleY = double(this->geometry().height()/double(1080));
+    } else {
+        if(!t_spawn->isActive()&&!t_death->isActive()) {
+            viewRect = QRect(-468,-288,width+936,height+576);
+            scaleX = double(this->geometry().width()/double(width+936));
+            scaleY = double(this->geometry().height()/double(height+576));
+        }
+    }
     worker->setViewRect(viewRect);
     QPainter painter(this);
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
     painter.scale(scaleX,scaleY);
-    painter.translate((ownTank->getRect().x()-940)*-1,(ownTank->getRect().y()-520)*-1);
+    if(ownTank->isSpawned()) {
+        transX = (ownTank->getRect().x()-940)*-1;
+        transY = (ownTank->getRect().y()-520)*-1;
+        painter.translate(transX,transY);
+    } else {
+        painter.translate(transX,transY);
+    }
     QPoint m;
     m.setX(this->mapFromGlobal(QCursor::pos()).x()/scaleX);
     m.setY(this->mapFromGlobal(QCursor::pos()).y()/scaleY);
     //m = painter.transform().map(m);
     mpos->setX(m.x());
     mpos->setY(m.y());
-    this->aim->setX(ownTank->getRect().x()+mpos->x()-940);
-    this->aim->setY(ownTank->getRect().y()+mpos->y()-520);
+    if(ownTank->isSpawned()) {
+        this->aim->setX(ownTank->getRect().x()+mpos->x()-940);
+        this->aim->setY(ownTank->getRect().y()+mpos->y()-520);
+    } else {
+        this->aim->setX(mpos->x()-transX);
+        this->aim->setY(mpos->y()-transY);
+    }
     //QFont f = QFont("Fixedsys");
     //painter.setFont(f);
     painter.setFont(font);
@@ -378,7 +525,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
             }
         }
     }
-    ownTank->drawTank(painter,ownTank,true);
+    if(ownTank->isSpawned()||t_spawn->isActive()) ownTank->drawTank(painter,ownTank,true);
     for(int i=0;i<tanks.size();i++) {
         if(tanks[i]->getRect().intersects(viewRect)&&tanks[i]->getRect().x()>0) {
             tanks[i]->drawTank(painter,ownTank,true);
@@ -429,65 +576,91 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.scale(scaleX,scaleY);
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::black);
-    int health = ownTank->getHealth();
-    int offset = 400;
-    painter.drawRect(18,998,offset+4,2);
-    painter.drawRect(18,998+52,offset+4,2);
-    painter.drawRect(18,998,2,52);
-    painter.drawRect(18+offset+2,998,2,52);
-    //painter.drawRect(18,998,404,54);
-    if(health>80) {
-        painter.setBrush(QColor(34,177,76));
-    } else if(health>60) {
-        painter.setBrush(QColor(181,230,29));
-    } else if(health>40) {
-        painter.setBrush(QColor(255,242,0));
-    } else if(health>20) {
-        painter.setBrush(QColor(223,89,0));
-    } else if(health>0) {
-        painter.setBrush(QColor(237,28,36));
-    }
-    painter.drawRect(20,1000,400*((double)health/100),50);
-    f = painter.font();
-    f.setPointSize(25);
-    painter.setFont(f);
-    painter.setPen(Qt::black);
-    painter.drawText(190,1045,QString::number(health));
-    painter.setPen(Qt::NoPen);
-    int x = 1920-1920*0.2;
-    int y = 1080-1080*0.25;
-    int w = 1920*0.2;
-    int h = 1080*0.25;
-    painter.drawPixmap(x,y,1920*0.2,1080*0.25,minimap);
-    painter.setBrush(Qt::black);
-    painter.drawRect(x-2,y-2,w+2,2);
-    painter.drawRect(x-2,y-2,2,h+2);
-    painter.translate(x,y);
-    painter.scale(1920*0.2/width,1080*0.25/height);
-    for(int i=0;i<capObjs.size();i++) {
-        int num = capObjs[i];
-        if(lvlObjs[num]->getOwner()==0) {
-            painter.setBrush(Qt::white);
-        } else if(lvlObjs[num]->getOwner()==ownTank->getTeam()) {
-            painter.setBrush(QColor(0,255,0));
-        } else {
-            painter.setBrush(QColor(255,0,0));
+    if(ownTank->isSpawned()) {
+        int health = ownTank->getHealth();
+        int offset = 400;
+        painter.drawRect(18,998,offset+4,2);
+        painter.drawRect(18,998+52,offset+4,2);
+        painter.drawRect(18,998,2,52);
+        painter.drawRect(18+offset+2,998,2,52);
+        //painter.drawRect(18,998,404,54);
+        if(health>80) {
+            painter.setBrush(QColor(34,177,76));
+        } else if(health>60) {
+            painter.setBrush(QColor(181,230,29));
+        } else if(health>40) {
+            painter.setBrush(QColor(255,242,0));
+        } else if(health>20) {
+            painter.setBrush(QColor(223,89,0));
+        } else if(health>0) {
+            painter.setBrush(QColor(237,28,36));
         }
-        painter.drawRect(lvlObjs[num]->getRect());
-    }
-    painter.setBrush(Qt::blue);
-    painter.drawRect(ownTank->getRect());
-    for(int i=0;i<tanks.size();i++) {
-        if(tanks[i]->getTeam()==ownTank->getTeam()) {
-            painter.setBrush(QColor(0,255,0));
-        } else {
-            painter.setBrush(QColor(255,0,0));
+        painter.drawRect(20,1000,400*((double)health/100),50);
+        f = painter.font();
+        f.setPointSize(25);
+        painter.setFont(f);
+        painter.setPen(Qt::black);
+        painter.drawText(190,1045,QString::number(health));
+        painter.setPen(Qt::NoPen);
+        //Minimap start
+        int x = 1920-1920*0.2;
+        int y = 1080-1080*0.25;
+        int w = 1920*0.2;
+        int h = 1080*0.25;
+        painter.drawPixmap(x,y,1920*0.2,1080*0.25,minimap);
+        painter.setBrush(Qt::black);
+        painter.drawRect(x-2,y-2,w+2,2);
+        painter.drawRect(x-2,y-2,2,h+2);
+        painter.translate(x,y);
+        painter.scale(1920*0.2/width,1080*0.25/height);
+        for(int i=0;i<capObjs.size();i++) {
+            int num = capObjs[i];
+            if(lvlObjs[num]->getOwner()==0) {
+                painter.setBrush(Qt::white);
+            } else if(lvlObjs[num]->getOwner()==ownTank->getTeam()) {
+                painter.setBrush(QColor(0,255,0));
+            } else {
+                painter.setBrush(QColor(255,0,0));
+            }
+            painter.drawRect(lvlObjs[num]->getRect());
+            if(lvlObjs[num]->getAmount()<100) {
+                painter.drawPixmap(lvlObjs[num]->getRect(),grid);
+            }
         }
-        QRect rect = tanks[i]->getRect();
-        if(rect.x()!=-200) {
-            painter.drawRect(rect);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(Qt::blue);
+        painter.drawRect(ownTank->getRect());
+        for(int i=0;i<tanks.size();i++) {
+            if(tanks[i]->getTeam()==ownTank->getTeam()) {
+                painter.setBrush(QColor(0,255,0));
+            } else {
+                painter.setBrush(QColor(255,0,0));
+            }
+            QRect rect = tanks[i]->getRect();
+            if(rect.x()!=-200) {
+                painter.drawRect(rect);
+            }
         }
+        //minimap end
+    } else {
+        if(t_spawn->isActive()||t_death->isActive()) return;
+        painter.translate(transX,transY);
+        if(selected<100&&selected>-1) {
+            painter.drawPixmap(spawns[selected].x()-14,spawns[selected].y()-21,172,259,sSpawn);
+        } else if(selected>=100) {
+            int num = selected-100;
+            painter.drawPixmap(lvlObjs[num]->getRect().x()-7,lvlObjs[num]->getRect().y()-7,86,86,sCap);
+        }
+        painter.resetTransform();
+        painter.scale(scaleX,scaleY);
+        QFont f = painter.font();
+        f.setPointSize(128);
+        painter.setFont(f);
+        painter.setPen(Qt::black);
+        painter.drawText(220,220,"SELECT SPAWN LOCATION");
     }
+
+
     painter.resetTransform();
     painter.scale(scaleX,scaleY);
     //painter.drawRect(0,0,1920,1110);
@@ -521,11 +694,6 @@ void FrmMain::paintEvent(QPaintEvent *e)
 
 }
 
-void FrmMain::on_death()
-{
-
-}
-
 void FrmMain::leaveEvent(QEvent *event)
 {
     Q_UNUSED(event);
@@ -544,6 +712,13 @@ void FrmMain::keyReleaseEvent(QKeyEvent *e)
 
 void FrmMain::mousePressEvent(QMouseEvent *e)
 {
+    if(!ownTank->isSpawned()) {
+        if(e->button()==Qt::LeftButton) {
+            if(selected>-1) {
+                worker->spawn(selected);
+            }
+        }
+    }
     worker->mPrs(e);
 }
 

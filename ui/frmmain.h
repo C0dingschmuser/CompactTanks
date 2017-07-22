@@ -31,6 +31,7 @@ public:
     explicit FrmMain(QWidget *parent = 0);
     ~FrmMain();
 private slots:
+    void on_tselect();
     void on_tdraw();
     void on_newPlayer(Tank *t);
     void on_delPlayer(int pos);
@@ -39,7 +40,6 @@ private slots:
     void on_delBullet(int pos);
     void on_delObjs();
     void on_disconnect();
-    void on_death();
     void on_message(QString message, int length);
     void on_tmessage();
     void on_killMessage(QString message);
@@ -50,12 +50,16 @@ private slots:
     void on_tab();
     void on_connFail();
     void on_newMap(QVector<Terrain*> lvlObjs);
-    void on_connectData(QString username,QString pw);
+    void on_connectData(QString username,QString pw, double volume);
     void on_connSuccess();
     void on_wrongData();
     void on_shot();
     void on_hit(Tank *t, int dmg);
     void on_thit();
+    void on_spawn();
+    void on_tspawn();
+    void on_death();
+    void on_tdeath();
 
 private:
     Ui::FrmMain *ui;
@@ -70,6 +74,9 @@ private:
     QTimer *t_message;
     QTimer *t_killMessage;
     QTimer *t_hit;
+    QTimer *t_select;
+    QTimer *t_spawn;
+    QTimer *t_death;
     QPoint *aim;
     QPoint *mpos;
     QRect viewRect;
@@ -78,6 +85,9 @@ private:
     int messageLength;
     int width;
     int height;
+    int sAstep;
+    double transX;
+    double transY;
     double scaleX;
     double scaleY;
     bool bmessage;
@@ -87,9 +97,14 @@ private:
     bool isConnected;
     QVector <QString> messageText;
     QVector <QString> killMessageText;
+    QVector <QRect> spawns;
+    int selected;
     QPixmap tree;
     QPixmap grass;
     QPixmap minimap;
+    QPixmap grid;
+    QPixmap sSpawn;
+    QPixmap sCap;
     bool contains(QString data, QString c);
     FrmLogin *login;
 protected:
