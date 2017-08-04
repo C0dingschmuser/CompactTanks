@@ -41,6 +41,7 @@ public:
     void send(QString data);
     void sendPos();
     void setTimer(int timer);
+    void stop();
     int getDistance(QPoint p1,QPoint p2);
 
 signals:
@@ -64,6 +65,10 @@ signals:
     void conn(bool success);
     void hit(Tank *t,int dmg);
     void spawn();
+    void stats(int id, int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel);
+    void spawn(Tank *t);
+    void otherDeath(QRect rect);
+    void chat(QString message);
 public slots:
 };
 

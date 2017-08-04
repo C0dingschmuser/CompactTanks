@@ -17,6 +17,8 @@ class FrmLogin : public QWidget
 public:
     explicit FrmLogin(QWidget *parent = 0);
     ~FrmLogin();
+    void fail();
+    void reset();
 
 private slots:
     void on_btnConnect_clicked();

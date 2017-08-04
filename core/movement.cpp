@@ -41,7 +41,7 @@ void Movement::on_tmoveW() {
         if(r.y()>=0+s) {
             bool ok=false;
             for(int i=0;i<lvlObjs.size();i++) {
-                if(QRect(r.x(),r.y()-s,40,40).intersects(lvlObjs[i]->getRect())) {
+                if(QRect(r.x(),r.y()-s,r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
                     if(!lvlObjs[i]->getType()) {
                         ok = true;
                         break;
@@ -63,7 +63,7 @@ void Movement::on_tmoveA() {
         if(r.x()>=0+s) {
             bool ok=false;
             for(int i=0;i<lvlObjs.size();i++) {
-                if(QRect(r.x()-s,r.y(),40,40).intersects(lvlObjs[i]->getRect())) {
+                if(QRect(r.x()-s,r.y(),r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
                     if(!lvlObjs[i]->getType()) {
                         ok = true;
                         break;
@@ -85,7 +85,7 @@ void Movement::on_tmoveS() {
         if(r.bottom()<=height-s*2) {
             bool ok=false;
             for(int i=0;i<lvlObjs.size();i++) {
-                if(QRect(r.x(),r.y()+s,40,40).intersects(lvlObjs[i]->getRect())) {
+                if(QRect(r.x(),r.y()+s,r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
                     if(!lvlObjs[i]->getType()) {
                         ok = true;
                         break;
@@ -107,7 +107,7 @@ void Movement::on_tmoveD() {
         if(r.right()<=width-s*2) {
             bool ok=false;
             for(int i=0;i<lvlObjs.size();i++) {
-                if(QRect(r.x()+s,r.y(),40,40).intersects(lvlObjs[i]->getRect())) {
+                if(QRect(r.x()+s,r.y(),r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
                     if(!lvlObjs[i]->getType()) {
                         ok = true;
                         break;
@@ -127,24 +127,25 @@ void Movement::keyPressEvent(QKeyEvent *e, QVector<Terrain *> lvlObjs)
     this->lvlObjs = lvlObjs;
     QRect r = ownTank->getRect();
     int s = ownTank->getSpeed();
+    int t = ownTank->getTimer();
     if(e->key()==Qt::Key_W) {
         if(r.y()>=0+s) {
-            t_moveW->start(8);
+            t_moveW->start(t);
         }
     }
     if(e->key()==Qt::Key_A) {
         if(r.x()>=0+s) {
-            t_moveA->start(8);
+            t_moveA->start(t);
         }
     }
     if(e->key()==Qt::Key_S) {
         if(r.bottom()<=height-s) {
-            t_moveS->start(8);
+            t_moveS->start(t);
         }
     }
     if(e->key()==Qt::Key_D) {
         if(r.right()<=width-s) {
-            t_moveD->start(8);
+            t_moveD->start(t);
         }
     }
     if(e->key()==Qt::Key_Tab) {

@@ -1,10 +1,21 @@
 <RCC>
     <qresource prefix="/">
 		<file>font/Pixeled.ttf</file>
-        <file>images/tank/tank1.png</file>
+		<file>images/tank/tank1.png</file>
         <file>images/tank/tank2.png</file>
-        <file>images/tank/tank3.png</file>
-        <file>images/tank/tank4.png</file>
+		<file>images/tank/tank3.png</file>
+        <file>images/tank/1/tank1.png</file>
+        <file>images/tank/1/tank2.png</file>
+        <file>images/tank/1/tank3.png</file>
+        <file>images/tank/1/tank4.png</file>
+		<file>images/tank/2/tank1.png</file>
+        <file>images/tank/2/tank2.png</file>
+        <file>images/tank/2/tank3.png</file>
+        <file>images/tank/2/tank4.png</file>
+		<file>images/tank/3/tank1.png</file>
+        <file>images/tank/3/tank2.png</file>
+        <file>images/tank/3/tank3.png</file>
+        <file>images/tank/3/tank4.png</file>
 		<file>images/area/grid.png</file>
 		<file>images/area/grid2.png</file>
 		<file>images/area/obj0.png</file>
@@ -24,9 +35,76 @@
 		<file>images/area/obj13.png</file>
 		<file>images/area/obj14.png</file>
 		<file>images/area/obj15.png</file>
-		<file>images/area/minimap.png</file>
-		<file>images/area/sSpawn.png</file>
-		<file>images/area/sCap.png</file>
+		<file>images/animation/explosion/0.png</file>
+		<file>images/animation/explosion/1.png</file>
+		<file>images/animation/explosion/2.png</file>
+		<file>images/animation/explosion/3.png</file>
+		<file>images/animation/explosion/4.png</file>
+		<file>images/animation/explosion/5.png</file>
+		<file>images/animation/explosion/6.png</file>
+		<file>images/animation/explosion/7.png</file>
+		<file>images/animation/explosion/8.png</file>
+		<file>images/animation/explosion/9.png</file>
+		<file>images/animation/explosion/10.png</file>
+		<file>images/animation/explosion/11.png</file>
+		<file>images/animation/explosion/12.png</file>
+		<file>images/animation/explosion/13.png</file>
+		<file>images/animation/explosion/14.png</file>
+		<file>images/animation/explosion/15.png</file>
+		<file>images/animation/explosion/16.png</file>
+		<file>images/animation/explosion/17.png</file>
+		<file>images/animation/explosion/18.png</file>
+		<file>images/animation/explosion/19.png</file>
+		<file>images/animation/explosion/20.png</file>
+		<file>images/animation/explosion/21.png</file>
+		<file>images/animation/explosion/22.png</file>
+		<file>images/animation/explosion/23.png</file>
+		<file>images/animation/explosion/24.png</file>
+		<file>images/animation/explosion/25.png</file>
+		<file>images/animation/explosion/26.png</file>
+		<file>images/animation/explosion/27.png</file>
+		<file>images/animation/explosion/28.png</file>
+		<file>images/animation/explosion/29.png</file>
+		<file>images/animation/explosion/30.png</file>
+		<file>images/animation/explosion/41.png</file>
+		<file>images/animation/explosion/42.png</file>
+		<file>images/animation/explosion/43.png</file>
+		<file>images/animation/explosion/44.png</file>
+		<file>images/animation/explosion/45.png</file>
+		<file>images/animation/explosion/46.png</file>
+		<file>images/animation/explosion/47.png</file>
+		<file>images/animation/explosion/48.png</file>
+		<file>images/animation/explosion/49.png</file>
+		<file>images/animation/explosion/50.png</file>
+		<file>images/animation/explosion/51.png</file>
+		<file>images/animation/explosion/52.png</file>
+		<file>images/animation/explosion/53.png</file>
+		<file>images/animation/explosion/54.png</file>
+		<file>images/animation/explosion/55.png</file>
+		<file>images/animation/explosion/56.png</file>
+		<file>images/animation/explosion/57.png</file>
+		<file>images/animation/explosion/58.png</file>
+		<file>images/animation/explosion/59.png</file>
+		<file>images/animation/explosion/60.png</file>
+		<file>images/animation/explosion/61.png</file>
+		<file>images/animation/explosion/62.png</file>
+		<file>images/animation/explosion/63.png</file>
+		<file>images/animation/explosion/64.png</file>
+		<file>images/animation/explosion/65.png</file>
+		<file>images/animation/explosion/66.png</file>
+		<file>images/animation/explosion/67.png</file>
+		<file>images/animation/explosion/68.png</file>
+		<file>images/animation/explosion/69.png</file>
+		<file>images/animation/explosion/70.png</file>
+		<file>images/animation/explosion/71.png</file>
+		<file>images/animation/explosion/72.png</file>
+		<file>images/animation/explosion/73.png</file>
+		<file>images/gui/minimap.png</file>
+		<file>images/gui/sSpawn.png</file>
+		<file>images/gui/sCap.png</file>
+		<file>images/gui/0.png</file>
+		<file>images/gui/1.png</file>
+		<file>images/gui/tanks.png</file>
         <file>images/tank/cursor.png</file>
 		<file>map/map.dat</file>
 		<file>sounds/shot.wav</file>

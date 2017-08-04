@@ -9,23 +9,26 @@ Tank::Tank(QRect rect, QString name, int team)
 {
     this->rect = rect;
     this->name = name;
-    speed = 2;
+    speed = 1;
     dir = 1;
     this->currentID = 0;
     angle = 0;
     kills = 0;
     deaths = 0;
+    timer = 10;
     moved = true;
     visible = true;
     spawned = false;
     viewRange = 120;
     health = 100;
+    hidden = false;
     spotted = 1;
     coins = 0;
+    type = 0;
     grid = QPixmap(":/images/area/grid2.png");
     this->team = team;
     for(int i=0;i<4;i++) {
-        QPixmap p = QPixmap(":/images/tank/tank"+QString::number(i+1,'f',0)+".png");
+        QPixmap p = QPixmap(":/images/tank/"+QString::number(type,'f',0)+"/tank"+QString::number(i+1,'f',0)+".png");
         imgs.append(p);
     }
     currentImg = imgs[0];
@@ -49,6 +52,11 @@ bool Tank::getMoved()
 bool Tank::isSpawned()
 {
     return spawned;
+}
+
+bool Tank::isHidden()
+{
+    return hidden;
 }
 
 QRect Tank::getRect()
@@ -133,6 +141,78 @@ void Tank::setID(int id)
     this->currentID = id;
 }
 
+void Tank::setType(int type)
+{
+    if(this->type==type) return;
+    this->type = type;
+    imgs.resize(0);
+    for(int i=0;i<4;i++) {
+        QPixmap p = QPixmap(":/images/tank/"+QString::number(type,'f',0)+"/tank"+QString::number(i+1,'f',0)+".png");
+        imgs.append(p);
+    }
+    currentImg = imgs[0];
+}
+
+void Tank::setData(int type, int speed, int health, int bvel, int reload, int width, int height, int barrelLength, int treeColl)
+{
+    setType(type);
+    this->timer = ((double)speed/10)/2;
+    this->health = health;
+    this->maxHealth = health;
+    this->bvel = bvel;
+    this->reload = reload;
+    this->width = width;
+    this->height = height;
+    this->barrelLength = barrelLength;
+    this->treeColl = treeColl;
+    rect = QRect(rect.x(),rect.y(),width,height);
+}
+
+void Tank::setDamage(int dmg)
+{
+    this->damage = dmg;
+}
+
+void Tank::setHidden(bool hidden)
+{
+    this->hidden = hidden;
+}
+
+int Tank::getDamage()
+{
+    return damage;
+}
+
+int Tank::getTimer()
+{
+    return timer;
+}
+
+int Tank::getType()
+{
+    return type;
+}
+
+int Tank::getReload()
+{
+    return this->reload;
+}
+
+int Tank::getBvel()
+{
+    return this->bvel;
+}
+
+int Tank::getWidth()
+{
+    return width;
+}
+
+int Tank::getHeight()
+{
+    return height;
+}
+
 int Tank::getSpotted()
 {
     return this->spotted;
@@ -146,6 +226,37 @@ int Tank::getID()
 QPoint Tank::getDeathPoint()
 {
     return deathPoint;
+}
+
+QPoint Tank::getShootPoint()
+{
+    QPoint p;
+    switch(type) {
+        case 1:
+            p = QPoint(rect.center().x(),rect.center().y()+2);
+        break;
+        case 2:
+            switch(dir) {
+                case 1:
+                    p = QPoint(rect.center().x(),rect.center().y()+10);
+                break;
+                case 2:
+                    p = QPoint(rect.center().x()+10,rect.center().y()+2);
+                break;
+                case 3:
+                    p = QPoint(rect.center().x(),rect.center().y()-10);
+                break;
+                case 4:
+                    p = QPoint(rect.center().x()-10,rect.center().y()+2);
+                break;
+            }
+
+        break;
+        case 3:
+            p = QPoint(rect.center().x(),rect.center().y()+2);
+        break;
+    }
+    return p;
 }
 
 void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
@@ -182,8 +293,8 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     }
     p.setBrush(rcolor);
     p.setPen(Qt::NoPen);
-    p.drawRect(r);
-    p.drawPixmap(xt,yt,40,40,imgs[dir-1]);
+    //p.drawRect(r);
+    p.drawPixmap(xt,yt,rect.width(),rect.height(),imgs[dir-1]);
     QFont f = p.font();
     f.setPointSize(6);
     p.setFont(f);
@@ -192,25 +303,25 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     p.setPen(Qt::NoPen);
     p.drawRect(xt,yt-br.height()*0.7-2,br.width(),br.height()*0.7);
     p.setPen(Qt::NoPen);
-    if(health>80) {
+    if(health>maxHealth*0.8) {
         p.setBrush(QColor(34,177,76));
-    } else if(health>60) {
+    } else if(health>maxHealth*0.6) {
         p.setBrush(QColor(181,230,29));
-    } else if(health>40) {
+    } else if(health>maxHealth*0.4) {
         p.setBrush(QColor(255,242,0));
-    } else if(health>20) {
+    } else if(health>maxHealth*0.2) {
         p.setBrush(QColor(223,89,0));
     } else if(health>0) {
         p.setBrush(QColor(237,28,36));
     }
-    p.drawRect(xt+1,yt+rect.height()+3,40*((double)health/100),10);
+    p.drawRect(xt+1,yt+rect.height()+3,40*((double)health/maxHealth),10);
     p.setPen(Qt::black);
     p.drawText(QPoint(xt,yt-br.height()*0.7+11),name);
     p.drawText(xt+8,yt+rect.height()+13,QString::number(health,'f',0));
     if(barrel) {
         QPen pen;
         pen.setColor(Qt::black);
-        pen.setWidth(5);
+        pen.setWidth(barrelLength);
         p.setPen(pen);
         p.drawLine(getBarrel(xt,yt));
         p.setPen(Qt::black);
@@ -221,7 +332,7 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
 void Tank::move()
 {
     //rect.moveTo(targetPos.x(),targetPos.y());
-    int speed = this->speed/2;
+    int speed = this->speed;
     if(rect.x()<targetPos.x()-speed-1) {
         rect.moveTo(rect.x()+speed,rect.y());
         //targetPos.setX(targetPos.x()+1);
@@ -273,6 +384,7 @@ void Tank::setAll(int x, int y, int dir, int health, int diff)
         rect.moveTo(x,y);
         targetPos = QPoint(x,y);
     } else {
+        if(rect.x()!=x||rect.y()!=y) rect.moveTo(x,y);
         int s = (speed*diff);
         switch(dir) {
             case 1:
@@ -297,6 +409,7 @@ void Tank::setAll(int x, int y, int dir, int health, int diff)
             break;
         }
         targetPos = QPoint(x,y);
+        //rect.moveTo(x,y);
         this->dir = dir;
     }
     //this->rect.moveTo(x,y);
@@ -314,7 +427,7 @@ void Tank::setMoved(bool m)
 
 void Tank::setSpeed(int speed)
 {
-    this->speed = speed;
+    this->speed = speed/10;
 }
 
 void Tank::setColor(int color)
@@ -378,9 +491,13 @@ int Tank::getDir()
     return this->dir;
 }
 
-int Tank::getHealth()
+int Tank::getHealth(int type)
 {
-    return this->health;
+    if(!type) {
+        return this->health;
+    } else {
+        return this->maxHealth;
+    }
 }
 
 int Tank::getTeam()
@@ -393,9 +510,12 @@ int Tank::getCoins()
     return this->coins;
 }
 
-void Tank::setHealth(int health)
+void Tank::setHealth(int health, int maxHealth)
 {
     this->health = health;
+    if(maxHealth) {
+        this->maxHealth = maxHealth;
+    }
 }
 
 void Tank::setTeam(int team)
@@ -406,8 +526,36 @@ void Tank::setTeam(int team)
 QLineF Tank::getBarrel(int xt, int yt)
 {
     QLineF barrel;
-    barrel.setP1(QPoint(xt+20,yt+20));
-    barrel.setP2(QPoint(xt+20,yt+5));
+    switch(type) {
+        case 1:
+            barrel.setP1(QPoint(xt+20,yt+20));
+            barrel.setP2(QPoint(xt+20,yt+5));
+        break;
+        case 2:
+            switch(dir) {
+                case 1:
+                    barrel.setP1(QPoint(xt+20,yt+27));
+                    barrel.setP2(QPoint(xt+20,yt+2));
+                break;
+                case 2:
+                    barrel.setP1(QPoint(xt+27,yt+20));
+                    barrel.setP2(QPoint(xt+27,yt-5));
+                break;
+                case 3:
+                    barrel.setP1(QPoint(xt+20,yt+13));
+                    barrel.setP2(QPoint(xt+20,yt-12));
+                break;
+                case 4:
+                    barrel.setP1(QPoint(xt+13,yt+20));
+                    barrel.setP2(QPoint(xt+13,yt-5));
+                break;
+            }
+        break;
+        case 3:
+            barrel.setP1(QPoint(xt+15,yt+15));
+            barrel.setP2(QPoint(xt+15,yt+5));
+        break;
+    }
     barrel.setAngle(angle);
     return barrel;
 }

@@ -27,18 +27,18 @@ void Shoot::on_tmain()
         if(t->getID()==4) return;
         if(!t_cool->isActive()) {
             isCool = true;
-            t_cool->start(w->getCoolDown());
+            t_cool->start(t->getReload());
         }
         int v;
         if(t->getMoved()) {
-            v = w->getVel()+t->getSpeed();
+            v = t->getBvel()+t->getSpeed();
         } else {
-            v = w->getVel();
+            v = t->getBvel();
         }
-        int dmg = 20;
+        int dmg = t->getDamage();
         network->send("|1#"+t->getName()+"#"+QString::number(mpos->x(),'f',0)+
                       "#"+QString::number(mpos->y(),'f',0)+"#1#~");
-        Bullet *b = new Bullet(t->getRect().center().x(),t->getRect().center().y()+2,
+        Bullet *b = new Bullet(t->getShootPoint().x(),t->getShootPoint().y(),
                                (double)mpos->x(),(double)mpos->y(),v,t->getName());
         b->setDmg(dmg);
         bool enabled = true;

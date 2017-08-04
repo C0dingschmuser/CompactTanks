@@ -23,7 +23,10 @@ SOURCES += ui/main.cpp\
     core/worker.cpp \
     ui/frmlogin.cpp \
     core/sound.cpp \
-    core/animation.cpp
+    core/animation.cpp \
+    ui/frmtanks.cpp \
+    core/dbtank.cpp \
+    core/expanimation.cpp
 
 HEADERS  += ui/frmmain.h \
     core/tank.h \
@@ -36,10 +39,14 @@ HEADERS  += ui/frmmain.h \
     core/worker.h \
     ui/frmlogin.h \
     core/sound.h \
-    core/animation.h
+    core/animation.h \
+    ui/frmtanks.h \
+    core/dbtank.h \
+    core/expanimation.h
 
 FORMS    += ui/frmmain.ui \
-    ui/frmlogin.ui
+    ui/frmlogin.ui \
+    ui/frmtanks.ui
 
 RESOURCES += \
     resources.qrc

@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QKeyEvent>
 #include <QInputDialog>
+#include "windows.h"
 #include <QTimer>
 #include <QKeyEvent>
 #include <QThread>
@@ -18,6 +19,7 @@
 #include "core/shoot.h"
 #include "core/worker.h"
 #include "core/animation.h"
+#include "core/expanimation.h"
 #include "ui/frmlogin.h"
 
 namespace Ui {
@@ -31,7 +33,6 @@ public:
     explicit FrmMain(QWidget *parent = 0);
     ~FrmMain();
 private slots:
-    void on_tselect();
     void on_tdraw();
     void on_newPlayer(Tank *t);
     void on_delPlayer(int pos);
@@ -39,8 +40,9 @@ private slots:
     void on_newBullet(Bullet *b);
     void on_delBullet(int pos);
     void on_delObjs();
+    void on_tchat();
+    void on_chat(QString message);
     void on_disconnect();
-    void on_message(QString message, int length);
     void on_tmessage();
     void on_killMessage(QString message);
     void on_tkillMessage();
@@ -60,6 +62,10 @@ private slots:
     void on_tspawn();
     void on_death();
     void on_tdeath();
+    void on_msgBox(QString title, QString text);
+    void on_otherDeath(QRect rect);
+    void on_tExpAn();
+    void on_ttime();
 
 private:
     Ui::FrmMain *ui;
@@ -70,13 +76,19 @@ private:
     QVector <Bullet*> bullets;
     QVector <int> capObjs;
     QVector <Animation> animations;
+    QVector <QPixmap> expAnPixmap;
+    QVector <ExpAnimation*> expAn;
     QTimer *t_draw;
-    QTimer *t_message;
+    QTimer *t_chat;
     QTimer *t_killMessage;
     QTimer *t_hit;
-    QTimer *t_select;
     QTimer *t_spawn;
     QTimer *t_death;
+    QTimer *t_expAn;
+    QTimer *t_time;
+    QThread *workerThread;
+    bool lowGraphics;
+    bool chatActive;
     QPoint *aim;
     QPoint *mpos;
     QRect viewRect;
@@ -86,6 +98,7 @@ private:
     int width;
     int height;
     int sAstep;
+    int msgCount;
     double transX;
     double transY;
     double scaleX;
@@ -95,17 +108,18 @@ private:
     bool fullscreen;
     bool tab;
     bool isConnected;
-    QVector <QString> messageText;
-    QVector <QString> killMessageText;
+    QVector <QString> chat;
+    QVector <QString> messages;
     QVector <QRect> spawns;
-    int selected;
     QPixmap tree;
     QPixmap grass;
     QPixmap minimap;
     QPixmap grid;
     QPixmap sSpawn;
     QPixmap sCap;
+    QPixmap tanksMenu;
     bool contains(QString data, QString c);
+    void closeEvent(QCloseEvent *e) override;
     FrmLogin *login;
 protected:
     void paintEvent(QPaintEvent *e) override;

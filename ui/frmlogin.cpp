@@ -31,6 +31,11 @@ FrmLogin::~FrmLogin()
 
 void FrmLogin::on_btnConnect_clicked()
 {
+    ui->btnConnect->setText("Verbinde...");
+    ui->edtUsername->setText(QString::number(qrand()%1000));
+    ui->edtPassword->setText("aaaaaaaaa");
+    ui->btnConnect->repaint();
+    qApp->processEvents();
     QString name = ui->edtUsername->text();
     QString pw = ui->edtPassword->text();
     if((contains(name,"|#äöü.,-")||name.length()>15||name=="")||
@@ -44,6 +49,19 @@ void FrmLogin::on_btnConnect_clicked()
         double vol = (double)ui->sliderVolume->value()/100;
         emit connectWithData(name,pw,vol);
     }
+}
+
+void FrmLogin::fail()
+{
+    ui->btnConnect->setText("Verbinden");
+    QMessageBox::critical(this,"FEHLER","Keine Verbindung möglich!");
+    update();
+}
+
+void FrmLogin::reset()
+{
+    ui->btnConnect->setText("Verbinden");
+    update();
 }
 
 bool FrmLogin::contains(QString data,QString c)

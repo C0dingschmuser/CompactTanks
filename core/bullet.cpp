@@ -17,7 +17,7 @@ Bullet::Bullet(int x, int y, double x2, double y2, int vel, QString shooter, QCo
     this->x = x;
     this->y = y;
     this->elapsed = 0;
-    double distance = qSqrt(qPow(qFabs(x2-x),2)+qPow(qFabs(y2-y),2));
+    double distance = qSqrt(qPow(qFabs(x2-(double)x),2)+qPow(qFabs(y2-(double)y),2));
     this->x2 = (x2-x)/distance;
     this->y2 = (y2-y)/distance;
     //this->x += x2*5;

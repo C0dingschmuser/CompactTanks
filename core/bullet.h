@@ -3,6 +3,7 @@
 #include <QtMath>
 #include <QRect>
 #include <QColor>
+#include <QPropertyAnimation>
 #include <QDebug>
 class Bullet
 {

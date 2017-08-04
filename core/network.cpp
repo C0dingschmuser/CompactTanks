@@ -40,10 +40,16 @@ bool Network::connectToServer(QString username, QString password)
     return ok;
 }
 
+void Network::stop()
+{
+    t_disconnect->stop();
+    t_main->stop();
+}
+
 void Network::on_tcpRecv()
 {
     buffer += tcpSocket->readAll();
-    if(buffer.size()>44) {
+    if(buffer.size()>54) {
         QString input = buffer;
         buffer.clear();
         if(input.contains("|")&&input.at(input.size()-1)=="~") {
@@ -78,7 +84,7 @@ void Network::on_tmain()
     }*/
     if(!ownTank->isSpawned()) return;
     QByteArray data;
-    data.append(QString("|0#"+ownTank->toString()).toUtf8());
+    data.append(QString("|0#"+ownTank->toString()+"#"+QString::number(timer)+"#~").toUtf8());
     udpSocket->writeDatagram(data,ip,38889);
 }
 
@@ -105,6 +111,11 @@ void Network::send(QString data)
     tcpSocket->flush();
 }
 
+void Network::setTimer(int timer)
+{
+    this->timer = timer;
+}
+
 int Network::getDistance(QPoint p1, QPoint p2)
 {
     return abs((int)sqrt(pow(p1.x()-p2.x(),2)+pow(p1.y()-p2.y(),2)));
@@ -120,7 +131,7 @@ bool Network::check(QStringList l, int anz)
 
 void Network::fetchTCP(QString data)
 {
-    //qDebug()<<data;
+    //if(!data.contains("11#")&&!data.contains("10#")) qDebug()<<data;
     QStringList list = data.split("#");
     if(list.at(0)!="") {
         int m = list.at(0).toInt();
@@ -255,6 +266,9 @@ void Network::fetchTCP(QString data)
                         if(list.size()>2) {
                             //qDebug()<<list.at(1);
                             Tank *tmp = sucheTank(list.at(1));
+                            QRect rect = tmp->getRect();
+                            rect.moveTo(list.at(2).toInt(),list.at(3).toInt());
+                            emit otherDeath(rect);
                             tmp->setSpawned(false);
                             tmp->teleport(-200,-200);
                             emit killMessage(list.at(4)+" killed "+list.at(1));
@@ -279,9 +293,23 @@ void Network::fetchTCP(QString data)
                         }
                     break;
                     case 13: //spawn other
-                        Tank *t = sucheTank(list.at(1));
-                        t->teleport(list.at(2).toInt(),list.at(3).toInt());
-                        t->setSpawned(true);
+                        {
+                            Tank *t = sucheTank(list.at(1));
+                            t->teleport(list.at(2).toInt(),list.at(3).toInt());
+                            t->setType(list.at(4).toInt());
+                            //t->setData(list.at(4).toInt(),list.at(5).toInt(),list.at(6).toInt(),list.at(7).toInt(),0,list.at(8).toInt(),list.at(9).toInt(),0,0);
+                            t->setSpawned(true);
+                            emit spawn(t);
+                        }
+                    break;
+                    case 14: //stats
+                    //qDebug()<<list;
+                        emit stats(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt(),list.at(6).toInt(),
+                                   list.at(7).toInt(),list.at(8).toInt(),list.at(9).toDouble(),list.at(10).toDouble(),list.at(11).toDouble(),list.at(12).toInt(),
+                                   list.at(13).toInt());
+                        break;
+                    case 15:
+                        emit chat(list.at(1));
                     break;
                 }
             }
