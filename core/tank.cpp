@@ -255,6 +255,9 @@ QPoint Tank::getShootPoint()
         case 3:
             p = QPoint(rect.center().x(),rect.center().y()+2);
         break;
+        case 4:
+            p = QPoint(rect.center().x(),rect.center().y()+2);
+        break;
     }
     return p;
 }
@@ -554,6 +557,10 @@ QLineF Tank::getBarrel(int xt, int yt)
         case 3:
             barrel.setP1(QPoint(xt+15,yt+15));
             barrel.setP2(QPoint(xt+15,yt+5));
+        break;
+        case 4:
+            barrel.setP1(QPoint(xt+25,yt+25));
+            barrel.setP2(QPoint(xt+25,yt+5));
         break;
     }
     barrel.setAngle(angle);

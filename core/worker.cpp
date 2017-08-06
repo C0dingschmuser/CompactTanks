@@ -39,7 +39,7 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     connect(network,SIGNAL(capobj(int,int,int)),this,SLOT(on_capobj(int,int,int)));
     connect(network,SIGNAL(setT(int)),this,SLOT(on_setT(int)));
     connect(network,SIGNAL(pos(Tank*,int,int,int,int,int,int,int)),this,SLOT(on_pos(Tank*,int,int,int,int,int,int,int)));
-    connect(network,SIGNAL(conn(bool)),this,SLOT(on_conn(bool)));
+    connect(network,SIGNAL(conn(int)),this,SLOT(on_conn(int)));
     connect(network,SIGNAL(hit(Tank*,int)),this,SIGNAL(hit(Tank*,int)));
     connect(network,SIGNAL(stats(int,int,int,int,int,int,int,int,double,double,double,int,int)),this,SLOT(on_db(int,int,int,int,int,int,int,int,double,double,double,int,int)));
     connect(network,SIGNAL(spawn(Tank*)),this,SLOT(on_spawn(Tank*)));
@@ -71,10 +71,10 @@ void Worker::on_disconnect()
     emit disconnected();
 }
 
-void Worker::connectToServer(QString username, QString password)
+void Worker::connectToServer(QString username, QString password, QString version)
 {
     //t_conn->start(200);
-    if(network->connectToServer(username,password)) {
+    if(network->connectToServer(username,password,version)) {
         this->username = username;
         t_conn->stop();
     } else {
@@ -82,9 +82,9 @@ void Worker::connectToServer(QString username, QString password)
     }
 }
 
-void Worker::on_conn(bool success)
+void Worker::on_conn(int id)
 {
-    if(success) {
+    if(id==1) {
         connect(network,SIGNAL(disconnect()),this,SLOT(on_disconnect()));
         ownTank->setName(username);
         loadMap();
@@ -92,7 +92,7 @@ void Worker::on_conn(bool success)
         t_visible->start(100);
         emit connSuccess();
     } else {
-        emit wrongData();
+        emit wrongData(id);
     }
 }
 
@@ -452,6 +452,7 @@ void Worker::mPrs(QMouseEvent *e, bool SD)
                 QPoint pos = mainWindow->pos();
                 tankWindow->move(pos.x()+200,pos.y()+200);
                 tankWindow->show();
+                tankWindow->setFocus();
             }
         }
     }

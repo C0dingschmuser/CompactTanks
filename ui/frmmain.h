@@ -54,7 +54,7 @@ private slots:
     void on_newMap(QVector<Terrain*> lvlObjs);
     void on_connectData(QString username,QString pw, double volume);
     void on_connSuccess();
-    void on_wrongData();
+    void on_wrongData(int id);
     void on_shot();
     void on_hit(Tank *t, int dmg);
     void on_thit();
@@ -77,6 +77,7 @@ private:
     QVector <int> capObjs;
     QVector <Animation> animations;
     QVector <QPixmap> expAnPixmap;
+    QVector <QPixmap> classIcons;
     QVector <ExpAnimation*> expAn;
     QTimer *t_draw;
     QTimer *t_chat;
@@ -118,6 +119,7 @@ private:
     QPixmap sSpawn;
     QPixmap sCap;
     QPixmap tanksMenu;
+    QString version;
     bool contains(QString data, QString c);
     void closeEvent(QCloseEvent *e) override;
     FrmLogin *login;

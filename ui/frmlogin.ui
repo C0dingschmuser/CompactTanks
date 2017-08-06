@@ -35,6 +35,9 @@
    </property>
   </widget>
   <widget class="QLineEdit" name="edtPassword">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -51,6 +54,9 @@
    </property>
    <property name="inputMask">
     <string/>
+   </property>
+   <property name="text">
+    <string>aaaaaaaaaa</string>
    </property>
    <property name="echoMode">
     <enum>QLineEdit::Password</enum>
@@ -164,7 +170,7 @@
     </font>
    </property>
    <property name="text">
-    <string>v0.0.5</string>
+    <string>v0.0.6</string>
    </property>
   </widget>
   <widget class="QPushButton" name="btnConnect">

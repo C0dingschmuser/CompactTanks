@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QMessageBox>
 #include <QFile>
+#include <QTime>
 #include <QTextStream>
 
 namespace Ui {
@@ -19,7 +20,7 @@ public:
     ~FrmLogin();
     void fail();
     void reset();
-
+    void setLogin(bool login);
 private slots:
     void on_btnConnect_clicked();
     void on_sliderVolume_sliderMoved(int position);
@@ -28,6 +29,8 @@ private:
     Ui::FrmLogin *ui;
     bool contains(QString data, QString c);
     QFile file;
+    bool login;
+    void sleep(int ms);
 signals:
     void connectWithData(QString username,QString pw, double volume);
 };

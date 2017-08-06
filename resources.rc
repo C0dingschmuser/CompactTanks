@@ -9,14 +9,14 @@ BEGIN
         BEGIN
             VALUE "CompanyName",        "Bruh Games"
             VALUE "FileDescription",    "CompactTanks"
-            VALUE "FileVersion",        "0.0.5.4"
+            VALUE "FileVersion",        "0.0.6.0"
             VALUE "InternalName",       "CompactTanks"
             VALUE "LegalCopyright",     "Copyright Bruh Games"
             VALUE "LegalTrademarks1",   ""
             VALUE "LegalTrademarks2",   ""
             VALUE "OriginalFilename",   "CompactTanks.exe"
             VALUE "ProductName",        "CompactTanks"
-            VALUE "ProductVersion",     "0.0.5.4"
+            VALUE "ProductVersion",     "0.0.6.0"
         END
     END
 

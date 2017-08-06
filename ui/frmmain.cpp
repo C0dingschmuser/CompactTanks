@@ -43,6 +43,7 @@ FrmMain::FrmMain(QWidget *parent) :
     t_draw->setTimerType(Qt::PreciseTimer);
     sound = new Sound();
     lowGraphics = false;
+    version = "v0.0.6";
     workerThread = new QThread();
     ui->edtChat->setStyleSheet("QLineEdit { background: rgba(0, 255, 255, 0);}");
     connect(t_chat,SIGNAL(timeout()),this,SLOT(on_tchat()));
@@ -70,7 +71,7 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(worker,SIGNAL(connFail()),this,SLOT(on_connFail()));
     connect(worker,SIGNAL(newMap(QVector<Terrain*>)),this,SLOT(on_newMap(QVector<Terrain*>)));
     connect(worker,SIGNAL(connSuccess()),this,SLOT(on_connSuccess()));
-    connect(worker,SIGNAL(wrongData()),this,SLOT(on_wrongData()));
+    connect(worker,SIGNAL(wrongData(int)),this,SLOT(on_wrongData(int)));
     connect(worker,SIGNAL(shot()),this,SLOT(on_shot()));
     connect(worker,SIGNAL(hit(Tank*,int)),this,SLOT(on_hit(Tank*,int)));
     connect(worker,SIGNAL(death()),this,SLOT(on_death()));
@@ -82,6 +83,10 @@ FrmMain::FrmMain(QWidget *parent) :
     msgCount = 0;
     for(int i=0;i<74;i++) {
         expAnPixmap.append(QPixmap(":/images/animation/explosion/"+QString::number(i)+".png"));
+    }
+    //maxplayerid
+    for(int i=0;i<4;i++) {
+        classIcons.append(QPixmap(":/images/tank/tank"+QString::number(i+1)+".png"));
     }
     this->setCursor(QPixmap(":/images/tank/cursor.png"));
     tree = QPixmap(":/images/area/obj0.png");
@@ -124,11 +129,12 @@ FrmMain::~FrmMain()
 void FrmMain::on_connectData(QString username, QString pw, double volume)
 {
     sound->setVolume(volume);
-    worker->connectToServer(username,pw);
+    worker->connectToServer(username,pw,version);
 }
 
 void FrmMain::on_connSuccess()
 {
+    login->setLogin(false);
     isConnected = false;
     worker->moveToThread(workerThread);
     workerThread->start();
@@ -141,9 +147,25 @@ void FrmMain::on_connSuccess()
     this->show();
 }
 
-void FrmMain::on_wrongData()
+void FrmMain::on_wrongData(int id)
 {
-    QMessageBox::information(login,"FEHLER","Falscher Benutzername und/oder Passwort");
+    QString msg;
+    switch(id) {
+        case -3:
+            msg = "Client outdatet";
+        break;
+        case -2:
+            msg = "Server voll!";
+        break;
+        case -1:
+            msg = "Benutzer bereits angemeldet!";
+        break;
+        case 0:
+            msg = "Falscher Benutzername und/oder Passwort";
+        break;
+    }
+
+    QMessageBox::information(login,"FEHLER",msg);
     login->reset();
 }
 
@@ -729,6 +751,8 @@ void FrmMain::paintEvent(QPaintEvent *e)
             painter.drawText(900,220,"SELECT TANK");
         }
         painter.drawPixmap(500,2490,300,216,tanksMenu);
+        int id = ownTank->getType();
+        if(id) painter.drawPixmap(900,2490,200,200,classIcons[id-1]);
     }
 
 
@@ -754,7 +778,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
             y = 750;
             space = 25;
         } else {
-            size = 32;
+            size = 25;
             x = 30;
             y = 1890;
             space = 75;
@@ -765,6 +789,8 @@ void FrmMain::paintEvent(QPaintEvent *e)
             QString text = chat[chat.size()-i];
             if(text.contains(ownTank->getName()+": ")) {
                 painter.setPen(Qt::black);
+            } else if(text.contains("SERVER: ")) {
+                painter.setPen(Qt::darkRed);
             } else {
                 painter.setPen(Qt::darkBlue);
             }

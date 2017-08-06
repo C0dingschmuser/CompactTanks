@@ -15,6 +15,7 @@ Network::Network(Tank *ownTank, QVector<Tank *> t, QHostAddress ip,QObject *pare
     connect(udpSocketListen,SIGNAL(readyRead()),this,SLOT(on_udpRecv()));
     connect(tcpSocket,SIGNAL(readyRead()),this,SLOT(on_tcpRecv()));
     connect(tcpSocket,SIGNAL(disconnected()),this,SLOT(on_disconnect()));
+    connect(tcpSocket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(on_disconnect()));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
     connect(t_disconnect,SIGNAL(timeout()),this,SLOT(on_tdisconnect()));
     t_main->start(10);
@@ -28,14 +29,15 @@ Network::~Network()
     delete tcpSocket;
 }
 
-bool Network::connectToServer(QString username, QString password)
+bool Network::connectToServer(QString username, QString password, QString version)
 {
-    bool ok;
+    bool ok = false;
     tcpSocket->connectToHost(ip,38888);
-    ok = tcpSocket->waitForConnected(3000);
-    if(ok) {
+    tcpSocket->waitForConnected(1000);
+    if(tcpSocket->state()==QTcpSocket::ConnectedState) {
+        ok = true;
         ownTank->setName(username);
-        send("|0#"+username+"#"+password+"#~");
+        send("|0#"+username+"#"+password+"#"+version+"#~");
     }
     return ok;
 }
@@ -139,11 +141,7 @@ void Network::fetchTCP(QString data)
             if(list.at(1)!=ownTank->getName()) {
                 switch(m) {
                     case -8: //login erfolgreich?
-                        if(list.at(1).toInt()) {
-                            emit conn(true);
-                        } else {
-                            emit conn(false);
-                        }
+                        emit conn(list.at(1).toInt());
                     break;
                     case -7: //setownpos spawn
                         //emit spawn, start animation
@@ -303,7 +301,6 @@ void Network::fetchTCP(QString data)
                         }
                     break;
                     case 14: //stats
-                    //qDebug()<<list;
                         emit stats(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt(),list.at(6).toInt(),
                                    list.at(7).toInt(),list.at(8).toInt(),list.at(9).toDouble(),list.at(10).toDouble(),list.at(11).toDouble(),list.at(12).toInt(),
                                    list.at(13).toInt());

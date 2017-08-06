@@ -21,6 +21,7 @@ FrmLogin::FrmLogin(QWidget *parent) :
         file.open(QIODevice::ReadWrite);
     }
     file.close();
+    login = false;
 }
 
 FrmLogin::~FrmLogin()
@@ -31,15 +32,14 @@ FrmLogin::~FrmLogin()
 
 void FrmLogin::on_btnConnect_clicked()
 {
+    login = true;
     ui->btnConnect->setText("Verbinde...");
-    ui->edtUsername->setText(QString::number(qrand()%1000));
-    ui->edtPassword->setText("aaaaaaaaa");
     ui->btnConnect->repaint();
     qApp->processEvents();
     QString name = ui->edtUsername->text();
     QString pw = ui->edtPassword->text();
-    if((contains(name,"|#äöü.,-")||name.length()>15||name=="")||
-            (contains(pw,"|#")||pw==""||pw.length()>20)) {
+    if((contains(name,"|#äöü:.,-")||name.length()>15||name=="")||
+            (contains(pw,"|#:")||pw==""||pw.length()>20)) {
         QMessageBox::critical(this,"FEHLER","Falsche Eingabe!");
     } else {
         file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
@@ -47,12 +47,31 @@ void FrmLogin::on_btnConnect_clicked()
         out << name << endl;
         file.close();
         double vol = (double)ui->sliderVolume->value()/100;
-        emit connectWithData(name,pw,vol);
+        //while(login) {
+            emit connectWithData(name,pw,vol);
+            //sleep(1000)
+            //qApp->processEvents();
+        //}
     }
+}
+
+void FrmLogin::sleep(int ms)
+{
+    QTime dieTime = QTime::currentTime().addMSecs( ms );
+    while( QTime::currentTime() < dieTime )
+    {
+        //QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
+    }
+}
+
+void FrmLogin::setLogin(bool login)
+{
+    this->login = login;
 }
 
 void FrmLogin::fail()
 {
+    login = false;
     ui->btnConnect->setText("Verbinden");
     QMessageBox::critical(this,"FEHLER","Keine Verbindung möglich!");
     update();
@@ -60,6 +79,7 @@ void FrmLogin::fail()
 
 void FrmLogin::reset()
 {
+    login = false;
     ui->btnConnect->setText("Verbinden");
     update();
 }

@@ -38,7 +38,7 @@ private slots:
     void on_setT(int timer);
     void on_pos(Tank *p,int x,int y,int dir,int health, int angle,int spotted,int stimer);
     void on_db(int id, int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel);
-    void on_conn(bool success);
+    void on_conn(int id);
     void on_tid();
     void on_spawn(Tank *t);
     void on_disconnect();
@@ -89,7 +89,7 @@ public:
     void mRls(QMouseEvent *e);
     void notActive();
     void setViewRect(QRect viewRect, int startPos = 0, int endPos = 1200);
-    void connectToServer(QString username,QString password);
+    void connectToServer(QString username,QString password,QString version);
     void doSpawn();
     void setScale(double scaleX, double scaleY,int transX,int transY);
     void chat(QString message);
@@ -116,7 +116,7 @@ signals:
     void tab();
     void connFail();
     void connSuccess();
-    void wrongData();
+    void wrongData(int id);
     void shot();
     void hit(Tank *t, int dmg);
     void spawn();

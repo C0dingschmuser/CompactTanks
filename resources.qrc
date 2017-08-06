@@ -4,6 +4,7 @@
 		<file>images/tank/tank1.png</file>
         <file>images/tank/tank2.png</file>
 		<file>images/tank/tank3.png</file>
+		<file>images/tank/tank4.png</file>
         <file>images/tank/1/tank1.png</file>
         <file>images/tank/1/tank2.png</file>
         <file>images/tank/1/tank3.png</file>
@@ -16,6 +17,10 @@
         <file>images/tank/3/tank2.png</file>
         <file>images/tank/3/tank3.png</file>
         <file>images/tank/3/tank4.png</file>
+		<file>images/tank/4/tank1.png</file>
+        <file>images/tank/4/tank2.png</file>
+        <file>images/tank/4/tank3.png</file>
+        <file>images/tank/4/tank4.png</file>
 		<file>images/area/grid.png</file>
 		<file>images/area/grid2.png</file>
 		<file>images/area/obj0.png</file>
@@ -102,8 +107,6 @@
 		<file>images/gui/minimap.png</file>
 		<file>images/gui/sSpawn.png</file>
 		<file>images/gui/sCap.png</file>
-		<file>images/gui/0.png</file>
-		<file>images/gui/1.png</file>
 		<file>images/gui/tanks.png</file>
         <file>images/tank/cursor.png</file>
 		<file>map/map.dat</file>

@@ -16,6 +16,7 @@ FrmTanks::FrmTanks(QFont f,Tank *ownTank, QOpenGLWidget *parent) :
     ui->lwTanks->addItem(new QListWidgetItem(QIcon(":/images/tank/tank1.png"),"Medium",ui->lwTanks,1001));
     ui->lwTanks->addItem(new QListWidgetItem(QIcon(":/images/tank/tank2.png"),"Jagdpanzer",ui->lwTanks,1002));
     ui->lwTanks->addItem(new QListWidgetItem(QIcon(":/images/tank/tank3.png"),"Scout",ui->lwTanks,1003));
+    ui->lwTanks->addItem(new QListWidgetItem(QIcon(":/images/tank/tank4.png"),"Heavy",ui->lwTanks,1004));
 }
 
 FrmTanks::~FrmTanks()
@@ -31,46 +32,57 @@ void FrmTanks::paintEvent(QPaintEvent *e)
     painter.drawRect(0,0,this->size().width(),this->size().height());
     if(id) {
         //dmg
+        int width = 240;
         painter.setPen(Qt::black);
         painter.setFont(font);
-        painter.drawText(QPoint(605,23),"Schaden: "+QString::number(dmg));
+        painter.drawText(QPoint(605,23),"Schaden: "+QString::number(dmg*0.7)+"-"+QString::number(dmg*1.3)+"HP");
         painter.setPen(Qt::NoPen);
         painter.setBrush(Qt::darkGray);
-        painter.drawRect(605,27,200,10);
+        painter.drawRect(605,27,width,10);
         painter.setBrush(Qt::darkGreen);
-        painter.drawRect(605,27,200*((double)dmg/100),10);
+        painter.drawRect(605,27,width*((double)dmg/100),10);
         //reload
         painter.setPen(Qt::black);
         painter.drawText(QPoint(605,53),"Nachladezeit: "+QString::number(reload/(double)1000,'f',2)+"s");
         painter.setPen(Qt::NoPen);
         painter.setBrush(Qt::darkGray);
-        painter.drawRect(605,57,200,10);
+        painter.drawRect(605,57,width,10);
         painter.setBrush(Qt::darkGreen);
-        painter.drawRect(605,57,200*((5000-(double)reload)/5000),10);
+        painter.drawRect(605,57,width*((5000-(double)reload)/5000),10);
         //speed
+        int val = calcSpeed(speed);
         painter.setPen(Qt::black);
-        painter.drawText(QPoint(605,83),"Geschwindigkeit: "+QString::number(speed));
+        painter.drawText(QPoint(605,83),"Geschw.: "+QString::number(val)+"Km/h");
         painter.setPen(Qt::NoPen);
         painter.setBrush(Qt::darkGray);
-        painter.drawRect(605,87,200,10);
+        painter.drawRect(605,87,width,10);
         painter.setBrush(Qt::darkGreen);
-        painter.drawRect(605,87,200*((double)speed/500),10);
+        painter.drawRect(605,87,width*((double)val/100),10);
         //health
         painter.setPen(Qt::black);
-        painter.drawText(QPoint(605,113),"Leben: "+QString::number(health));
+        painter.drawText(QPoint(605,113),"Leben: "+QString::number(health)+"HP");
         painter.setPen(Qt::NoPen);
         painter.setBrush(Qt::darkGray);
-        painter.drawRect(605,117,200,10);
+        painter.drawRect(605,117,width,10);
         painter.setBrush(Qt::darkGreen);
-        painter.drawRect(605,117,200*((double)health/500),10);
+        painter.drawRect(605,117,width*((double)health/500),10);
         //vel
         painter.setPen(Qt::black);
-        painter.drawText(QPoint(605,143),"Projektilgeschw.: "+QString::number(vel));
+        painter.drawText(QPoint(605,143),"Projektilgeschw.: "+QString::number(vel*6)+"m/s");
         painter.setPen(Qt::NoPen);
         painter.setBrush(Qt::darkGray);
-        painter.drawRect(605,147,200,10);
+        painter.drawRect(605,147,width,10);
         painter.setBrush(Qt::darkGreen);
-        painter.drawRect(605,147,200*((double)vel/500),10);
+        painter.drawRect(605,147,width*((double)vel/500),10);
+        //dpm
+        int dpm = dmg*(60000/(double)reload);
+        painter.setPen(Qt::black);
+        painter.drawText(QPoint(605,173),"Schaden pro Min.: "+QString::number(dpm)+"HP");
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(Qt::darkGray);
+        painter.drawRect(605,177,width,10);
+        painter.setBrush(Qt::darkGreen);
+        painter.drawRect(605,177,width*((double)dpm/5000),10);
     }
 }
 
@@ -125,4 +137,14 @@ void FrmTanks::on_lwTanks_itemDoubleClicked(QListWidgetItem *item)
     ownTank->setType(id);
     ownTank->setData(id,speed,health,vel,reload,width,height,barrelLength,treeColl);
     this->hide();
+}
+
+double FrmTanks::calcSpeed(int value)
+{
+    value*=2;
+    double p1 = 1/(double)120;
+    double p2 = (value-190)*(value-190);
+    double p3 = 235/(double)6;
+    double num = p1*p2+p3;
+    return num;
 }

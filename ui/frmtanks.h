@@ -41,6 +41,7 @@ private:
     double softTerrRes;
     double hardTerrRes;
     double treeTerrRes;
+    double calcSpeed(int value);
     int treeColl;
     int vel;
 protected:

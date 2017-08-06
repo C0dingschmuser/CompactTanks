@@ -37,7 +37,7 @@ private:
 public:
     explicit Network(Tank *ownTank, QVector<Tank*> t, QHostAddress ip, QObject *parent = 0);
     ~Network();
-    bool connectToServer(QString username,QString password);
+    bool connectToServer(QString username, QString password, QString version);
     void send(QString data);
     void sendPos();
     void setTimer(int timer);
@@ -62,7 +62,7 @@ signals:
     void visible(int visible);
     void capobj(int num,int owner,int cp);
     void setT(int timer);
-    void conn(bool success);
+    void conn(int id);
     void hit(Tank *t,int dmg);
     void spawn();
     void stats(int id, int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel);
