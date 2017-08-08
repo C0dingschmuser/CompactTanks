@@ -21,7 +21,6 @@ class Worker : public QObject
 private slots:
     void on_newPlayer(Tank *t);
     void on_delPlayer(int pos);
-    void on_newlvlObj(int x,int y,int w,int h,int type);
     void on_newBullet(Bullet *b);
     void on_delBullet(int pos);
     void on_syncBullet(int pos,int dmg);
@@ -43,6 +42,8 @@ private slots:
     void on_spawn(Tank *t);
     void on_disconnect();
     void on_tvisible();
+    void on_playerDeath();
+    void on_tmove();
 private:
     QRect viewRect;
     QTimer *t_bullet;
@@ -51,6 +52,7 @@ private:
     QTimer *t_id;
     QTimer *t_select;
     QTimer *t_visible;
+    QTimer *t_move;
     Tank *ownTank;
     FrmTanks *tankWindow;
     QWidget *mainWindow;

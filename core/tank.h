@@ -9,6 +9,7 @@
 #include <QLineF>
 #include <QFont>
 #include <QPixmap>
+#include <QRawFont>
 #include <QPainter>
 
 class Tank
@@ -38,6 +39,7 @@ private:
     int height;
     int barrelLength;
     int treeColl;
+    double endSpeed;
     QPoint deathPoint;
     bool moved;
     bool visible;
@@ -46,6 +48,7 @@ private:
     QVector <QPixmap> imgs;
     QPixmap currentImg;
     QPixmap grid;
+    QPixmap turret;
     QPoint targetPos;
     QPoint barrelStart;
 public:
@@ -92,6 +95,7 @@ public:
     int getBvel();
     int getWidth();
     int getHeight();
+    int getEndSpeed();
     QPoint getDeathPoint();
     QPoint getShootPoint();
     void setVisible(bool visible);

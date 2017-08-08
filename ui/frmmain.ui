@@ -45,7 +45,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Pixeled</family>
+     <family>Arial</family>
      <pointsize>10</pointsize>
     </font>
    </property>
@@ -54,6 +54,9 @@
    </property>
    <property name="styleSheet">
     <string notr="true">border:0px;</string>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
  </widget>

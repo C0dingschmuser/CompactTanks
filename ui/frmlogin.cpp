@@ -37,6 +37,11 @@ void FrmLogin::on_btnConnect_clicked()
     ui->btnConnect->repaint();
     qApp->processEvents();
     QString name = ui->edtUsername->text();
+    if(name.size()<4) {
+        QMessageBox::critical(this,"FEHLER","Name zu kurz!");
+        reset();
+        return;
+    }
     QString pw = ui->edtPassword->text();
     if((contains(name,"|#äöü:.,-")||name.length()>15||name=="")||
             (contains(pw,"|#:")||pw==""||pw.length()>20)) {

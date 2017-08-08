@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QKeyEvent>
+#include <QDebug>
 #include "tank.h"
 #include "terrain.h"
 
@@ -24,12 +25,16 @@ private:
     QTimer *t_moveS;
     QTimer *t_moveD;
     QVector<Terrain*>lvlObjs;
+    QVector<Terrain*>collObjs;
     int width;
     int height;
+    int first;
+    int sPos;
+    int ePos;
 public:
     explicit Movement(Tank *t,int width,int height,QObject *parent = 0);
     ~Movement();
-    void keyPressEvent(QKeyEvent *e,QVector<Terrain*>lvlObjs);
+    void keyPressEvent(QKeyEvent *e,QVector<Terrain*>lvlObjs, int sPos, int ePos);
     void keyReleaseEvent(QKeyEvent *e);
     void stop();
 

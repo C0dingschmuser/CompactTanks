@@ -5,6 +5,9 @@ Movement::Movement(Tank *t, int width, int height, QObject *parent) : QObject(pa
     this->width = width;
     this->height = height;
     ownTank = t;
+    int first = 0;
+    sPos = 0;
+    ePos = 1200;
     t_move = new QTimer();
     t_moveW = new QTimer();
     t_moveA = new QTimer();
@@ -32,15 +35,21 @@ void Movement::on_tmove()
             !t_moveS->isActive()&&!t_moveD->isActive()) {
         ownTank->setMoved(false);
     }
+    if(!ownTank->isSpawned()) {
+        t_moveW->stop();
+        t_moveA->stop();
+        t_moveS->stop();
+        t_moveD->stop();
+    }
 }
 
 void Movement::on_tmoveW() {
     QRect r = ownTank->getRect();
     int s = ownTank->getSpeed();
-    if(!t_moveA->isActive()&&!t_moveD->isActive()) {
+    if(((!t_moveA->isActive()&&!t_moveD->isActive())||first==1)&&!t_moveS->isActive()) {
         if(r.y()>=0+s) {
             bool ok=false;
-            for(int i=0;i<lvlObjs.size();i++) {
+            for(int i=sPos;i<ePos;i++) {
                 if(QRect(r.x(),r.y()-s,r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
                     if(!lvlObjs[i]->getType()) {
                         ok = true;
@@ -59,10 +68,10 @@ void Movement::on_tmoveW() {
 void Movement::on_tmoveA() {
     QRect r = ownTank->getRect();
     int s = ownTank->getSpeed();
-    if(!t_moveW->isActive()&&!t_moveS->isActive()) {
+    if(((!t_moveW->isActive()&&!t_moveS->isActive())||first==2)&&!t_moveD->isActive()) {
         if(r.x()>=0+s) {
             bool ok=false;
-            for(int i=0;i<lvlObjs.size();i++) {
+            for(int i=sPos;i<ePos;i++) {
                 if(QRect(r.x()-s,r.y(),r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
                     if(!lvlObjs[i]->getType()) {
                         ok = true;
@@ -81,10 +90,10 @@ void Movement::on_tmoveA() {
 void Movement::on_tmoveS() {
     QRect r = ownTank->getRect();
     int s = ownTank->getSpeed();
-    if(!t_moveA->isActive()&&!t_moveD->isActive()) {
+    if(((!t_moveA->isActive()&&!t_moveD->isActive())||first==3)&&!t_moveW->isActive()) {
         if(r.bottom()<=height-s*2) {
             bool ok=false;
-            for(int i=0;i<lvlObjs.size();i++) {
+            for(int i=sPos;i<ePos;i++) {
                 if(QRect(r.x(),r.y()+s,r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
                     if(!lvlObjs[i]->getType()) {
                         ok = true;
@@ -103,10 +112,10 @@ void Movement::on_tmoveS() {
 void Movement::on_tmoveD() {
     QRect r = ownTank->getRect();
     int s = ownTank->getSpeed();
-    if(!t_moveW->isActive()&&!t_moveS->isActive()) {
+    if(((!t_moveW->isActive()&&!t_moveS->isActive())||first==4)&&!t_moveA->isActive()) {
         if(r.right()<=width-s*2) {
             bool ok=false;
-            for(int i=0;i<lvlObjs.size();i++) {
+            for(int i=sPos;i<ePos;i++) {
                 if(QRect(r.x()+s,r.y(),r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
                     if(!lvlObjs[i]->getType()) {
                         ok = true;
@@ -122,29 +131,35 @@ void Movement::on_tmoveD() {
     }
 }
 
-void Movement::keyPressEvent(QKeyEvent *e, QVector<Terrain *> lvlObjs)
+void Movement::keyPressEvent(QKeyEvent *e, QVector<Terrain *> lvlObjs, int sPos, int ePos)
 {
     this->lvlObjs = lvlObjs;
     QRect r = ownTank->getRect();
     int s = ownTank->getSpeed();
     int t = ownTank->getTimer();
+    this->sPos = sPos;
+    this->ePos = ePos;
     if(e->key()==Qt::Key_W) {
         if(r.y()>=0+s) {
+            first = 1;
             t_moveW->start(t);
         }
     }
     if(e->key()==Qt::Key_A) {
         if(r.x()>=0+s) {
+            first = 2;
             t_moveA->start(t);
         }
     }
     if(e->key()==Qt::Key_S) {
         if(r.bottom()<=height-s) {
+            first = 3;
             t_moveS->start(t);
         }
     }
     if(e->key()==Qt::Key_D) {
         if(r.right()<=width-s) {
+            first = 4;
             t_moveD->start(t);
         }
     }

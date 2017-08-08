@@ -29,9 +29,12 @@
    </property>
    <property name="font">
     <font>
-     <family>Pixeled</family>
-     <pointsize>7</pointsize>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
     </font>
+   </property>
+   <property name="text">
+    <string>aaa</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="edtPassword">
@@ -48,8 +51,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Times New Roman</family>
-     <pointsize>11</pointsize>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="inputMask">
@@ -73,7 +76,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Pixeled</family>
+     <family>Arial</family>
+     <pointsize>12</pointsize>
     </font>
    </property>
    <property name="text">
@@ -91,7 +95,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Pixeled</family>
+     <family>Arial</family>
+     <pointsize>12</pointsize>
     </font>
    </property>
    <property name="text">
@@ -147,8 +152,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Pixeled</family>
-     <pointsize>4</pointsize>
+     <family>Arial</family>
+     <pointsize>8</pointsize>
     </font>
    </property>
    <property name="text">
@@ -158,15 +163,16 @@
   <widget class="QLabel" name="label_6">
    <property name="geometry">
     <rect>
-     <x>340</x>
+     <x>350</x>
      <y>280</y>
-     <width>61</width>
+     <width>41</width>
      <height>20</height>
     </rect>
    </property>
    <property name="font">
     <font>
-     <family>Pixeled</family>
+     <family>Arial</family>
+     <pointsize>10</pointsize>
     </font>
    </property>
    <property name="text">
@@ -184,7 +190,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Pixeled</family>
+     <family>Arial</family>
+     <pointsize>14</pointsize>
     </font>
    </property>
    <property name="text">
@@ -202,7 +209,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Pixeled</family>
+     <family>Arial</family>
+     <pointsize>12</pointsize>
     </font>
    </property>
    <property name="text">
@@ -239,7 +247,8 @@
    </property>
    <property name="font">
     <font>
-     <family>Pixeled</family>
+     <family>Arial</family>
+     <pointsize>11</pointsize>
     </font>
    </property>
    <property name="text">

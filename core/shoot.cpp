@@ -48,6 +48,15 @@ void Shoot::on_tmain()
         b->setEnabled(enabled);
         emit newBullet(b);
     }
+    if(!t->isSpawned()) {
+        click = false;
+    }
+}
+
+void Shoot::reset()
+{
+    click = false;
+    t_cool->stop();
 }
 
 void Shoot::MousePressEvent(QMouseEvent *e)

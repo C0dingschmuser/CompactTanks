@@ -30,7 +30,7 @@ FrmMain::FrmMain(QWidget *parent) :
     ownTank = new Tank(QRect(-200,-200,40,40),"");
     QFontDatabase d;
     d.addApplicationFont(":/font/Pixeled.ttf");
-    font = d.font("Pixeled","Normal",12);
+    font = QFont("Arial",12);//d.font("Arial","Normal",12);
     worker = new Worker(ownTank,aim,width,height,font,static_cast<QWidget*>(this));
     t_spawn = new QTimer();
     t_death = new QTimer();
@@ -43,7 +43,7 @@ FrmMain::FrmMain(QWidget *parent) :
     t_draw->setTimerType(Qt::PreciseTimer);
     sound = new Sound();
     lowGraphics = false;
-    version = "v0.0.6";
+    version = "v0.0.6.1";
     workerThread = new QThread();
     ui->edtChat->setStyleSheet("QLineEdit { background: rgba(0, 255, 255, 0);}");
     connect(t_chat,SIGNAL(timeout()),this,SLOT(on_tchat()));
@@ -142,7 +142,7 @@ void FrmMain::on_connSuccess()
     login->hide();
     spawns = worker->getSpawns();
     t_expAn->start(6);
-    t_chat->start(15000);
+    t_chat->start(30000);
     t_time->start(5000);
     this->show();
 }
@@ -151,8 +151,11 @@ void FrmMain::on_wrongData(int id)
 {
     QString msg;
     switch(id) {
+        case -4:
+            msg = "Du wurdest gebannt!";
+        break;
         case -3:
-            msg = "Client outdatet";
+            msg = "Client outdated";
         break;
         case -2:
             msg = "Server voll!";
@@ -290,7 +293,10 @@ void FrmMain::on_tdeath()
 void FrmMain::on_spawn()
 {
     sAstep = 0;
-    t_spawn->start(10);
+    ownTank->setSpawned(true);
+    transX = (ownTank->getRect().x()-940)*-1;
+    transY = (ownTank->getRect().y()-520)*-1;
+    //t_spawn->start(10);
 }
 
 void FrmMain::on_death()
@@ -298,9 +304,9 @@ void FrmMain::on_death()
     sAstep = 0;
     //scaleX = double(this->geometry().width()/double(width+936));
     //scaleY = double(this->geometry().height()/double(height+576));
-    t_death->start(10);
-    //transX = 468;
-    //transY = 288;
+    //t_death->start(10);
+    transX = 468;
+    transY = 288;
 }
 
 void FrmMain::on_thit()
@@ -342,6 +348,13 @@ void FrmMain::on_tkillMessage()
 
 void FrmMain::on_chat(QString message)
 {
+    if(message=="") return;
+    message.replace("&1","ä");
+    message.replace("&2","ö");
+    message.replace("&3","ü");
+    message.replace("&11","Ä");
+    message.replace("&22","Ö");
+    message.replace("&33","Ü");
     chat.append(message);
     if(chat.size()>24) {
         chat.removeAt(0);
@@ -435,7 +448,7 @@ void FrmMain::on_tab()
 
 void FrmMain::on_visible(bool visible)
 {
-
+    Q_UNUSED(visible)
 }
 
 void FrmMain::on_newMap(QVector<Terrain*> lvlObjs)
@@ -648,11 +661,20 @@ void FrmMain::paintEvent(QPaintEvent *e)
     //painter.setBrush(QColor(255,255,0,50));
     painter.setPen(Qt::blue);
     QFont f = painter.font();
-    f.setPointSize(15);
+    f.setPointSize(20);
     painter.setFont(f);
     for(int i=0;i<animations.size();i++) {
         painter.drawText(QPoint(aim->x()-15,aim->y()-animations[i].getCount()-17),animations[i].getText());
     }
+    /*-------------------------
+    f = painter.font();
+    f.setPointSize(18);
+    painter.setFont(f);
+    painter.setPen(Qt::black);
+    for(int i=startPos;i<endPos;i++) {
+        painter.drawText(QPoint(lvlObjs[i]->getRect().center()),QString::number(i));
+    }
+    //----------------------------*/
     painter.resetTransform();
     /*painter.setPen(Qt::red);
     painter.drawLine(0,540,1920,540);
@@ -682,10 +704,10 @@ void FrmMain::paintEvent(QPaintEvent *e)
         }
         painter.drawRect(20,1000,400*((double)health/maxHealth),50);
         f = painter.font();
-        f.setPointSize(25);
+        f.setPointSize(32);
         painter.setFont(f);
         painter.setPen(Qt::black);
-        painter.drawText(190,1045,QString::number(health));
+        painter.drawText(190,1040,QString::number(health));
         painter.setPen(Qt::NoPen);
         //Minimap start
         painter.setOpacity(0.75);
@@ -742,20 +764,18 @@ void FrmMain::paintEvent(QPaintEvent *e)
         painter.resetTransform();
         painter.scale(scaleX,scaleY);
         QFont f = painter.font();
-        f.setPointSize(128);
+        f.setPointSize(150);
         painter.setFont(f);
         painter.setPen(Qt::black);
         if(ownTank->getType()) {
-            painter.drawText(900,220,"SELECT SPAWN");
+            painter.drawText(1200,220,"SELECT SPAWN");
         } else {
-            painter.drawText(900,220,"SELECT TANK");
+            painter.drawText(1200,220,"SELECT TANK");
         }
         painter.drawPixmap(500,2490,300,216,tanksMenu);
         int id = ownTank->getType();
         if(id) painter.drawPixmap(900,2490,200,200,classIcons[id-1]);
     }
-
-
     painter.resetTransform();
     painter.scale(scaleX,scaleY);
     //painter.drawRect(0,0,1920,1110);
@@ -773,12 +793,12 @@ void FrmMain::paintEvent(QPaintEvent *e)
         QFont f = painter.font();
         int size,x,y,space;
         if(ownTank->isSpawned()) {
-            size = 12;
+            size = 24;
             x = 20;
             y = 750;
             space = 25;
         } else {
-            size = 25;
+            size = 36;
             x = 30;
             y = 1890;
             space = 75;
@@ -789,7 +809,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
             QString text = chat[chat.size()-i];
             if(text.contains(ownTank->getName()+": ")) {
                 painter.setPen(Qt::black);
-            } else if(text.contains("SERVER: ")) {
+            } else if(text.contains("*SERVER: ")) {
                 painter.setPen(Qt::darkRed);
             } else {
                 painter.setPen(Qt::darkBlue);
@@ -797,6 +817,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
             painter.drawText(x, y-(i*space),text);
         }
     }
+
     if(tab) {
         int offset = 350;
         painter.setPen(Qt::red);

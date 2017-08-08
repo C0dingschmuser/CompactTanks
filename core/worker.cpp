@@ -17,17 +17,17 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     t_id = new QTimer(this);
     t_select = new QTimer(this);
     t_visible = new QTimer(this);
+    t_move = new QTimer(this);
     t_main->setTimerType(Qt::PreciseTimer);
     move = new Movement(this->ownTank,this->width,this->height);
-    network = new Network(this->ownTank,tanks,QHostAddress("127.0.0.1")); //ändern
+    network = new Network(this->ownTank,tanks,QHostAddress("62.143.187.202")); //ändern
     shoot = new Shoot(this->ownTank,network,this->aim);
     tankWindow = new FrmTanks(f,ownTank);
     connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
-    connect(network,SIGNAL(playerDeath()),this,SIGNAL(death()));
+    connect(network,SIGNAL(playerDeath()),this,SLOT(on_playerDeath()));
     connect(network,SIGNAL(spawn()),this,SIGNAL(spawn()));
     connect(network,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*)));
     connect(network,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
-    connect(network,SIGNAL(newlvlObj(int,int,int,int,int)),this,SLOT(on_newlvlObj(int,int,int,int,int)));
     connect(network,SIGNAL(delObjs()),this,SLOT(on_delObjs()));
     connect(network,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(network,SIGNAL(delBullet(int)),this,SLOT(on_delBullet(int)));
@@ -53,8 +53,10 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     connect(t_id,SIGNAL(timeout()),this,SLOT(on_tid()));
     connect(t_select,SIGNAL(timeout()),this,SLOT(on_tselect()));
     connect(t_visible,SIGNAL(timeout()),this,SLOT(on_tvisible()));
+    connect(t_move,SIGNAL(timeout()),this,SLOT(on_tmove()));
     t_bullet->start(2);
     t_main->start(4);
+    t_move->start(5);
     //loadMap();
 }
 
@@ -109,6 +111,10 @@ void Worker::on_tid()
 void Worker::on_pos(Tank *p, int x, int y, int dir, int health, int angle, int spotted, int stimer)
 {
     int diff = getDifference(stimer,timer);
+    /*qDebug()<<stimer;
+    qDebug()<<timer;
+    qDebug()<<diff/p->getTimer();
+    qDebug()<<"-------------";*/
     p->setAll(x,y,dir,health,diff/p->getTimer());
     p->setAngle(angle);
     p->setSpotted(spotted);
@@ -175,11 +181,6 @@ void Worker::on_delPlayer(int pos)
 {
     tanks.removeAt(pos);
     emit delPlayer(pos);
-}
-
-void Worker::on_newlvlObj(int x, int y, int w, int h, int type)
-{
-    //loadMap();
 }
 
 void Worker::on_delObjs()
@@ -286,6 +287,7 @@ void Worker::on_tvisible()
 
 void Worker::on_capobj(int num, int owner, int cp)
 {
+    if(num>lvlObjs.size()-1) return;
     lvlObjs[num]->setOwner(owner);
     lvlObjs[num]->setAmount(cp);
 }
@@ -310,6 +312,11 @@ void Worker::on_tmain()
     }
 }
 
+void Worker::on_playerDeath()
+{
+    emit death();
+}
+
 void Worker::doSpawn()
 {
     //ownTank->setSpawned(true);
@@ -324,13 +331,32 @@ void Worker::on_spawn(Tank *t)
             dbTanks[id-1]->getWidth(),dbTanks[id-1]->getHeight(),dbTanks[id-1]->getBarrelLength(),dbTanks[id-1]->getTreeColl());
 }
 
+void Worker::on_tmove()
+{
+    for(int i=0;i<tanks.size();i++) {
+        if(tanks[i]->isSpawned()&&tanks[i]->getRect().x()!=-200) {
+            tanks[i]->move();
+        }
+    }
+}
+
 void Worker::chat(QString message)
 {
     if(message=="") return;
-    if(contains(message,":|~")) {
-        emit chatS("Fehler: Zeichen verboten");
+    if(contains(message,"|~")) {
+        emit chatS("Fehler: Zeichen verboten!");
         return;
     }
+    if(message.size()>30) {
+        emit chatS("Fehler: Text zu lang!");
+        return;
+    }
+    message.replace("ä","&1");
+    message.replace("ö", "&2");
+    message.replace("ü","&3");
+    message.replace("Ä","&11");
+    message.replace("Ö", "&22");
+    message.replace("Ü","&33");
     network->send("|3#"+ownTank->getName()+": "+message);
 }
 
@@ -422,7 +448,7 @@ double Worker::getDifference(double v1,double v2)
 void Worker::keyP(QKeyEvent *e)
 {
     if(!ownTank->isSpawned()) return;
-    move->keyPressEvent(e,lvlObjs);
+    move->keyPressEvent(e,lvlObjs,startPos,endPos);
 }
 
 void Worker::keyR(QKeyEvent *e)

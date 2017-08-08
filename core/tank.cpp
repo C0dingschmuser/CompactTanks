@@ -25,6 +25,7 @@ Tank::Tank(QRect rect, QString name, int team)
     spotted = 1;
     coins = 0;
     type = 0;
+    endSpeed = 0;
     grid = QPixmap(":/images/area/grid2.png");
     this->team = team;
     for(int i=0;i<4;i++) {
@@ -151,6 +152,7 @@ void Tank::setType(int type)
         imgs.append(p);
     }
     currentImg = imgs[0];
+    turret = QPixmap(":/images/tank/"+QString::number(type,'f',0)+"/turm.png");
 }
 
 void Tank::setData(int type, int speed, int health, int bvel, int reload, int width, int height, int barrelLength, int treeColl)
@@ -236,21 +238,7 @@ QPoint Tank::getShootPoint()
             p = QPoint(rect.center().x(),rect.center().y()+2);
         break;
         case 2:
-            switch(dir) {
-                case 1:
-                    p = QPoint(rect.center().x(),rect.center().y()+10);
-                break;
-                case 2:
-                    p = QPoint(rect.center().x()+10,rect.center().y()+2);
-                break;
-                case 3:
-                    p = QPoint(rect.center().x(),rect.center().y()-10);
-                break;
-                case 4:
-                    p = QPoint(rect.center().x()-10,rect.center().y()+2);
-                break;
-            }
-
+            p = QPoint(rect.center().x(),rect.center().y()+2);
         break;
         case 3:
             p = QPoint(rect.center().x(),rect.center().y()+2);
@@ -299,12 +287,12 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     //p.drawRect(r);
     p.drawPixmap(xt,yt,rect.width(),rect.height(),imgs[dir-1]);
     QFont f = p.font();
-    f.setPointSize(6);
+    f.setPointSize(12);
     p.setFont(f);
     QFontMetrics m(f);
     QRect br = m.boundingRect(name);
     p.setPen(Qt::NoPen);
-    p.drawRect(xt,yt-br.height()*0.7-2,br.width(),br.height()*0.7);
+    p.drawRect(xt-2,yt-br.height()-2,br.width()+3,(br.height()+4)/2);
     p.setPen(Qt::NoPen);
     if(health>maxHealth*0.8) {
         p.setBrush(QColor(34,177,76));
@@ -319,15 +307,39 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     }
     p.drawRect(xt+1,yt+rect.height()+3,40*((double)health/maxHealth),10);
     p.setPen(Qt::black);
-    p.drawText(QPoint(xt,yt-br.height()*0.7+11),name);
-    p.drawText(xt+8,yt+rect.height()+13,QString::number(health,'f',0));
+    p.drawText(QPointF(xt,yt-br.height()/2),name);
+    p.drawText(QPointF(xt+8,yt+rect.height()+13),QString::number(health,'f',0));
     if(barrel) {
-        QPen pen;
-        pen.setColor(Qt::black);
-        pen.setWidth(barrelLength);
-        p.setPen(pen);
-        p.drawLine(getBarrel(xt,yt));
-        p.setPen(Qt::black);
+        p.save();
+        switch(type) {
+            case 1:
+                p.translate(xt+20,yt+20);
+                p.rotate(-angle);
+                p.drawPixmap(-20,-25,50,50,turret);
+            break;
+            case 2:
+                p.translate(xt+25,yt+23);
+                p.rotate(-angle);
+                p.drawPixmap(-25,-30,100,60,turret);
+            break;
+            case 3:
+                p.translate(xt+20,yt+20);
+                p.rotate(-angle);
+                p.drawPixmap(-25,-25,50,50,turret);
+            break;
+            case 4:
+                p.translate(xt+25,yt+25);
+                p.rotate(-angle);
+                p.drawPixmap(-25,-20,80,40,turret);
+            break;
+        }
+        p.restore();
+        /*p.setPen(Qt::red);
+        p.setBrush(Qt::red);
+        p.drawRect(xt+20,yt+20,1,1);
+        p.setPen(Qt::green);
+        p.setBrush(Qt::green);
+        p.drawRect(xt+30,yt+25,1,1);*/
     }
     p.setOpacity(1.0);
 }
@@ -335,7 +347,7 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
 void Tank::move()
 {
     //rect.moveTo(targetPos.x(),targetPos.y());
-    int speed = this->speed;
+    int speed = this->endSpeed/5;
     if(rect.x()<targetPos.x()-speed-1) {
         rect.moveTo(rect.x()+speed,rect.y());
         //targetPos.setX(targetPos.x()+1);
@@ -388,30 +400,37 @@ void Tank::setAll(int x, int y, int dir, int health, int diff)
         targetPos = QPoint(x,y);
     } else {
         if(rect.x()!=x||rect.y()!=y) rect.moveTo(x,y);
+        int tx = x;
+        int ty = y;
         int s = (speed*diff);
         switch(dir) {
             case 1:
                 if(getDifference(y,y-s)>s) {
                     y-=s;
+                    ty-=s*2;
                 }
             break;
             case 2:
                 if(getDifference(x,x-s)>s) {
                     x-=s;
+                    tx-=s*2;
                 }
             break;
             case 3:
                 if(getDifference(y,y+s)>s) {
                     y+=s;
+                    ty+=s*2;
                 }
             break;
             case 4:
                 if(getDifference(x,x+s)>s) {
                     x+=s;
+                    tx-=s*2;
                 }
             break;
         }
-        targetPos = QPoint(x,y);
+        endSpeed = s*2;
+        targetPos = QPoint(tx,ty);
         //rect.moveTo(x,y);
         this->dir = dir;
     }

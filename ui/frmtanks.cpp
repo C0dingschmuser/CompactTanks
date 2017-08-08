@@ -6,7 +6,7 @@ FrmTanks::FrmTanks(QFont f,Tank *ownTank, QOpenGLWidget *parent) :
     ui(new Ui::FrmTanks)
 {
     ui->setupUi(this);
-    f.setPointSize(8);
+    f.setPointSize(10);
     font = f;
     this->ownTank = ownTank;
     id = 0;
@@ -35,7 +35,7 @@ void FrmTanks::paintEvent(QPaintEvent *e)
         int width = 240;
         painter.setPen(Qt::black);
         painter.setFont(font);
-        painter.drawText(QPoint(605,23),"Schaden: "+QString::number(dmg*0.7)+"-"+QString::number(dmg*1.3)+"HP");
+        painter.drawText(QPoint(605,23),"Schaden: "+QString::number(dmg*0.7,'f',0)+"-"+QString::number(dmg*1.3,'f',0)+"HP");
         painter.setPen(Qt::NoPen);
         painter.setBrush(Qt::darkGray);
         painter.drawRect(605,27,width,10);

@@ -31,6 +31,7 @@ public:
     void MousePressEvent(QMouseEvent *e);
     void MouseReleaseEvent(QMouseEvent *e);
     void setMpos(QPoint mpos);
+    void reset();
 
 signals:
     void newBullet(Bullet *b);

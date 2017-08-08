@@ -86,7 +86,7 @@ void Network::on_tmain()
     }*/
     if(!ownTank->isSpawned()) return;
     QByteArray data;
-    data.append(QString("|0#"+ownTank->toString()+"#"+QString::number(timer)+"#~").toUtf8());
+    data.append(QString("|0#"+ownTank->toString()+QString::number(timer)+"#~").toUtf8());
     udpSocket->writeDatagram(data,ip,38889);
 }
 
@@ -145,6 +145,7 @@ void Network::fetchTCP(QString data)
                     break;
                     case -7: //setownpos spawn
                         //emit spawn, start animation
+                        if(ownTank->isSpawned()) return;
                         ownTank->setAll(list.at(2).toInt(),list.at(3).toInt());
                         if(list.at(1).toInt()) {
                             ownTank->setColor(1);
@@ -167,7 +168,6 @@ void Network::fetchTCP(QString data)
                         {
                             if(list.size()>8) {
                                 //9 = timer
-                                //qDebug()<<data;
                                 Tank *tmp = sucheTank(list.at(1));
                                 emit pos(tmp,list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(6).toInt(),list.at(8).toInt(),list.at(5).toInt(),list.at(9).toInt());
                                 /*tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(6).toInt());
@@ -221,7 +221,7 @@ void Network::fetchTCP(QString data)
                     case 3: //lvlobj
                         {
                             if(list.size()>4) {
-                                emit newlvlObj(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt());
+                                //emit newlvlObj(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt());
                             }
                         }
                     break;
@@ -305,8 +305,24 @@ void Network::fetchTCP(QString data)
                                    list.at(7).toInt(),list.at(8).toInt(),list.at(9).toDouble(),list.at(10).toDouble(),list.at(11).toDouble(),list.at(12).toInt(),
                                    list.at(13).toInt());
                         break;
-                    case 15:
+                    case 15: //chat
                         emit chat(list.at(1));
+                    break;
+                    case 16: //teamwechsel
+                        if(list.at(1)==ownTank->getName()) {
+                            if(ownTank->getTeam()==1) {
+                                ownTank->setTeam(2);
+                            } else if(ownTank->getTeam()==2) {
+                                ownTank->setTeam(2);
+                            }
+                        } else {
+                            Tank *t = sucheTank(list.at(1));
+                            if(t->getTeam()==1) {
+                                t->setTeam(2);
+                            } else if(t->getTeam()==2) {
+                                t->setTeam(1);
+                            }
+                        }
                     break;
                 }
             }
