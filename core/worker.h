@@ -36,7 +36,9 @@ private slots:
     void on_capobj(int num,int owner,int cp);
     void on_setT(int timer);
     void on_pos(Tank *p,int x,int y,int dir,int health, int angle,int spotted,int stimer);
-    void on_db(int id, int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel);
+    void on_db(int id, int dmg, int reload, int speed, int health, int width, int height, int barrelLength,
+               double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel,
+               int camo, int viewrange);
     void on_conn(int id);
     void on_tid();
     void on_spawn(Tank *t);
@@ -44,6 +46,8 @@ private slots:
     void on_tvisible();
     void on_playerDeath();
     void on_tmove();
+    void on_reset(int team);
+    void on_tRespawn();
 private:
     QRect viewRect;
     QTimer *t_bullet;
@@ -53,6 +57,7 @@ private:
     QTimer *t_select;
     QTimer *t_visible;
     QTimer *t_move;
+    QTimer *t_respawn;
     Tank *ownTank;
     FrmTanks *tankWindow;
     QWidget *mainWindow;
@@ -79,6 +84,7 @@ private:
     int startPos;
     int endPos;
     int selected;
+    int respawn;
     void loadMap();
     int getType(int type);
     bool contains(QString data, QString c);
@@ -119,13 +125,17 @@ signals:
     void connFail();
     void connSuccess();
     void wrongData(int id);
-    void shot();
-    void hit(Tank *t, int dmg);
+    void shot(int type);
+    void hit(Tank *t, QString dmg);
     void spawn();
     void death();
     void msgbox(QString title,QString text);
     void otherDeath(QRect rect);
     void chatS(QString message);
+    void ping(int ping);
+    void teamCP(int team1cp, int team2cp);
+    void resetMatch(int team);
+    void ownHit();
 };
 
 #endif // WORKER_H

@@ -3,16 +3,21 @@
 
 #include <QObject>
 #include <QSoundEffect>
+#include <QVector>
 
 class Sound : public QObject
 {
     Q_OBJECT
 private:
-    QSoundEffect *shot;
+    QVector <QSoundEffect*> shot;
+    QSoundEffect *ownHit;
+    QSoundEffect *death;
 public:
     explicit Sound(QObject *parent = nullptr);
     void setVolume(double volume);
-    void playShot();
+    void playShot(int type);
+    void playOwnHit();
+    void playDeath();
 signals:
 
 public slots:

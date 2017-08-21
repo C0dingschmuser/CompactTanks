@@ -44,6 +44,8 @@ private:
     double calcSpeed(int value);
     int treeColl;
     int vel;
+    int camo;
+    int viewrange;
 protected:
     void paintEvent(QPaintEvent *e) override;
 private slots:

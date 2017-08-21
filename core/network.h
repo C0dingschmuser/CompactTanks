@@ -17,9 +17,11 @@ private slots:
     void on_disconnect();
     void on_tmain();
     void on_tdisconnect();
+    void on_tping();
 private:
     QHostAddress ip;
     QTimer *t_main;
+    QTimer *t_ping;
     QTimer *t_disconnect;
     QTcpSocket *tcpSocket;
     QUdpSocket *udpSocketListen;
@@ -27,13 +29,13 @@ private:
     QVector <Tank*> players;
     QByteArray buffer;
     Tank *ownTank;
-    Tank *sucheTank(QString name);
     int getArrayPos(QString name);
     void fetchUDP(QString data);
     void fetchTCP(QString data);
     bool check(QStringList l,int anz);
     quint16 udpPort;
     int timer;
+    bool connected;
 public:
     explicit Network(Tank *ownTank, QVector<Tank*> t, QHostAddress ip, QObject *parent = 0);
     ~Network();
@@ -43,6 +45,7 @@ public:
     void setTimer(int timer);
     void stop();
     int getDistance(QPoint p1,QPoint p2);
+    Tank *sucheTank(QString name);
 
 signals:
     void pos(Tank *p,int x,int y,int dir,int health, int angle,int spotted,int stimer);
@@ -63,12 +66,18 @@ signals:
     void capobj(int num,int owner,int cp);
     void setT(int timer);
     void conn(int id);
-    void hit(Tank *t,int dmg);
+    void hit(Tank *t,QString dmg);
     void spawn();
-    void stats(int id, int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel);
+    void stats(int id, int dmg, int reload, int speed, int health, int width, int height, int barrelLength,
+               double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel,
+               int camo, int viewrange);
     void spawn(Tank *t);
     void otherDeath(QRect rect);
     void chat(QString message);
+    void ping(int ping);
+    void teamCP(int team1cp, int team2cp);
+    void reset(int team);
+    void ownHit();
 public slots:
 };
 

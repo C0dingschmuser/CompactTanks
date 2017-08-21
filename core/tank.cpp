@@ -1,11 +1,7 @@
 #include "tank.h"
 
-Tank::Tank()
-{
-
-}
-
-Tank::Tank(QRect rect, QString name, int team)
+Tank::Tank(QRect rect, QString name, int team, QObject *parent) :
+    QObject(parent)
 {
     this->rect = rect;
     this->name = name;
@@ -155,7 +151,7 @@ void Tank::setType(int type)
     turret = QPixmap(":/images/tank/"+QString::number(type,'f',0)+"/turm.png");
 }
 
-void Tank::setData(int type, int speed, int health, int bvel, int reload, int width, int height, int barrelLength, int treeColl)
+void Tank::setData(int type, int speed, int health, int bvel, int reload, int width, int height, int barrelLength, int treeColl, int camo, int viewrange)
 {
     setType(type);
     this->timer = ((double)speed/10)/2;
@@ -167,6 +163,8 @@ void Tank::setData(int type, int speed, int health, int bvel, int reload, int wi
     this->height = height;
     this->barrelLength = barrelLength;
     this->treeColl = treeColl;
+    this->camo = camo;
+    this->viewRange = viewrange;
     rect = QRect(rect.x(),rect.y(),width,height);
 }
 
@@ -225,6 +223,11 @@ int Tank::getID()
     return currentID;
 }
 
+int Tank::getViewrange()
+{
+    return viewRange;
+}
+
 QPoint Tank::getDeathPoint()
 {
     return deathPoint;
@@ -246,8 +249,16 @@ QPoint Tank::getShootPoint()
         case 4:
             p = QPoint(rect.center().x(),rect.center().y()+2);
         break;
+        default:
+            p = QPoint(rect.center().x(),rect.center().y()+2);
+        break;
     }
     return p;
+}
+
+void Tank::setUsername(QString text)
+{
+    this->name = text;
 }
 
 void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
@@ -305,7 +316,7 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     } else if(health>0) {
         p.setBrush(QColor(237,28,36));
     }
-    p.drawRect(xt+1,yt+rect.height()+3,40*((double)health/maxHealth),10);
+    p.drawRect(xt+1,yt+rect.height()+3,rect.width()*((double)health/maxHealth),10);
     p.setPen(Qt::black);
     p.drawText(QPointF(xt,yt-br.height()/2),name);
     p.drawText(QPointF(xt+8,yt+rect.height()+13),QString::number(health,'f',0));
@@ -328,16 +339,31 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
                 p.drawPixmap(-25,-25,50,50,turret);
             break;
             case 4:
+                p.translate(xt+30,yt+30);
+                p.rotate(-angle);
+                p.drawPixmap(-30,-25,90,50,turret);
+            break;
+            case 5:
                 p.translate(xt+25,yt+25);
                 p.rotate(-angle);
-                p.drawPixmap(-25,-20,80,40,turret);
+                p.drawPixmap(-35,-21,80,40,turret);
+            break;
+            case 6:
+                p.translate(xt+20,yt+20);
+                p.rotate(-angle);
+                p.drawPixmap(-40,-19,80,40,turret);
+            break;
+            case 7:
+                p.translate(xt+25,yt+25);
+                p.rotate(-angle);
+                p.drawPixmap(-20,-21,80,40,turret);
             break;
         }
         p.restore();
         /*p.setPen(Qt::red);
         p.setBrush(Qt::red);
-        p.drawRect(xt+20,yt+20,1,1);
-        p.setPen(Qt::green);
+        p.drawRect(xt+30,yt+30,1,1);
+        /*p.setPen(Qt::green);
         p.setBrush(Qt::green);
         p.drawRect(xt+30,yt+25,1,1);*/
     }

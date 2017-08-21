@@ -20,6 +20,7 @@
 #include "core/worker.h"
 #include "core/animation.h"
 #include "core/expanimation.h"
+#include "core/filedownloader.h"
 #include "ui/frmlogin.h"
 
 namespace Ui {
@@ -52,11 +53,11 @@ private slots:
     void on_tab();
     void on_connFail();
     void on_newMap(QVector<Terrain*> lvlObjs);
-    void on_connectData(QString username,QString pw, double volume);
+    void on_connectData(QString username, QString pw, double volume, int graphics, bool lowTexture);
     void on_connSuccess();
     void on_wrongData(int id);
-    void on_shot();
-    void on_hit(Tank *t, int dmg);
+    void on_shot(int type);
+    void on_hit(Tank *t, QString dmg);
     void on_thit();
     void on_spawn();
     void on_tspawn();
@@ -66,6 +67,11 @@ private slots:
     void on_otherDeath(QRect rect);
     void on_tExpAn();
     void on_ttime();
+    void on_ping(int ping);
+    void on_teamCP(int team1cp, int team2cp);
+    void on_resetMatch(int team);
+    void on_download();
+    void on_ownHit();
 
 private:
     Ui::FrmMain *ui;
@@ -88,6 +94,7 @@ private:
     QTimer *t_expAn;
     QTimer *t_time;
     QThread *workerThread;
+    FileDownloader *updateDL;
     bool lowGraphics;
     bool chatActive;
     QPoint *aim;
@@ -100,6 +107,11 @@ private:
     int height;
     int sAstep;
     int msgCount;
+    int ping;
+    int graphics;
+    int team1CP;
+    int team2CP;
+    int maxDmg;
     double transX;
     double transY;
     double scaleX;
@@ -119,9 +131,13 @@ private:
     QPixmap sSpawn;
     QPixmap sCap;
     QPixmap tanksMenu;
+    QPixmap win;
+    QPixmap map;
+    QPainter::PixmapFragment camera;
     QString version;
     bool contains(QString data, QString c);
     void closeEvent(QCloseEvent *e) override;
+    void drawPlayerScores(QPainter &p);
     FrmLogin *login;
 protected:
     void paintEvent(QPaintEvent *e) override;

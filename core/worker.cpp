@@ -10,6 +10,7 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     classID = 0;
     startPos = 0;
     endPos = 1200;
+    respawn = 0;
     this->mainWindow = mainWindow;
     t_bullet = new QTimer(this);
     t_main = new QTimer(this);
@@ -18,9 +19,11 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     t_select = new QTimer(this);
     t_visible = new QTimer(this);
     t_move = new QTimer(this);
+    t_respawn = new QTimer(this);
     t_main->setTimerType(Qt::PreciseTimer);
     move = new Movement(this->ownTank,this->width,this->height);
-    network = new Network(this->ownTank,tanks,QHostAddress("62.143.187.202")); //ändern
+    //79.137.121.62
+    network = new Network(this->ownTank,tanks,QHostAddress("37.120.177.121")); //ändern
     shoot = new Shoot(this->ownTank,network,this->aim);
     tankWindow = new FrmTanks(f,ownTank);
     connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
@@ -40,11 +43,15 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     connect(network,SIGNAL(setT(int)),this,SLOT(on_setT(int)));
     connect(network,SIGNAL(pos(Tank*,int,int,int,int,int,int,int)),this,SLOT(on_pos(Tank*,int,int,int,int,int,int,int)));
     connect(network,SIGNAL(conn(int)),this,SLOT(on_conn(int)));
-    connect(network,SIGNAL(hit(Tank*,int)),this,SIGNAL(hit(Tank*,int)));
-    connect(network,SIGNAL(stats(int,int,int,int,int,int,int,int,double,double,double,int,int)),this,SLOT(on_db(int,int,int,int,int,int,int,int,double,double,double,int,int)));
+    connect(network,SIGNAL(hit(Tank*,QString)),this,SIGNAL(hit(Tank*,QString)));
+    connect(network,SIGNAL(stats(int,int,int,int,int,int,int,int,double,double,double,int,int,int,int)),this,SLOT(on_db(int,int,int,int,int,int,int,int,double,double,double,int,int,int,int)));
     connect(network,SIGNAL(spawn(Tank*)),this,SLOT(on_spawn(Tank*)));
     connect(network,SIGNAL(otherDeath(QRect)),this,SIGNAL(otherDeath(QRect)));
     connect(network,SIGNAL(chat(QString)),this,SIGNAL(chatS(QString)));
+    connect(network,SIGNAL(ping(int)),this,SIGNAL(ping(int)));
+    connect(network,SIGNAL(teamCP(int,int)),this,SIGNAL(teamCP(int,int)));
+    connect(network,SIGNAL(reset(int)),this,SLOT(on_reset(int)));
+    connect(network,SIGNAL(ownHit()),this,SIGNAL(ownHit()));
     connect(move,SIGNAL(fullscreen()),this,SIGNAL(fullscreen()));
     connect(move,SIGNAL(tab()),this,SIGNAL(tab()));
     connect(shoot,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
@@ -54,6 +61,7 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     connect(t_select,SIGNAL(timeout()),this,SLOT(on_tselect()));
     connect(t_visible,SIGNAL(timeout()),this,SLOT(on_tvisible()));
     connect(t_move,SIGNAL(timeout()),this,SLOT(on_tmove()));
+    connect(t_respawn,SIGNAL(timeout()),this,SLOT(on_tRespawn()));
     t_bullet->start(2);
     t_main->start(4);
     t_move->start(5);
@@ -78,6 +86,7 @@ void Worker::connectToServer(QString username, QString password, QString version
     //t_conn->start(200);
     if(network->connectToServer(username,password,version)) {
         this->username = username;
+
         t_conn->stop();
     } else {
         emit connFail();
@@ -110,6 +119,7 @@ void Worker::on_tid()
 
 void Worker::on_pos(Tank *p, int x, int y, int dir, int health, int angle, int spotted, int stimer)
 {
+    if(!p->isSpawned()) return;
     int diff = getDifference(stimer,timer);
     /*qDebug()<<stimer;
     qDebug()<<timer;
@@ -123,9 +133,9 @@ void Worker::on_pos(Tank *p, int x, int y, int dir, int health, int angle, int s
     qDebug()<<stimer;*/
 }
 
-void Worker::on_db(int id, int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel)
+void Worker::on_db(int id, int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel, int camo, int viewrange)
 {
-    dbTanks.append(new dbTank("",dmg,reload,speed,health,width,height,barrelLength,softTerrRes,hardTerrRes,treeTerrRes,treeColl,vel));
+    dbTanks.append(new dbTank("",dmg,reload,speed,health,width,height,barrelLength,softTerrRes,hardTerrRes,treeTerrRes,treeColl,vel,camo,viewrange));
     tankWindow->setDB(dbTanks);
 }
 
@@ -195,7 +205,14 @@ void Worker::on_delObjs()
 void Worker::on_newBullet(Bullet *b)
 {
     bullets.append(b);
-    if(b->get().intersects(viewRect)) emit shot();
+    int type = 0;
+    Tank *tmp = network->sucheTank(b->getShooter());
+    if(tmp) {
+        type = tmp->getType();
+    } else {
+        type = ownTank->getType();
+    }
+    if(b->get().intersects(viewRect)) emit shot(type);
     emit newBullet(b);
 }
 
@@ -248,7 +265,7 @@ void Worker::on_visible(int v)
             }
         }
     }
-    if(v||ok) {
+    if(v) {
         ownTank->setVisible(true);
         ok = true;
     } else {
@@ -270,7 +287,7 @@ void Worker::on_tvisible()
             }
         }
         if(tanks[i]->getTeam()==ownTank->getTeam()) {
-            if(ok||tanks[i]->getSpotted()) {
+            if(tanks[i]->getSpotted()) {
                 tanks[i]->setVisible(true);
             } else {
                 tanks[i]->setVisible(false);
@@ -314,6 +331,7 @@ void Worker::on_tmain()
 
 void Worker::on_playerDeath()
 {
+    t_respawn->start(1000);
     emit death();
 }
 
@@ -328,7 +346,8 @@ void Worker::on_spawn(Tank *t)
 {
     int id = t->getType();
     t->setData(id,dbTanks[id-1]->getSpeed(),dbTanks[id-1]->getHealth(),dbTanks[id-1]->getVel(),dbTanks[id-1]->getReload(),
-            dbTanks[id-1]->getWidth(),dbTanks[id-1]->getHeight(),dbTanks[id-1]->getBarrelLength(),dbTanks[id-1]->getTreeColl());
+            dbTanks[id-1]->getWidth(),dbTanks[id-1]->getHeight(),dbTanks[id-1]->getBarrelLength(),dbTanks[id-1]->getTreeColl(),
+            dbTanks[id-1]->getCamo(),dbTanks[id-1]->getViewrange());
 }
 
 void Worker::on_tmove()
@@ -340,17 +359,41 @@ void Worker::on_tmove()
     }
 }
 
+void Worker::on_reset(int team)
+{
+    emit resetMatch(team);
+    for(int i=0;i<capObjs.size();i++) {
+        int num = capObjs[i];
+        lvlObjs[num]->setAmount(0);
+        lvlObjs[num]->setOwner(0);
+    }
+    for(int i=0;i<tanks.size();i++) {
+        tanks[i]->setSpawned(false);
+        tanks[i]->setAll(-200,-200);
+    }
+    t_respawn->start(1000);
+}
+
+void Worker::on_tRespawn()
+{
+    if(respawn>0) {
+        respawn--;
+        if(!respawn) t_respawn->stop();
+    }
+}
+
 void Worker::chat(QString message)
 {
     if(message=="") return;
-    if(contains(message,"|~")) {
+    if(contains(message,"|*~")) {
         emit chatS("Fehler: Zeichen verboten!");
         return;
     }
-    if(message.size()>30) {
+    if(message.size()>40) {
         emit chatS("Fehler: Text zu lang!");
         return;
     }
+    message.replace("ß","&0");
     message.replace("ä","&1");
     message.replace("ö", "&2");
     message.replace("ü","&3");
@@ -391,6 +434,7 @@ void Worker::loadMap()
     spawns.append(QRect(0,1800,144,216)); //links unten
     spawns.append(QRect(2736,504,144,216)); //rechts oben
     spawns.append(QRect(2736,1296,144,216)); //rechts unten
+    move->setSpawns(spawns);
     classRects.append(QRect(500,2490,300,216));
     classRects.append(QRect(900,2490,300,216));
     t_select->start(50);
@@ -447,13 +491,13 @@ double Worker::getDifference(double v1,double v2)
 
 void Worker::keyP(QKeyEvent *e)
 {
-    if(!ownTank->isSpawned()) return;
+    //if(!ownTank->isSpawned()) return;
     move->keyPressEvent(e,lvlObjs,startPos,endPos);
 }
 
 void Worker::keyR(QKeyEvent *e)
 {
-    if(!ownTank->isSpawned()) return;
+    //if(!ownTank->isSpawned()) return;
     move->keyReleaseEvent(e);
 }
 
@@ -468,6 +512,8 @@ void Worker::mPrs(QMouseEvent *e, bool SD)
                 if(!ownTank->getType()) {
                     emit msgbox("FEHLER","Wähle zuerst einen Panzer aus!");
                 } else {
+                    if(respawn) return;
+                    respawn = 3;
                     if(tankWindow->isVisible()) tankWindow->hide();
                     doSpawn();
                 }

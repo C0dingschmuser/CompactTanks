@@ -3,14 +3,13 @@
 #include <QtMath>
 #include <QRect>
 #include <QColor>
-#include <QPropertyAnimation>
 #include <QDebug>
 class Bullet
 {
 public:
     Bullet();
     ~Bullet();
-    Bullet(int x, int y, double x2, double y2, int vel, QString shooter, QColor color = Qt::black, int onImpact = 0);
+    Bullet(int x, int y, double x2, double y2, int vel, QString shooter, bool heal = false, QColor color = Qt::black);
     void setColl(bool coll);
     void update();
     void sync(int x, int y, int elapsed=-1);
@@ -32,7 +31,7 @@ private:
     double x2;
     double y2;
     int vel;
-    int onImpact;
+    bool heal;
     QString shooter;
     int elapsed;
     int dmg;

@@ -12,7 +12,7 @@ Shoot::Shoot(Tank *t, Network *n, QPoint *aim, QObject *parent) : QObject(parent
     w = new Weapon(150,1000);
     connect(t_cool,SIGNAL(timeout()),this,SLOT(on_tcool()));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
-    t_main->start(50);
+    t_main->start(25);
 }
 
 void Shoot::on_tcool()

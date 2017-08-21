@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>306</height>
    </rect>
   </property>
   <property name="font">
@@ -34,7 +34,7 @@
     </font>
    </property>
    <property name="text">
-    <string>aaa</string>
+    <string/>
    </property>
   </widget>
   <widget class="QLineEdit" name="edtPassword">
@@ -106,10 +106,10 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>10</y>
+     <x>10</x>
+     <y>-10</y>
      <width>231</width>
-     <height>81</height>
+     <height>91</height>
     </rect>
    </property>
    <property name="font">
@@ -126,7 +126,7 @@
    <property name="geometry">
     <rect>
      <x>210</x>
-     <y>70</y>
+     <y>50</y>
      <width>171</width>
      <height>81</height>
     </rect>
@@ -183,7 +183,7 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>210</y>
+     <y>170</y>
      <width>121</width>
      <height>71</height>
     </rect>
@@ -202,7 +202,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>160</y>
+     <y>162</y>
      <width>131</width>
      <height>16</height>
     </rect>
@@ -253,6 +253,140 @@
    </property>
    <property name="text">
     <string>10%</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_8">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>120</y>
+     <width>131</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>12</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Grafik:</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="cbGraphics">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>140</y>
+     <width>131</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="currentIndex">
+    <number>1</number>
+   </property>
+   <item>
+    <property name="text">
+     <string>Niedrig</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Mittel</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Hoch</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QCheckBox" name="cBoxTextures">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>-400</x>
+     <y>140</y>
+     <width>121</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Niedrige Texturen</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_9">
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>237</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Noch kein Konto?</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnRegister">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>252</y>
+     <width>121</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+    </font>
+   </property>
+   <property name="text">
+    <string>Registrieren</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_10">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>292</y>
+     <width>371</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>8</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Dev: FireDiver,  Bilder:  Soldiermelly &amp; Darmzotte, Server: AciVanConis</string>
    </property>
   </widget>
  </widget>

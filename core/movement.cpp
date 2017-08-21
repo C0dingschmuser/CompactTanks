@@ -57,6 +57,20 @@ void Movement::on_tmoveW() {
                     }
                 }
             }
+            int min,max;
+            switch(ownTank->getTeam()) {
+                case 1:
+                    min=2;
+                    max=4;
+                break;
+                case 2:
+                    min=0;
+                    max=2;
+                break;
+            }
+            for(int i=min;i<max;i++) {
+                if(QRect(r.x(),r.y()-s,r.width(),r.height()).intersects(spawns[i])) ok = true;
+            }
             if(!ok) {
                 ownTank->w();
             }
@@ -78,6 +92,20 @@ void Movement::on_tmoveA() {
                         break;
                     }
                 }
+            }
+            int min,max;
+            switch(ownTank->getTeam()) {
+                case 1:
+                    min=2;
+                    max=4;
+                break;
+                case 2:
+                    min=0;
+                    max=2;
+                break;
+            }
+            for(int i=min;i<max;i++) {
+                if(QRect(r.x()-s,r.y(),r.width(),r.height()).intersects(spawns[i])) ok = true;
             }
             if(!ok) {
                 ownTank->a();
@@ -101,6 +129,20 @@ void Movement::on_tmoveS() {
                     }
                 }
             }
+            int min,max;
+            switch(ownTank->getTeam()) {
+                case 1:
+                    min=2;
+                    max=4;
+                break;
+                case 2:
+                    min=0;
+                    max=2;
+                break;
+            }
+            for(int i=min;i<max;i++) {
+                if(QRect(r.x(),r.y()+s,r.width(),r.height()).intersects(spawns[i])) ok = true;
+            }
             if(!ok) {
                 ownTank->s();
             }
@@ -123,6 +165,20 @@ void Movement::on_tmoveD() {
                     }
                 }
             }
+            int min,max;
+            switch(ownTank->getTeam()) {
+                case 1:
+                    min=2;
+                    max=4;
+                break;
+                case 2:
+                    min=0;
+                    max=2;
+                break;
+            }
+            for(int i=min;i<max;i++) {
+                if(QRect(r.x()+s,r.y(),r.width(),r.height()).intersects(spawns[i])) ok = true;
+            }
             if(!ok) {
                 ownTank->d();
             }
@@ -133,6 +189,7 @@ void Movement::on_tmoveD() {
 
 void Movement::keyPressEvent(QKeyEvent *e, QVector<Terrain *> lvlObjs, int sPos, int ePos)
 {
+    if(!ownTank->isSpawned()) return;
     this->lvlObjs = lvlObjs;
     QRect r = ownTank->getRect();
     int s = ownTank->getSpeed();
@@ -170,6 +227,10 @@ void Movement::keyPressEvent(QKeyEvent *e, QVector<Terrain *> lvlObjs, int sPos,
 
 void Movement::keyReleaseEvent(QKeyEvent *e)
 {
+    if(e->key()==Qt::Key_F11) {
+        emit fullscreen();
+    }
+    if(!ownTank->isSpawned()) return;
     if(e->key()==Qt::Key_W) {
         t_moveW->stop();
         ownTank->setMoved(false);
@@ -189,9 +250,6 @@ void Movement::keyReleaseEvent(QKeyEvent *e)
     if(e->key()==Qt::Key_Tab) {
         emit tab();
     }
-    if(e->key()==Qt::Key_F11) {
-        emit fullscreen();
-    }
 }
 
 void Movement::stop()
@@ -200,4 +258,9 @@ void Movement::stop()
     t_moveA->stop();
     t_moveS->stop();
     t_moveD->stop();
+}
+
+void Movement::setSpawns(QVector<QRect> spawns)
+{
+    this->spawns = spawns;
 }

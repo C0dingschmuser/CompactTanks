@@ -3,6 +3,7 @@
 #include <QRect>
 #include <QtMath>
 #include <QDebug>
+#include <QObject>
 #include <QString>
 #include <QVector>
 #include <QPointF>
@@ -12,8 +13,9 @@
 #include <QRawFont>
 #include <QPainter>
 
-class Tank
+class Tank : public QObject
 {
+    Q_OBJECT
 private:
     QRect rect;
     QString name;
@@ -39,6 +41,7 @@ private:
     int height;
     int barrelLength;
     int treeColl;
+    int camo;
     double endSpeed;
     QPoint deathPoint;
     bool moved;
@@ -52,8 +55,7 @@ private:
     QPoint targetPos;
     QPoint barrelStart;
 public:
-    Tank();
-    Tank(QRect rect, QString name, int team=-1);
+    explicit Tank(QRect rect, QString name, int team=-1, QObject *parent=0);
     ~Tank();
     bool getMoved();
     QRect getRect();
@@ -73,10 +75,11 @@ public:
     void setSpawned(bool spawned);
     void setDeathPoint(QPoint dPoint);
     void setType(int type);
-    void setData(int type,int speed, int health, int bvel, int reload,int width,int height,int barrelLength,int treeColl);
+    void setData(int type,int speed, int health, int bvel, int reload,int width,int height,int barrelLength,int treeColl, int camo, int viewrange);
     void loadImages();
     void setDamage(int dmg);
     void setHidden(bool hidden);
+    void setUsername(QString text);
     int getDamage();
     int getSpeed();
     int getTimer();
@@ -96,6 +99,7 @@ public:
     int getWidth();
     int getHeight();
     int getEndSpeed();
+    int getViewrange();
     QPoint getDeathPoint();
     QPoint getShootPoint();
     void setVisible(bool visible);

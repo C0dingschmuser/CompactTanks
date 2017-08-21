@@ -26,7 +26,8 @@ SOURCES += ui/main.cpp\
     core/animation.cpp \
     ui/frmtanks.cpp \
     core/dbtank.cpp \
-    core/expanimation.cpp
+    core/expanimation.cpp \
+    core/filedownloader.cpp
 
 HEADERS  += ui/frmmain.h \
     core/tank.h \
@@ -42,7 +43,8 @@ HEADERS  += ui/frmmain.h \
     core/animation.h \
     ui/frmtanks.h \
     core/dbtank.h \
-    core/expanimation.h
+    core/expanimation.h \
+    core/filedownloader.h
 
 FORMS    += ui/frmmain.ui \
     ui/frmlogin.ui \

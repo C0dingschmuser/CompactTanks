@@ -1,6 +1,7 @@
 #ifndef DBTANK_H
 #define DBTANK_H
 #include <QString>
+#include <QDebug>
 
 class dbTank
 {
@@ -13,13 +14,15 @@ private:
     int width;
     int height;
     int barrelLength;
+    int camo;
+    int viewrange;
     double softTerrRes;
     double hardTerrRes;
     double treeTerrRes;
     int treeColl;
     int vel;
 public:
-    dbTank(QString name,int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel);
+    dbTank(QString name,int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel, int camo, int viewrange);
     QString getName();
     int getDmg();
     int getReload();
@@ -28,6 +31,8 @@ public:
     int getWidth();
     int getHeight();
     int getBarrelLength();
+    int getCamo();
+    int getViewrange();
     double getSoftTerrRes();
     double getHardTerrRes();
     double getTreeTerrRes();

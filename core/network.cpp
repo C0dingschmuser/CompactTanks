@@ -7,9 +7,11 @@ Network::Network(Tank *ownTank, QVector<Tank *> t, QHostAddress ip,QObject *pare
     this->ip = ip;
     t_main = new QTimer(this);
     t_disconnect = new QTimer(this);
+    t_ping = new QTimer(this);
     tcpSocket = new QTcpSocket(this);
     udpSocket = new QUdpSocket(this);
     udpSocketListen = new QUdpSocket(this);
+    connected = false;
     //udpSocketListen->bind(QHostAddress::AnyIPv4,8889,QUdpSocket::ShareAddress); //client wartet bei 8889 server bei 8890
     //udpSocketListen->joinMulticastGroup(ip);
     connect(udpSocketListen,SIGNAL(readyRead()),this,SLOT(on_udpRecv()));
@@ -18,6 +20,7 @@ Network::Network(Tank *ownTank, QVector<Tank *> t, QHostAddress ip,QObject *pare
     connect(tcpSocket,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(on_disconnect()));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
     connect(t_disconnect,SIGNAL(timeout()),this,SLOT(on_tdisconnect()));
+    connect(t_ping,SIGNAL(timeout()),this,SLOT(on_tping()));
     t_main->start(10);
 }
 
@@ -110,7 +113,6 @@ void Network::on_udpRecv()
 void Network::send(QString data)
 {
     tcpSocket->write(data.toLatin1());
-    tcpSocket->flush();
 }
 
 void Network::setTimer(int timer)
@@ -131,6 +133,11 @@ bool Network::check(QStringList l, int anz)
     return true;
 }
 
+void Network::on_tping()
+{
+    send("|-2#"+QString::number(timer)+"#~");
+}
+
 void Network::fetchTCP(QString data)
 {
     //if(!data.contains("11#")&&!data.contains("10#")) qDebug()<<data;
@@ -141,8 +148,15 @@ void Network::fetchTCP(QString data)
             if(list.at(1)!=ownTank->getName()) {
                 switch(m) {
                     case -8: //login erfolgreich?
-                        emit conn(list.at(1).toInt());
-                    break;
+                        {
+                            int id = list.at(1).toInt();
+                            if(id==1) {
+                                connected = true;
+                                t_ping->start(1000);
+                            }
+                            emit conn(id);
+                            break;
+                        }
                     case -7: //setownpos spawn
                         //emit spawn, start animation
                         if(ownTank->isSpawned()) return;
@@ -174,8 +188,8 @@ void Network::fetchTCP(QString data)
                                 tmp->setAngle(list.at(8).toInt());
                                 tmp->setSpotted(list.at(5).toInt());*/
                             }
+                            break;
                         }
-                    break;
                     case -2: //bulletsync
                         emit syncBullet(list.at(1).toInt(),list.at(2).toInt());
                     break;
@@ -204,17 +218,17 @@ void Network::fetchTCP(QString data)
                                 emit newPlayer(t);
                                 emit killMessage(list.at(1)+" joined");
                             }
+                            break;
                         }
-                    break;
                     case 2: //spieler entfernen
                         {
                             if(list.size()>0) {
                                 Tank *t = sucheTank(list.at(1));
                                 int pos = getArrayPos(t->getName());
                                 emit killMessage(t->getName()+" left");
-                                delete t;
                                 players.removeAt(pos);
                                 emit delPlayer(pos);
+                                t->deleteLater();
                             }
                         }
                     break;
@@ -287,7 +301,9 @@ void Network::fetchTCP(QString data)
                     case 12: //hit
                         {
                             Tank *t = sucheTank(list.at(1));
-                            emit hit(t,list.at(2).toInt());
+                            QString v = "-";
+                            if(list.at(3).toInt()) v = "+";
+                            emit hit(t,v+list.at(2));
                         }
                     break;
                     case 13: //spawn other
@@ -303,7 +319,7 @@ void Network::fetchTCP(QString data)
                     case 14: //stats
                         emit stats(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(5).toInt(),list.at(6).toInt(),
                                    list.at(7).toInt(),list.at(8).toInt(),list.at(9).toDouble(),list.at(10).toDouble(),list.at(11).toDouble(),list.at(12).toInt(),
-                                   list.at(13).toInt());
+                                   list.at(13).toInt(),list.at(14).toInt(),list.at(15).toInt());
                         break;
                     case 15: //chat
                         emit chat(list.at(1));
@@ -323,6 +339,18 @@ void Network::fetchTCP(QString data)
                                 t->setTeam(1);
                             }
                         }
+                    break;
+                    case 17: //ping
+                        emit ping(list.at(1).toInt());
+                    break;
+                    case 18: //teamCP
+                        emit teamCP(list.at(1).toInt(),list.at(2).toInt());
+                    break;
+                    case 19: //win/lose
+                        emit reset(list.at(1).toInt());
+                    break;
+                    case 20: //ownhit
+                        emit ownHit();
                     break;
                 }
             }
@@ -358,7 +386,7 @@ void Network::fetchUDP(QString data)
 
 Tank* Network::sucheTank(QString name)
 {
-    Tank *tmp;
+    Tank *tmp = NULL;
     for(int i=0;i<players.size();i++) {
         if(players[i]->getName()==name) {
             tmp = players[i];

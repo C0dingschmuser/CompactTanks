@@ -26,6 +26,7 @@ private:
     QTimer *t_moveD;
     QVector<Terrain*>lvlObjs;
     QVector<Terrain*>collObjs;
+    QVector<QRect>spawns;
     int width;
     int height;
     int first;
@@ -36,6 +37,7 @@ public:
     ~Movement();
     void keyPressEvent(QKeyEvent *e,QVector<Terrain*>lvlObjs, int sPos, int ePos);
     void keyReleaseEvent(QKeyEvent *e);
+    void setSpawns(QVector<QRect>spawns);
     void stop();
 
 

@@ -10,7 +10,7 @@ Bullet::~Bullet()
 
 }
 
-Bullet::Bullet(int x, int y, double x2, double y2, int vel, QString shooter, QColor color, int onImpact)
+Bullet::Bullet(int x, int y, double x2, double y2, int vel, QString shooter, bool heal, QColor color)
 {
     this->color = color;
     this->coll = true;
@@ -24,7 +24,7 @@ Bullet::Bullet(int x, int y, double x2, double y2, int vel, QString shooter, QCo
     //this->y += y2*5;
     this->vel = vel/2;
     this->shooter = shooter;
-    this->onImpact = onImpact;
+    this->heal = heal;
     this->dmg = 20;
 }
 
@@ -89,11 +89,6 @@ QRect Bullet::get()
 QColor Bullet::getColor()
 {
     return this->color;
-}
-
-int Bullet::getImpactID()
-{
-    return this->onImpact;
 }
 
 int Bullet::getElapsed()

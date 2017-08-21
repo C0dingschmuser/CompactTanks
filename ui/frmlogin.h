@@ -5,7 +5,9 @@
 #include <QMessageBox>
 #include <QFile>
 #include <QTime>
+#include <QKeyEvent>
 #include <QTextStream>
+#include <QDebug>
 
 namespace Ui {
 class FrmLogin;
@@ -31,8 +33,10 @@ private:
     QFile file;
     bool login;
     void sleep(int ms);
+protected:
+    void keyPressEvent(QKeyEvent *event);
 signals:
-    void connectWithData(QString username,QString pw, double volume);
+    void connectWithData(QString username,QString pw, double volume, int graphics, bool lowTexture);
 };
 
 #endif // FRMLOGIN_H
