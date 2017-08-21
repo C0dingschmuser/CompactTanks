@@ -49,7 +49,7 @@ FrmMain::FrmMain(QWidget *parent) :
     t_draw->setTimerType(Qt::PreciseTimer);
     sound = new Sound();
     lowGraphics = false;
-    version = "v0.0.6.2";
+    version = "v0.0.6.2b";
     updateDL = new FileDownloader(QUrl("http://37.120.177.121/compacttanks/update.zip"));
     connect(updateDL,SIGNAL(downloaded()),this,SLOT(on_download()));
     workerThread = new QThread();
@@ -174,6 +174,7 @@ void FrmMain::on_connSuccess()
     isConnected = false;
     worker->moveToThread(workerThread);
     workerThread->start();
+    //worker->moveObjects(workerThread);
     //this->showMaximized();
     initializeGL();
     login->hide();

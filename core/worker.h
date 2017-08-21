@@ -102,6 +102,7 @@ public:
     void setScale(double scaleX, double scaleY,int transX,int transY);
     void chat(QString message);
     void close();
+    void moveObjects(QThread *thread);
     int getDifference(int v1,int v2);
     int getSelected();
     int getClassID();

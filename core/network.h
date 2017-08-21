@@ -5,6 +5,7 @@
 #include <QTcpSocket>
 #include <QUdpSocket>
 #include <QTimer>
+#include <QStringList>
 #include "tank.h"
 #include "bullet.h"
 

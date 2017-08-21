@@ -5,12 +5,12 @@ Network::Network(Tank *ownTank, QVector<Tank *> t, QHostAddress ip,QObject *pare
     this->ownTank = ownTank;
     this->players = t;
     this->ip = ip;
-    t_main = new QTimer(this);
-    t_disconnect = new QTimer(this);
-    t_ping = new QTimer(this);
-    tcpSocket = new QTcpSocket(this);
-    udpSocket = new QUdpSocket(this);
-    udpSocketListen = new QUdpSocket(this);
+    t_main = new QTimer();
+    t_disconnect = new QTimer();
+    t_ping = new QTimer();
+    tcpSocket = new QTcpSocket();
+    udpSocket = new QUdpSocket();
+    udpSocketListen = new QUdpSocket();
     connected = false;
     //udpSocketListen->bind(QHostAddress::AnyIPv4,8889,QUdpSocket::ShareAddress); //client wartet bei 8889 server bei 8890
     //udpSocketListen->joinMulticastGroup(ip);
@@ -57,8 +57,8 @@ void Network::on_tcpRecv()
     if(buffer.size()>54) {
         QString input = buffer;
         buffer.clear();
-        if(input.contains("|")&&input.at(input.size()-1)=="~") {
-            QStringList p = input.split("|");
+        if(input.contains('|')&&input.at(input.size()-1)=='~') {
+            QStringList p = input.split('|');
             for(int i=1;i<p.size();i++) {
                 fetchTCP(p.at(i));
             }
@@ -112,6 +112,7 @@ void Network::on_udpRecv()
 
 void Network::send(QString data)
 {
+    data.insert(1,".");
     tcpSocket->write(data.toLatin1());
 }
 
@@ -140,7 +141,12 @@ void Network::on_tping()
 
 void Network::fetchTCP(QString data)
 {
-    //if(!data.contains("11#")&&!data.contains("10#")) qDebug()<<data;
+    //qDebug()<<data;
+    if(data.at(0)==".") {
+        data.remove(0,1);
+    } else {
+        return;
+    }
     QStringList list = data.split("#");
     if(list.at(0)!="") {
         int m = list.at(0).toInt();
@@ -159,11 +165,12 @@ void Network::fetchTCP(QString data)
                         }
                     case -7: //setownpos spawn
                         //emit spawn, start animation
-                        if(ownTank->isSpawned()) return;
-                        ownTank->setAll(list.at(2).toInt(),list.at(3).toInt());
-                        if(list.at(1).toInt()) {
-                            ownTank->setColor(1);
-                            emit spawn();
+                        if(!ownTank->isSpawned()) {
+                            ownTank->setAll(list.at(2).toInt(),list.at(3).toInt());
+                            if(list.at(1).toInt()) {
+                                ownTank->setColor(1);
+                                emit spawn();
+                            }
                         }
                     break;
                     case -6: //settimer
@@ -266,7 +273,7 @@ void Network::fetchTCP(QString data)
                         }
                     break;
                     case 7: //ownplayerdeath
-                        if(list.size()>2) {
+                        if(list.size()>3) {
                             ownTank->setSpawned(false);
                             ownTank->setDeathPoint(QPoint(ownTank->getRect().x(),ownTank->getRect().y()));
                             ownTank->teleport(list.at(2).toInt(),list.at(3).toInt());

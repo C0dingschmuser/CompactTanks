@@ -22,7 +22,7 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     t_respawn = new QTimer(this);
     t_main->setTimerType(Qt::PreciseTimer);
     move = new Movement(this->ownTank,this->width,this->height);
-    //79.137.121.62
+    //37.120.177.121
     network = new Network(this->ownTank,tanks,QHostAddress("37.120.177.121")); //ändern
     shoot = new Shoot(this->ownTank,network,this->aim);
     tankWindow = new FrmTanks(f,ownTank);
@@ -406,6 +406,13 @@ void Worker::chat(QString message)
 void Worker::close()
 {
     tankWindow->hide();
+}
+
+void Worker::moveObjects(QThread *thread)
+{
+    move->moveToThread(thread);
+    network->moveToThread(thread);
+    shoot->moveToThread(thread);
 }
 
 void Worker::loadMap()

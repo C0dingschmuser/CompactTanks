@@ -4,7 +4,6 @@
 #include <QPainter>
 #include <QKeyEvent>
 #include <QInputDialog>
-#include "windows.h"
 #include <QTimer>
 #include <QKeyEvent>
 #include <QThread>
