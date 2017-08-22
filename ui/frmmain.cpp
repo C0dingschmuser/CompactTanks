@@ -50,8 +50,10 @@ FrmMain::FrmMain(QWidget *parent) :
     sound = new Sound();
     lowGraphics = false;
     version = "v0.0.6.2b";
+    changeDl = new FileDownloader(QUrl("http://37.120.177.121/compacttanks/changelog.txt"));
     updateDL = new FileDownloader(QUrl("http://37.120.177.121/compacttanks/update.zip"));
     connect(updateDL,SIGNAL(downloaded()),this,SLOT(on_download()));
+    connect(changeDl,SIGNAL(downloaded()),this,SLOT(on_changeDL()));
     workerThread = new QThread();
     ui->edtChat->setStyleSheet("QLineEdit { background: rgba(0, 255, 255, 0);}");
     connect(t_chat,SIGNAL(timeout()),this,SLOT(on_tchat()));
@@ -90,6 +92,7 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(worker,SIGNAL(teamCP(int,int)),this,SLOT(on_teamCP(int,int)));
     connect(worker,SIGNAL(resetMatch(int)),this,SLOT(on_resetMatch(int)));
     connect(worker,SIGNAL(ownHit()),this,SLOT(on_ownHit()));
+    connect(worker,SIGNAL(changeStart()),this,SLOT(on_changeDLStart()));
     connect(t_expAn,SIGNAL(timeout()),this,SLOT(on_tExpAn()));
     connect(login,SIGNAL(connectWithData(QString,QString,double,int,bool)),this,SLOT(on_connectData(QString,QString,double,int,bool)));
     msgCount = 0;
@@ -218,6 +221,23 @@ void FrmMain::on_download()
     file.write(updateDL->downloadedData());
     file.close();
     QMessageBox::information(this,"Download beendet","Das Update befindet sich im ordner update.zip");
+}
+
+void FrmMain::on_changeDL()
+{
+    QFile file("changelog.txt");
+    file.open(QIODevice::WriteOnly);
+    file.write(changeDl->downloadedData());
+    file.close();
+    QMessageBox::StandardButton box = QMessageBox::question(this,"Changelog","Changelog anzeigen?");
+    if(box==QMessageBox::Yes) {
+        QDesktopServices::openUrl(QUrl::fromLocalFile("changelog.txt"));
+    }
+}
+
+void FrmMain::on_changeDLStart()
+{
+    changeDl->start();
 }
 
 void FrmMain::on_connFail()

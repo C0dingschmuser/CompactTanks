@@ -79,6 +79,7 @@ signals:
     void teamCP(int team1cp, int team2cp);
     void reset(int team);
     void ownHit();
+    void changelog(int size);
 public slots:
 };
 

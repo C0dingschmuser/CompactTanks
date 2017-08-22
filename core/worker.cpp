@@ -52,6 +52,7 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     connect(network,SIGNAL(teamCP(int,int)),this,SIGNAL(teamCP(int,int)));
     connect(network,SIGNAL(reset(int)),this,SLOT(on_reset(int)));
     connect(network,SIGNAL(ownHit()),this,SIGNAL(ownHit()));
+    connect(network,SIGNAL(changelog(int)),this,SLOT(on_changelog(int)));
     connect(move,SIGNAL(fullscreen()),this,SIGNAL(fullscreen()));
     connect(move,SIGNAL(tab()),this,SIGNAL(tab()));
     connect(shoot,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
@@ -105,6 +106,12 @@ void Worker::on_conn(int id)
     } else {
         emit wrongData(id);
     }
+}
+
+void Worker::on_changelog(int size)
+{
+    int lsize = QFileInfo("changelog.txt").size();
+    if(lsize!=size) emit changeStart();
 }
 
 void Worker::on_tid()

@@ -142,7 +142,7 @@ void Network::on_tping()
 void Network::fetchTCP(QString data)
 {
     //qDebug()<<data;
-    if(data.at(0)==".") {
+    if(data.at(0)=='.') {
         data.remove(0,1);
     } else {
         return;
@@ -153,6 +153,9 @@ void Network::fetchTCP(QString data)
         if(list.size()>1) {
             if(list.at(1)!=ownTank->getName()) {
                 switch(m) {
+                    case -9: //changelog size
+                        emit changelog(list.at(1).toInt());
+                    break;
                     case -8: //login erfolgreich?
                         {
                             int id = list.at(1).toInt();

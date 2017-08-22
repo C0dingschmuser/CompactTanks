@@ -6,7 +6,10 @@
 #include <QStringList>
 #include <QVector>
 #include <QFont>
+#include <QFileInfo>
+#include <QMessageBox>
 #include <QThread>
+#include "core/filedownloader.h"
 #include "core/network.h"
 #include "core/movement.h"
 #include "core/shoot.h"
@@ -48,6 +51,7 @@ private slots:
     void on_tmove();
     void on_reset(int team);
     void on_tRespawn();
+    void on_changelog(int size);
 private:
     QRect viewRect;
     QTimer *t_bullet;
@@ -137,6 +141,7 @@ signals:
     void teamCP(int team1cp, int team2cp);
     void resetMatch(int team);
     void ownHit();
+    void changeStart();
 };
 
 #endif // WORKER_H

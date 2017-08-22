@@ -8,6 +8,7 @@
 #include <QKeyEvent>
 #include <QThread>
 #include <QFontDatabase>
+#include <QDesktopServices>
 #include <QApplication>
 #include <QMessageBox>
 #include "core/bullet.h"
@@ -71,6 +72,8 @@ private slots:
     void on_resetMatch(int team);
     void on_download();
     void on_ownHit();
+    void on_changeDL();
+    void on_changeDLStart();
 
 private:
     Ui::FrmMain *ui;
@@ -94,6 +97,7 @@ private:
     QTimer *t_time;
     QThread *workerThread;
     FileDownloader *updateDL;
+    FileDownloader *changeDl;
     bool lowGraphics;
     bool chatActive;
     QPoint *aim;
