@@ -34,7 +34,7 @@ public:
     void reset();
 
 signals:
-    void newBullet(Bullet *b);
+    void newBullet(Bullet *b, Tank *t);
 public slots:
 };
 

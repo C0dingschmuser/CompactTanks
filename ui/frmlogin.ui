@@ -274,40 +274,6 @@
     <string>Grafik:</string>
    </property>
   </widget>
-  <widget class="QComboBox" name="cbGraphics">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>140</y>
-     <width>131</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Arial</family>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="currentIndex">
-    <number>1</number>
-   </property>
-   <item>
-    <property name="text">
-     <string>Niedrig</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Mittel</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Hoch</string>
-    </property>
-   </item>
-  </widget>
   <widget class="QCheckBox" name="cBoxTextures">
    <property name="enabled">
     <bool>false</bool>
@@ -387,6 +353,28 @@
    </property>
    <property name="text">
     <string>Dev: FireDiver,  Bilder:  Soldiermelly &amp; Darmzotte, Server: AciVanConis</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="cBoxVsync">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>140</y>
+     <width>131</width>
+     <height>19</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>10</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>VSync</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>

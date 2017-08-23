@@ -51,6 +51,16 @@ void Network::stop()
     t_main->stop();
 }
 
+void Network::run(QThread *thread)
+{
+    t_main->moveToThread(thread);
+    t_disconnect->moveToThread(thread);
+    t_ping->moveToThread(thread);
+    tcpSocket->moveToThread(thread);
+    udpSocket->moveToThread(thread);
+    udpSocketListen->moveToThread(thread);
+}
+
 void Network::on_tcpRecv()
 {
     buffer += tcpSocket->readAll();
@@ -141,7 +151,6 @@ void Network::on_tping()
 
 void Network::fetchTCP(QString data)
 {
-    //qDebug()<<data;
     if(data.at(0)=='.') {
         data.remove(0,1);
     } else {
@@ -259,7 +268,7 @@ void Network::fetchTCP(QString data)
                                     //enabled = false;
                                 }
                                 b->setEnabled(enabled);
-                                emit newBullet(b);
+                                emit newBullet(b,sucheTank(b->getShooter()));
                             }
                         }
                     break;

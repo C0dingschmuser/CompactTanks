@@ -19,7 +19,7 @@ FrmLogin::FrmLogin(QWidget *parent) :
         QStringList list = in.readLine().split("#");
         if(list.size()>2) {
             ui->edtUsername->setText(list.at(0));
-            ui->cbGraphics->setCurrentIndex(list.at(1).toInt());
+            //ui->cbGraphics->setCurrentIndex(list.at(1).toInt());
             if(list.at(2).toInt()) ui->cBoxTextures->setChecked(true);
         }
     } else {
@@ -56,13 +56,13 @@ void FrmLogin::on_btnConnect_clicked()
         QTextStream out(&file);
         QString sel = "0";
         if(ui->cBoxTextures->isChecked()) sel = "1";
-        out << name << "#" << QString::number(ui->cbGraphics->currentIndex()) << "#" <<
+        out << name << "#2#" <<
                sel << "#" << endl;
         file.close();
-        int graphics = ui->cbGraphics->currentIndex();
+        int graphics = 2;//ui->cbGraphics->currentIndex();
         double vol = (double)ui->sliderVolume->value()/100;
         bool ok = false;
-        if(ui->cBoxTextures->isChecked()) {
+        if(ui->cBoxVsync->isChecked()) {
             ok = true;
         }
         //while(login) {

@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     QSurfaceFormat f;
     //f.setSwapBehavior(QSurfaceFormat::TripleBuffer);
     f.setSwapInterval(0);
-    QSurfaceFormat::setDefaultFormat(f);
+    //QSurfaceFormat::setDefaultFormat(f);
     FrmMain w;
     w.hide();
     //w.showFullScreen();

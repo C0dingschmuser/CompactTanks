@@ -29,6 +29,15 @@ Movement::~Movement()
     delete t_moveD;
 }
 
+void Movement::run(QThread *thread)
+{
+    t_move->moveToThread(thread);
+    t_moveW->moveToThread(thread);
+    t_moveA->moveToThread(thread);
+    t_moveS->moveToThread(thread);
+    t_moveD->moveToThread(thread);
+}
+
 void Movement::on_tmove()
 {
     if(!t_moveW->isActive()&&!t_moveA->isActive()&&
@@ -187,7 +196,7 @@ void Movement::on_tmoveD() {
     }
 }
 
-void Movement::keyPressEvent(QKeyEvent *e, QVector<Terrain *> lvlObjs, int sPos, int ePos)
+void Movement::keyPressEvent(QVector<Terrain *> lvlObjs, int sPos, int ePos,int key)
 {
     if(!ownTank->isSpawned()) return;
     this->lvlObjs = lvlObjs;
@@ -196,58 +205,58 @@ void Movement::keyPressEvent(QKeyEvent *e, QVector<Terrain *> lvlObjs, int sPos,
     int t = ownTank->getTimer();
     this->sPos = sPos;
     this->ePos = ePos;
-    if(e->key()==Qt::Key_W) {
+    if(key==Qt::Key_W) {
         if(r.y()>=0+s) {
             first = 1;
             t_moveW->start(t);
         }
     }
-    if(e->key()==Qt::Key_A) {
+    if(key==Qt::Key_A) {
         if(r.x()>=0+s) {
             first = 2;
             t_moveA->start(t);
         }
     }
-    if(e->key()==Qt::Key_S) {
+    if(key==Qt::Key_S) {
         if(r.bottom()<=height-s) {
             first = 3;
             t_moveS->start(t);
         }
     }
-    if(e->key()==Qt::Key_D) {
+    if(key==Qt::Key_D) {
         if(r.right()<=width-s) {
             first = 4;
             t_moveD->start(t);
         }
     }
-    if(e->key()==Qt::Key_Tab) {
+    if(key==Qt::Key_Tab) {
         emit tab();
     }
 }
 
-void Movement::keyReleaseEvent(QKeyEvent *e)
+void Movement::keyReleaseEvent(int key)
 {
-    if(e->key()==Qt::Key_F11) {
+    if(key==Qt::Key_F11) {
         emit fullscreen();
     }
     if(!ownTank->isSpawned()) return;
-    if(e->key()==Qt::Key_W) {
+    if(key==Qt::Key_W) {
         t_moveW->stop();
         ownTank->setMoved(false);
     }
-    if(e->key()==Qt::Key_A) {
+    if(key==Qt::Key_A) {
         t_moveA->stop();
         ownTank->setMoved(false);
     }
-    if(e->key()==Qt::Key_S) {
+    if(key==Qt::Key_S) {
         t_moveS->stop();
         ownTank->setMoved(false);
     }
-    if(e->key()==Qt::Key_D) {
+    if(key==Qt::Key_D) {
         t_moveD->stop();
         ownTank->setMoved(false);
     }
-    if(e->key()==Qt::Key_Tab) {
+    if(key==Qt::Key_Tab) {
         emit tab();
     }
 }

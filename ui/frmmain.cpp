@@ -49,7 +49,7 @@ FrmMain::FrmMain(QWidget *parent) :
     t_draw->setTimerType(Qt::PreciseTimer);
     sound = new Sound();
     lowGraphics = false;
-    version = "v0.0.6.2b";
+    version = "v0.0.6.2b2";
     changeDl = new FileDownloader(QUrl("http://37.120.177.121/compacttanks/changelog.txt"));
     updateDL = new FileDownloader(QUrl("http://37.120.177.121/compacttanks/update.zip"));
     connect(updateDL,SIGNAL(downloaded()),this,SLOT(on_download()));
@@ -148,12 +148,14 @@ FrmMain::~FrmMain()
     QApplication::exit();
 }
 
-void FrmMain::on_connectData(QString username, QString pw, double volume, int graphics, bool lowTexture)
+void FrmMain::on_connectData(QString username, QString pw, double volume, int graphics, bool VSync)
 {
     this->graphics = graphics;
     ownTank->setUsername(username);
-    if(lowTexture) {
-        lowGraphics = true;
+    if(!VSync) {
+        QSurfaceFormat f;
+        f.setSwapInterval(0);
+        QSurfaceFormat::setDefaultFormat(f);
     }
     switch(graphics) {
         case 0:
@@ -177,8 +179,10 @@ void FrmMain::on_connSuccess()
     isConnected = false;
     worker->moveToThread(workerThread);
     workerThread->start();
+    workerThread->setPriority(QThread::NormalPriority);
     //worker->moveObjects(workerThread);
     //this->showMaximized();
+    worker->run(workerThread);
     initializeGL();
     login->hide();
     spawns = worker->getSpawns();

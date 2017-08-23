@@ -36,8 +36,9 @@ void Shoot::on_tmain()
             v = t->getBvel();
         }
         int dmg = t->getDamage();
-        network->send("|1#"+t->getName()+"#"+QString::number(mpos->x(),'f',0)+
-                      "#"+QString::number(mpos->y(),'f',0)+"#1#~");
+        QString str = "|1#"+t->getName()+"#"+QString::number(mpos->x(),'f',0)+
+                "#"+QString::number(mpos->y(),'f',0)+"#1#~";
+        QMetaObject::invokeMethod(network,"send",Q_ARG(QString,str));
         Bullet *b = new Bullet(t->getShootPoint().x(),t->getShootPoint().y(),
                                (double)mpos->x(),(double)mpos->y(),v,t->getName());
         b->setDmg(dmg);
@@ -46,7 +47,7 @@ void Shoot::on_tmain()
             enabled = false;
         }
         b->setEnabled(enabled);
-        emit newBullet(b);
+        emit newBullet(b,t);
     }
     if(!t->isSpawned()) {
         click = false;

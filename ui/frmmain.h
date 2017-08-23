@@ -53,7 +53,7 @@ private slots:
     void on_tab();
     void on_connFail();
     void on_newMap(QVector<Terrain*> lvlObjs);
-    void on_connectData(QString username, QString pw, double volume, int graphics, bool lowTexture);
+    void on_connectData(QString username, QString pw, double volume, int graphics, bool VSync);
     void on_connSuccess();
     void on_wrongData(int id);
     void on_shot(int type);

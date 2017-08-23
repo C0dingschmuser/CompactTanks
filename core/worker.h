@@ -6,6 +6,7 @@
 #include <QStringList>
 #include <QVector>
 #include <QFont>
+#include <QKeyEvent>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QThread>
@@ -18,13 +19,17 @@
 #include "core/dbtank.h"
 #include "ui/frmtanks.h"
 
+Q_DECLARE_METATYPE(QKeyEvent*)
+Q_DECLARE_METATYPE(QVector<Terrain*>)
+Q_DECLARE_METATYPE(Tank*)
+
 class Worker : public QObject
 {
     Q_OBJECT
 private slots:
     void on_newPlayer(Tank *t);
     void on_delPlayer(int pos);
-    void on_newBullet(Bullet *b);
+    void on_newBullet(Bullet *b, Tank *t);
     void on_delBullet(int pos);
     void on_syncBullet(int pos,int dmg);
     void on_delObjs();
@@ -78,6 +83,7 @@ private:
     Shoot *shoot;
     QPoint *aim;
     QString username;
+    Sound *sound;
     double scaleX;
     double scaleY;
     int transX;
@@ -112,6 +118,7 @@ public:
     int getClassID();
     double getDifference(double v1, double v2);
     QVector<QRect> getSpawns();
+    void run(QThread *thread);
 signals:
     void newPlayer(Tank *t);
     void delPlayer(int pos);

@@ -2,6 +2,9 @@
 
 Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidget *mainWindow, QObject *parent) : QObject(parent)
 {
+    qRegisterMetaType<QKeyEvent*>("QKeyEvent*");
+    qRegisterMetaType<QVector<Terrain*>>("QVector<Terrain*>");
+    qRegisterMetaType<Tank*>("Tank*");
     this->width = width;
     this->height = height;
     this->ownTank = ownTank;
@@ -21,7 +24,7 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     t_move = new QTimer(this);
     t_respawn = new QTimer(this);
     t_main->setTimerType(Qt::PreciseTimer);
-    move = new Movement(this->ownTank,this->width,this->height);
+    move = new Movement(this->ownTank,this->width,this->height,this);
     //37.120.177.121
     network = new Network(this->ownTank,tanks,QHostAddress("37.120.177.121")); //ändern
     shoot = new Shoot(this->ownTank,network,this->aim);
@@ -32,7 +35,7 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     connect(network,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*)));
     connect(network,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
     connect(network,SIGNAL(delObjs()),this,SLOT(on_delObjs()));
-    connect(network,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
+    connect(network,SIGNAL(newBullet(Bullet*,Tank*)),this,SLOT(on_newBullet(Bullet*,Tank*)));
     connect(network,SIGNAL(delBullet(int)),this,SLOT(on_delBullet(int)));
     connect(network,SIGNAL(syncBullet(int,int)),this,SLOT(on_syncBullet(int,int)));
     connect(network,SIGNAL(visible(int)),this,SLOT(on_visible(int)));
@@ -55,7 +58,7 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     connect(network,SIGNAL(changelog(int)),this,SLOT(on_changelog(int)));
     connect(move,SIGNAL(fullscreen()),this,SIGNAL(fullscreen()));
     connect(move,SIGNAL(tab()),this,SIGNAL(tab()));
-    connect(shoot,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
+    connect(shoot,SIGNAL(newBullet(Bullet*,Tank*)),this,SLOT(on_newBullet(Bullet*,Tank*)));
     connect(t_main,SIGNAL(timeout()),this,SLOT(on_tmain()));
     connect(t_conn,SIGNAL(timeout()),this,SLOT(on_tconn()));
     connect(t_id,SIGNAL(timeout()),this,SLOT(on_tid()));
@@ -77,6 +80,14 @@ Worker::~Worker()
     delete tankWindow;
 }
 
+void Worker::run(QThread *thread)
+{
+    move->moveToThread(thread);
+    network->moveToThread(thread);
+    move->run(thread);
+    network->run(thread);
+}
+
 void Worker::on_disconnect()
 {
     emit disconnected();
@@ -85,9 +96,10 @@ void Worker::on_disconnect()
 void Worker::connectToServer(QString username, QString password, QString version)
 {
     //t_conn->start(200);
-    if(network->connectToServer(username,password,version)) {
+    bool ok = false;
+    QMetaObject::invokeMethod(network,"connectToServer",Q_RETURN_ARG(bool,ok),Q_ARG(QString,username),Q_ARG(QString,password),Q_ARG(QString,version));
+    if(ok) {
         this->username = username;
-
         t_conn->stop();
     } else {
         emit connFail();
@@ -209,16 +221,12 @@ void Worker::on_delObjs()
     emit delObjs();
 }
 
-void Worker::on_newBullet(Bullet *b)
+void Worker::on_newBullet(Bullet *b, Tank *t)
 {
     bullets.append(b);
     int type = 0;
-    Tank *tmp = network->sucheTank(b->getShooter());
-    if(tmp) {
-        type = tmp->getType();
-    } else {
-        type = ownTank->getType();
-    }
+    Tank *tmp = t;
+    type = tmp->getType();
     if(b->get().intersects(viewRect)) emit shot(type);
     emit newBullet(b);
 }
@@ -324,10 +332,12 @@ void Worker::on_setT(int timer)
 void Worker::on_tmain()
 {
     timer+= 4;
-    network->setTimer(timer);
+    //network->setTimer(timer);
+    QMetaObject::invokeMethod(network,"setTimer",Q_ARG(int,timer));
     if(timer>5000) {
         timer = 0;
-        network->setTimer(0);
+        //network->setTimer(0);
+        QMetaObject::invokeMethod(network,"setTimer",Q_ARG(int,0));
     }
     for(int i=0;i<tanks.size();i++) {
         if(tanks[i]->getRect().x()>0) {
@@ -346,7 +356,9 @@ void Worker::doSpawn()
 {
     //ownTank->setSpawned(true);
     ownTank->setDamage(dbTanks[ownTank->getType()-1]->getDmg());
-    network->send("|0#"+QString::number(selected,'f',0)+"#"+QString::number(ownTank->getType(),'f',0)+"#~");
+    QString str = "|0#"+QString::number(selected,'f',0)+"#"+QString::number(ownTank->getType(),'f',0)+"#~";
+    QMetaObject::invokeMethod(network,"send",Q_ARG(QString,str));
+    //->send("|0#"+QString::number(selected,'f',0)+"#"+QString::number(ownTank->getType(),'f',0)+"#~");
 }
 
 void Worker::on_spawn(Tank *t)
@@ -407,7 +419,9 @@ void Worker::chat(QString message)
     message.replace("Ä","&11");
     message.replace("Ö", "&22");
     message.replace("Ü","&33");
-    network->send("|3#"+ownTank->getName()+": "+message);
+    QString str = "|3#"+ownTank->getName()+": "+message;
+    //->send("|3#"+ownTank->getName()+": "+message);
+    QMetaObject::invokeMethod(network,"send",Q_ARG(QString,str));
 }
 
 void Worker::close()
@@ -506,13 +520,17 @@ double Worker::getDifference(double v1,double v2)
 void Worker::keyP(QKeyEvent *e)
 {
     //if(!ownTank->isSpawned()) return;
-    move->keyPressEvent(e,lvlObjs,startPos,endPos);
+    //move->keyPressEvent(e,lvlObjs,startPos,endPos);
+    int key = e->key();
+    QMetaObject::invokeMethod(move,"keyPressEvent",Q_ARG(QVector<Terrain*>,lvlObjs),Q_ARG(int,startPos),Q_ARG(int,endPos),Q_ARG(int,key));
 }
 
 void Worker::keyR(QKeyEvent *e)
 {
     //if(!ownTank->isSpawned()) return;
-    move->keyReleaseEvent(e);
+    //move->keyReleaseEvent(e);
+    int key = e->key();
+    QMetaObject::invokeMethod(move,"keyReleaseEvent",Q_ARG(int,key));
 }
 
 void Worker::mPrs(QMouseEvent *e, bool SD)

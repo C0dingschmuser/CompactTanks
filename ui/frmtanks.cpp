@@ -58,7 +58,7 @@ void FrmTanks::paintEvent(QPaintEvent *e)
         painter.setBrush(Qt::darkGray);
         painter.drawRect(605,27,width,10);
         painter.setBrush(Qt::darkGreen);
-        painter.drawRect(605,27,width*((double)dmg/100),10);
+        painter.drawRect(605,27,width*((double)dmg/1500),10);
         //reload
         painter.setPen(Qt::black);
         painter.drawText(QPoint(605,53),"Nachladezeit: "+QString::number(reload/(double)1000,'f',2)+"s");

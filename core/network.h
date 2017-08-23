@@ -5,6 +5,7 @@
 #include <QTcpSocket>
 #include <QUdpSocket>
 #include <QTimer>
+#include <QThread>
 #include <QStringList>
 #include "tank.h"
 #include "bullet.h"
@@ -40,20 +41,21 @@ private:
 public:
     explicit Network(Tank *ownTank, QVector<Tank*> t, QHostAddress ip, QObject *parent = 0);
     ~Network();
-    bool connectToServer(QString username, QString password, QString version);
-    void send(QString data);
-    void sendPos();
-    void setTimer(int timer);
+    Q_INVOKABLE bool connectToServer(QString username, QString password, QString version);
+    Q_INVOKABLE void send(QString data);
+    //Q_INVOKABLE void sendPos();
+    Q_INVOKABLE void setTimer(int timer);
     void stop();
     int getDistance(QPoint p1,QPoint p2);
-    Tank *sucheTank(QString name);
+    Q_INVOKABLE Tank *sucheTank(QString name);
+    void run(QThread *thread);
 
 signals:
     void pos(Tank *p,int x,int y,int dir,int health, int angle,int spotted,int stimer);
     void newPlayer(Tank *t);
     void newlvlObj(int x,int y,int w,int h,int type);
     void delPlayer(int i);
-    void newBullet(Bullet *b);
+    void newBullet(Bullet *b,Tank *t);
     void delBullet(int pos);
     void syncBullet(int pos,int dmg);
     void setViewRange(int vr);
