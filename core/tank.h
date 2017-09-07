@@ -40,7 +40,8 @@ private:
     int width;
     int height;
     int barrelLength;
-    int treeColl;
+    bool heal;
+    int vehicleID;
     int camo;
     double endSpeed;
     QPoint deathPoint;
@@ -48,7 +49,7 @@ private:
     bool visible;
     bool hidden;
     bool spawned;
-    QVector <QPixmap> imgs;
+    QPixmap img;
     QPixmap currentImg;
     QPixmap grid;
     QPixmap turret;
@@ -75,7 +76,7 @@ public:
     void setSpawned(bool spawned);
     void setDeathPoint(QPoint dPoint);
     void setType(int type);
-    void setData(int type,int speed, int health, int bvel, int reload,int width,int height,int barrelLength,int treeColl, int camo, int viewrange);
+    void setData(int type,int speed, int health, int bvel, int reload,int width,int height,int barrelLength,bool heal, int camo, int viewrange, int vehicleID);
     void loadImages();
     void setDamage(int dmg);
     void setHidden(bool hidden);
@@ -100,6 +101,7 @@ public:
     int getHeight();
     int getEndSpeed();
     int getViewrange();
+    int getVehicleID();
     QPoint getDeathPoint();
     QPoint getShootPoint();
     void setVisible(bool visible);
@@ -110,11 +112,13 @@ public:
     void setHealth(int health, int maxHealth=0);
     void setTeam(int team);
     void setCoins(int coins);
+    void setVehicleID(int id);
     void drawTank(QPainter &p, Tank *own, bool barrel=false);
     void move();
     bool getVisible();
     bool isSpawned();
     bool isHidden();
+    bool getHeal();
     QString getName();
     QString toString();
     QPixmap getIMG();

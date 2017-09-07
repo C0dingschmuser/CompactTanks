@@ -3,6 +3,7 @@
 
 #include <QOpenGLWidget>
 #include <QPainter>
+#include <QPen>
 #include <QDebug>
 #include <QString>
 #include <QFont>
@@ -40,9 +41,9 @@ private:
     int barrelLength;
     double softTerrRes;
     double hardTerrRes;
-    double treeTerrRes;
+    int vehicleID;
     double calcSpeed(int value);
-    int treeColl;
+    bool heal;
     int vel;
     int camo;
     int viewrange;

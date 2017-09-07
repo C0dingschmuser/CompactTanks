@@ -7,8 +7,10 @@
 #include <QTimer>
 #include <QThread>
 #include <QStringList>
+#include <QCoreApplication>
 #include "tank.h"
 #include "bullet.h"
+#include "powerup.h"
 
 class Network : public QObject
 {
@@ -41,7 +43,7 @@ private:
 public:
     explicit Network(Tank *ownTank, QVector<Tank*> t, QHostAddress ip, QObject *parent = 0);
     ~Network();
-    Q_INVOKABLE bool connectToServer(QString username, QString password, QString version);
+    Q_INVOKABLE bool connectToServer(QString username, QString password="", QString version="");
     Q_INVOKABLE void send(QString data);
     //Q_INVOKABLE void sendPos();
     Q_INVOKABLE void setTimer(int timer);
@@ -56,7 +58,7 @@ signals:
     void newlvlObj(int x,int y,int w,int h,int type);
     void delPlayer(int i);
     void newBullet(Bullet *b,Tank *t);
-    void delBullet(int pos);
+    void delBullet(int pos, bool flak);
     void syncBullet(int pos,int dmg);
     void setViewRange(int vr);
     void delObjs();
@@ -75,13 +77,16 @@ signals:
                double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel,
                int camo, int viewrange);
     void spawn(Tank *t);
-    void otherDeath(QRect rect);
+    void otherDeath(QRect rect, bool flak);
     void chat(QString message);
     void ping(int ping);
     void teamCP(int team1cp, int team2cp);
     void reset(int team);
     void ownHit();
     void changelog(int size);
+    void powerup(Powerup *tmp);
+    void delPowerup(int pos);
+    void registration(int code);
 public slots:
 };
 

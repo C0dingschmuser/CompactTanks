@@ -35,12 +35,16 @@ Network::~Network()
 bool Network::connectToServer(QString username, QString password, QString version)
 {
     bool ok = false;
-    tcpSocket->connectToHost(ip,38888);
-    tcpSocket->waitForConnected(1000);
+    if(tcpSocket->state()!=QTcpSocket::ConnectedState) {
+        tcpSocket->connectToHost(ip,38888);
+        tcpSocket->waitForConnected(1000);
+    }
     if(tcpSocket->state()==QTcpSocket::ConnectedState) {
         ok = true;
-        ownTank->setName(username);
-        send("|0#"+username+"#"+password+"#"+version+"#~");
+        if(username!="#0") {
+            ownTank->setName(username);
+            send("|0#"+username+"#"+password+"#"+version+"#~");
+        }
     }
     return ok;
 }
@@ -122,8 +126,13 @@ void Network::on_udpRecv()
 
 void Network::send(QString data)
 {
+    //qDebug()<<"la";
+    while(tcpSocket->state()!=QTcpSocket::ConnectedState) {
+        QCoreApplication::processEvents();
+    }
     data.insert(1,".");
     tcpSocket->write(data.toLatin1());
+    tcpSocket->flush();
 }
 
 void Network::setTimer(int timer)
@@ -162,6 +171,9 @@ void Network::fetchTCP(QString data)
         if(list.size()>1) {
             if(list.at(1)!=ownTank->getName()) {
                 switch(m) {
+                    case -10: //register code
+                        emit registration(list.at(1).toInt());
+                    break;
                     case -9: //changelog size
                         emit changelog(list.at(1).toInt());
                     break;
@@ -275,7 +287,8 @@ void Network::fetchTCP(QString data)
                     case 5: //del bullet
                         {
                             if(list.size()>0) {
-                                emit delBullet(list.at(1).toInt());
+                                bool flak = list.at(2).toInt();
+                                emit delBullet(list.at(1).toInt(),flak);
                             }
                         }
                     break;
@@ -299,7 +312,7 @@ void Network::fetchTCP(QString data)
                             Tank *tmp = sucheTank(list.at(1));
                             QRect rect = tmp->getRect();
                             rect.moveTo(list.at(2).toInt(),list.at(3).toInt());
-                            emit otherDeath(rect);
+                            emit otherDeath(rect,false);
                             tmp->setSpawned(false);
                             tmp->teleport(-200,-200);
                             emit killMessage(list.at(4)+" killed "+list.at(1));
@@ -328,9 +341,9 @@ void Network::fetchTCP(QString data)
                     case 13: //spawn other
                         {
                             Tank *t = sucheTank(list.at(1));
-                            t->teleport(list.at(2).toInt(),list.at(3).toInt());
-                            t->setType(list.at(4).toInt());
-                            //t->setData(list.at(4).toInt(),list.at(5).toInt(),list.at(6).toInt(),list.at(7).toInt(),0,list.at(8).toInt(),list.at(9).toInt(),0,0);
+                            t->teleport(-200,-200);
+                            t->setVehicleID(list.at(2).toInt());
+                            t->setType(list.at(3).toInt());
                             t->setSpawned(true);
                             emit spawn(t);
                         }
@@ -370,6 +383,16 @@ void Network::fetchTCP(QString data)
                     break;
                     case 20: //ownhit
                         emit ownHit();
+                    break;
+                    case 21: //powerup
+                        emit powerup(new Powerup(QRect(list.at(1).toInt(),list.at(2).toInt(),15,15),list.at(3).toInt(),list.at(4).toInt()));
+                    break;
+                    case 22: //delPowerup
+                        emit delPowerup(list.at(1).toInt());
+                    break;
+                    case 23: //explosion
+                        QRect rect(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                        emit otherDeath(rect,false);
                     break;
                 }
             }
@@ -412,6 +435,7 @@ Tank* Network::sucheTank(QString name)
             break;
         }
     }
+    if(!tmp) tmp = ownTank;
     return tmp;
 }
 

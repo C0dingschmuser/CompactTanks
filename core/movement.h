@@ -39,7 +39,7 @@ public:
     Q_INVOKABLE void keyPressEvent(QVector<Terrain*>lvlObjs, int sPos, int ePos, int key);
     Q_INVOKABLE void keyReleaseEvent(int key);
     void setSpawns(QVector<QRect>spawns);
-    void stop();
+    Q_INVOKABLE void stop();
     void run(QThread *thread);
 
 

@@ -20,13 +20,23 @@ FrmLogin::FrmLogin(QWidget *parent) :
         if(list.size()>2) {
             ui->edtUsername->setText(list.at(0));
             //ui->cbGraphics->setCurrentIndex(list.at(1).toInt());
-            if(list.at(2).toInt()) ui->cBoxTextures->setChecked(true);
+            if(!list.at(1).toInt()) {
+                vsync = false;
+            } else {
+                vsync = true;
+            }
+            this->vol1 = list.at(2).toDouble();
+            this->vol2 = list.at(3).toInt();
         }
     } else {
         file.open(QIODevice::ReadWrite);
     }
     file.close();
     login = false;
+    registration = new FrmRegister();
+    connect(registration,SIGNAL(sendEmail(QString)),this,SIGNAL(sendEmail(QString)));
+    connect(registration,SIGNAL(confirm(QString)),this,SIGNAL(confirm(QString)));
+    connect(registration,SIGNAL(connect()),this,SLOT(on_connect()));
 }
 
 FrmLogin::~FrmLogin()
@@ -37,6 +47,7 @@ FrmLogin::~FrmLogin()
 
 void FrmLogin::on_btnConnect_clicked()
 {
+    if(registration->isVisible()) return;
     login = true;
     ui->btnConnect->setText("Verbinde...");
     ui->btnConnect->repaint();
@@ -55,22 +66,21 @@ void FrmLogin::on_btnConnect_clicked()
         file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
         QTextStream out(&file);
         QString sel = "0";
-        if(ui->cBoxTextures->isChecked()) sel = "1";
-        out << name << "#2#" <<
-               sel << "#" << endl;
+        if(vsync) sel = "1";
+        out << name << "#" << sel << "#" <<
+               QString::number(vol1,'f',2) << "#" << QString::number(vol2) << "#" << endl;
         file.close();
-        int graphics = 2;//ui->cbGraphics->currentIndex();
-        double vol = (double)ui->sliderVolume->value()/100;
-        bool ok = false;
-        if(ui->cBoxVsync->isChecked()) {
-            ok = true;
-        }
         //while(login) {
-            emit connectWithData(name,pw,vol,graphics,ok);
+            emit connectWithData(name,pw,vol1,vol2,vsync);
             //sleep(1000)
             //qApp->processEvents();
         //}
     }
+}
+
+void FrmLogin::reg(int code)
+{
+    registration->reg(code);
 }
 
 void FrmLogin::keyPressEvent(QKeyEvent *event)
@@ -118,7 +128,12 @@ bool FrmLogin::contains(QString data,QString c)
     return ok;
 }
 
-void FrmLogin::on_sliderVolume_sliderMoved(int position)
+void FrmLogin::on_btnRegister_clicked()
 {
-    ui->lblVolume->setText(QString::number(position,'f',0)+"%");
+    registration->show();
+}
+
+void FrmLogin::on_connect()
+{
+    emit connectWithData("#0","",0,0,0);
 }

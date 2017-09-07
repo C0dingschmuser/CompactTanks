@@ -8,6 +8,7 @@
 #include <QKeyEvent>
 #include <QTextStream>
 #include <QDebug>
+#include "frmregister.h"
 
 namespace Ui {
 class FrmLogin;
@@ -23,9 +24,11 @@ public:
     void fail();
     void reset();
     void setLogin(bool login);
+    void reg(int code);
 private slots:
     void on_btnConnect_clicked();
-    void on_sliderVolume_sliderMoved(int position);
+    void on_btnRegister_clicked();
+    void on_connect();
 
 private:
     Ui::FrmLogin *ui;
@@ -33,10 +36,16 @@ private:
     QFile file;
     bool login;
     void sleep(int ms);
+    FrmRegister *registration;
+    bool vsync;
+    double vol1;
+    int vol2;
 protected:
     void keyPressEvent(QKeyEvent *event);
 signals:
-    void connectWithData(QString username,QString pw, double volume, int graphics, bool lowTexture);
+    void connectWithData(QString username,QString pw, double volume, int volume2, bool vsync);
+    void sendEmail(QString email);
+    void confirm(QString code);
 };
 
 #endif // FRMLOGIN_H

@@ -9,6 +9,8 @@
 #include <QThread>
 #include <QFontDatabase>
 #include <QDesktopServices>
+#include <QFile>
+#include <QTextStream>
 #include <QApplication>
 #include <QMessageBox>
 #include "core/bullet.h"
@@ -21,7 +23,9 @@
 #include "core/animation.h"
 #include "core/expanimation.h"
 #include "core/filedownloader.h"
+#include "core/powerup.h"
 #include "ui/frmlogin.h"
+#include "ui/frmsettings.h"
 
 namespace Ui {
 class FrmMain;
@@ -53,7 +57,7 @@ private slots:
     void on_tab();
     void on_connFail();
     void on_newMap(QVector<Terrain*> lvlObjs);
-    void on_connectData(QString username, QString pw, double volume, int graphics, bool VSync);
+    void on_connectData(QString username, QString pw, double volume, int volume2, bool VSync);
     void on_connSuccess();
     void on_wrongData(int id);
     void on_shot(int type);
@@ -64,7 +68,7 @@ private slots:
     void on_death();
     void on_tdeath();
     void on_msgBox(QString title, QString text);
-    void on_otherDeath(QRect rect);
+    void on_otherDeath(QRect rect, bool flak);
     void on_tExpAn();
     void on_ttime();
     void on_ping(int ping);
@@ -74,6 +78,13 @@ private slots:
     void on_ownHit();
     void on_changeDL();
     void on_changeDLStart();
+    void on_tmouse();
+    void on_reload(int current,int max);
+    void on_powerup(Powerup *tmp);
+    void on_delPowerup(int pos);
+    void on_sendData(QString email);
+    void on_registration(int code);
+    void on_settingsSave(double vol1, int vol2, bool vsync);
 
 private:
     Ui::FrmMain *ui;
@@ -87,6 +98,7 @@ private:
     QVector <QPixmap> expAnPixmap;
     QVector <QPixmap> classIcons;
     QVector <ExpAnimation*> expAn;
+    QVector <Powerup*> powerups;
     QTimer *t_draw;
     QTimer *t_chat;
     QTimer *t_killMessage;
@@ -95,6 +107,7 @@ private:
     QTimer *t_death;
     QTimer *t_expAn;
     QTimer *t_time;
+    QTimer *t_mouse;
     QThread *workerThread;
     FileDownloader *updateDL;
     FileDownloader *changeDl;
@@ -115,6 +128,8 @@ private:
     int team1CP;
     int team2CP;
     int maxDmg;
+    int currentReload;
+    int maxReload;
     double transX;
     double transY;
     double scaleX;
@@ -124,6 +139,7 @@ private:
     bool fullscreen;
     bool tab;
     bool isConnected;
+    QRect reloadRect;
     QVector <QString> chat;
     QVector <QString> messages;
     QVector <QRect> spawns;
@@ -139,9 +155,9 @@ private:
     QPainter::PixmapFragment camera;
     QString version;
     bool contains(QString data, QString c);
-    void closeEvent(QCloseEvent *e) override;
     void drawPlayerScores(QPainter &p);
     FrmLogin *login;
+    FrmSettings *settings;
 protected:
     void paintEvent(QPaintEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;
@@ -149,6 +165,7 @@ protected:
     void mousePressEvent(QMouseEvent *e) override;
     void mouseReleaseEvent(QMouseEvent *e) override;
     void leaveEvent(QEvent *event) override;
+    void closeEvent(QCloseEvent *e) override;
 };
 
 #endif // FRMMAIN_H

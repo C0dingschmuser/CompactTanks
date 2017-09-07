@@ -12,8 +12,6 @@ Terrain::Terrain(int x, int y, int w, int h, int type, int itype)
     this->w = w;
     this->h = h;
     this->type = type;
-    this->p = QPixmap(":/images/area/obj"+QString::number(itype,'f',0)+".png");
-    this->grass = QPixmap(":/images/area/obj9.png");
     owner = 0;
     cp = 0;
 }
@@ -45,11 +43,6 @@ int Terrain::getAmount()
     return cp;
 }
 
-QPixmap Terrain::getPixmap()
-{
-    return this->p;
-}
-
 void Terrain::setAmount(int amount)
 {
     this->cp = amount;
@@ -58,9 +51,4 @@ void Terrain::setAmount(int amount)
 void Terrain::setOwner(int owner)
 {
     this->owner = owner;
-}
-
-QPixmap Terrain::getGrassPixmap()
-{
-    return this->grass;
 }

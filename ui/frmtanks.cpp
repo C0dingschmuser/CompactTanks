@@ -22,19 +22,22 @@ FrmTanks::FrmTanks(QFont f,Tank *ownTank, QOpenGLWidget *parent) :
     barrelLength = 0;
     softTerrRes = 0;
     hardTerrRes = 0;
-    treeTerrRes = 0;
-    treeColl = 0;
+    vehicleID = 0;
+    heal = 0;
     vel = 0;
     ui->lwTanks->setIconSize(QSize(128,128));
     ui->lwTanks->setViewMode(QListView::IconMode);
     ui->lwTanks->setMovement(QListView::Static);
-    ui->lwTanks->addItem(new QListWidgetItem(QIcon(":/images/tank/tank1.png"),"Pz. IV",ui->lwTanks,1001));
-    ui->lwTanks->addItem(new QListWidgetItem(QIcon(":/images/tank/tank2.png"),"WT auf Pz. IV",ui->lwTanks,1002));
-    ui->lwTanks->addItem(new QListWidgetItem(QIcon(":/images/tank/tank3.png"),"Leopard",ui->lwTanks,1003));
-    ui->lwTanks->addItem(new QListWidgetItem(QIcon(":/images/tank/tank4.png"),"Tiger II",ui->lwTanks,1004));
-    ui->lwTanks->addItem(new QListWidgetItem(QIcon(":/images/tank/tank5.png"),"KV-2",ui->lwTanks,1005));
-    ui->lwTanks->addItem(new QListWidgetItem(QIcon(":/images/tank/tank6.png"),"M4 Sherman",ui->lwTanks,1006));
-    ui->lwTanks->addItem(new QListWidgetItem(QIcon(":/images/tank/tank7.png"),"Tiger",ui->lwTanks,1007));
+    ui->lwTanks->addItem(new QListWidgetItem(QIcon("images/tank/tank1.png"),"Pz. IV",ui->lwTanks,1001));
+    ui->lwTanks->addItem(new QListWidgetItem(QIcon("images/tank/tank2.png"),"WT auf Pz. IV",ui->lwTanks,1002));
+    ui->lwTanks->addItem(new QListWidgetItem(QIcon("images/tank/tank3.png"),"Leopard",ui->lwTanks,1003));
+    ui->lwTanks->addItem(new QListWidgetItem(QIcon("images/tank/tank4.png"),"Tiger II",ui->lwTanks,1004));
+    ui->lwTanks->addItem(new QListWidgetItem(QIcon("images/tank/tank5.png"),"KV-2",ui->lwTanks,1005));
+    ui->lwTanks->addItem(new QListWidgetItem(QIcon("images/tank/tank6.png"),"M4 Sherman",ui->lwTanks,1006));
+    ui->lwTanks->addItem(new QListWidgetItem(QIcon("images/tank/tank7.png"),"Tiger",ui->lwTanks,1007));
+    ui->lwTanks->addItem(new QListWidgetItem(QIcon("images/tank/tank8.png"),"Flugzeug",ui->lwTanks,1008));
+    ui->lwTanks->addItem(new QListWidgetItem(QIcon("images/tank/tank9.png"),"Flak",ui->lwTanks,1009));
+    this->setWindowFlags(Qt::CustomizeWindowHint);
 }
 
 FrmTanks::~FrmTanks()
@@ -118,6 +121,28 @@ void FrmTanks::paintEvent(QPaintEvent *e)
         painter.drawRect(605,237,width,10);
         painter.setBrush(Qt::darkGreen);
         painter.drawRect(605,237,width*((double)viewrange/2000),10);
+        //Warnung bei Flak
+        painter.setPen(Qt::black);
+        painter.drawText(605,263,"Fahrzeugtyp:");
+        painter.drawText(605,303,"Kann folgende Fahrzeugtypen angreifen:");
+        QFont f = painter.font();
+        f.setPointSize(12);
+        f.setBold(true);
+        painter.setFont(f);
+        switch(vehicleID) {
+            case 0:
+                painter.drawText(605,283,"Normal");
+                painter.drawText(605,323,"Normal/Flak");
+            break;
+            case 1:
+                painter.drawText(605,283,"Flugzeug");
+                painter.drawText(605,323,"Normal/Flak");
+            break;
+            case 2:
+                painter.drawText(605,283,"Flak");
+                painter.drawText(605,323,"Flugzeug");
+            break;
+        }
     }
 }
 
@@ -140,8 +165,8 @@ void FrmTanks::on_lwTanks_itemClicked(QListWidgetItem *item)
     this->barrelLength = dbTanks[id-1]->getBarrelLength();
     this->softTerrRes = dbTanks[id-1]->getSoftTerrRes();
     this->hardTerrRes = dbTanks[id-1]->getHardTerrRes();
-    this->treeTerrRes = dbTanks[id-1]->getTreeTerrRes();
-    this->treeColl = dbTanks[id-1]->getTreeColl();
+    this->vehicleID = dbTanks[id-1]->getVehicleID();
+    this->heal = dbTanks[id-1]->getHeal();
     this->vel = dbTanks[id-1]->getVel();
     this->camo = dbTanks[id-1]->getCamo();
     this->viewrange = dbTanks[id-1]->getViewrange();
@@ -150,8 +175,7 @@ void FrmTanks::on_lwTanks_itemClicked(QListWidgetItem *item)
 
 void FrmTanks::on_btnChoose_clicked()
 {
-    ownTank->setType(id);
-    ownTank->setData(id,speed,health,vel,reload,width,height,barrelLength,treeColl,camo,viewrange);
+    ownTank->setData(id,speed,health,vel,reload,width,height,barrelLength,heal,camo,viewrange,vehicleID);
     this->hide();
 }
 
@@ -168,13 +192,12 @@ void FrmTanks::on_lwTanks_itemDoubleClicked(QListWidgetItem *item)
     this->barrelLength = dbTanks[id-1]->getBarrelLength();
     this->softTerrRes = dbTanks[id-1]->getSoftTerrRes();
     this->hardTerrRes = dbTanks[id-1]->getHardTerrRes();
-    this->treeTerrRes = dbTanks[id-1]->getTreeTerrRes();
-    this->treeColl = dbTanks[id-1]->getTreeColl();
+    this->vehicleID = dbTanks[id-1]->getVehicleID();
+    this->heal = dbTanks[id-1]->getHeal();
     this->vel = dbTanks[id-1]->getVel();
     this->camo = dbTanks[id-1]->getCamo();
     this->viewrange = dbTanks[id-1]->getViewrange();
-    ownTank->setType(id);
-    ownTank->setData(id,speed,health,vel,reload,width,height,barrelLength,treeColl,camo,viewrange);
+    ownTank->setData(id,speed,health,vel,reload,width,height,barrelLength,heal,camo,viewrange,vehicleID);
     this->hide();
 }
 

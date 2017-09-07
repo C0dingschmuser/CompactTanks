@@ -15,8 +15,6 @@ private:
     int type;
     int owner;
     int cp;
-    QPixmap p;
-    QPixmap grass;
 public:
     Terrain();
     Terrain(int x, int y, int w, int h, int type=0,int itype=0);
@@ -29,8 +27,6 @@ public:
     int getType();
     int getOwner();
     int getAmount();
-    QPixmap getPixmap();
-    QPixmap getGrassPixmap();
 };
 
 #endif // TERRAIN_H

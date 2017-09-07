@@ -58,11 +58,13 @@ void Movement::on_tmoveW() {
     if(((!t_moveA->isActive()&&!t_moveD->isActive())||first==1)&&!t_moveS->isActive()) {
         if(r.y()>=0+s) {
             bool ok=false;
-            for(int i=sPos;i<ePos;i++) {
-                if(QRect(r.x(),r.y()-s,r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
-                    if(!lvlObjs[i]->getType()) {
-                        ok = true;
-                        break;
+            if(ownTank->getVehicleID()!=1) {
+                for(int i=sPos;i<ePos;i++) {
+                    if(QRect(r.x(),r.y()-s,r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
+                        if(!lvlObjs[i]->getType()) {
+                            ok = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -80,8 +82,19 @@ void Movement::on_tmoveW() {
             for(int i=min;i<max;i++) {
                 if(QRect(r.x(),r.y()-s,r.width(),r.height()).intersects(spawns[i])) ok = true;
             }
+            if(ownTank->getVehicleID()==1) ok = false;
             if(!ok) {
                 ownTank->w();
+            }
+        } else if(ownTank->getVehicleID()==1) {
+            int dir = qrand() %(2-0) + 0;
+            t_moveW->stop();
+            if(dir) {
+                first = 1;
+                t_moveA->start(ownTank->getTimer());
+            } else {
+                first = 4;
+                t_moveD->start(ownTank->getTimer());
             }
         }
         ownTank->setMoved(true);
@@ -94,11 +107,13 @@ void Movement::on_tmoveA() {
     if(((!t_moveW->isActive()&&!t_moveS->isActive())||first==2)&&!t_moveD->isActive()) {
         if(r.x()>=0+s) {
             bool ok=false;
-            for(int i=sPos;i<ePos;i++) {
-                if(QRect(r.x()-s,r.y(),r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
-                    if(!lvlObjs[i]->getType()) {
-                        ok = true;
-                        break;
+            if(ownTank->getVehicleID()!=1) {
+                for(int i=sPos;i<ePos;i++) {
+                    if(QRect(r.x()-s,r.y(),r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
+                        if(!lvlObjs[i]->getType()) {
+                            ok = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -116,8 +131,19 @@ void Movement::on_tmoveA() {
             for(int i=min;i<max;i++) {
                 if(QRect(r.x()-s,r.y(),r.width(),r.height()).intersects(spawns[i])) ok = true;
             }
+            if(ownTank->getVehicleID()==1) ok = false;
             if(!ok) {
                 ownTank->a();
+            }
+        } else if(ownTank->getVehicleID()==1) {
+            int dir = qrand() %(2-0) + 0;
+            t_moveA->stop();
+            if(dir) {
+                first = 1;
+                t_moveW->start(ownTank->getTimer());
+            } else {
+                first = 3;
+                t_moveS->start(ownTank->getTimer());
             }
         }
         ownTank->setMoved(true);
@@ -130,11 +156,13 @@ void Movement::on_tmoveS() {
     if(((!t_moveA->isActive()&&!t_moveD->isActive())||first==3)&&!t_moveW->isActive()) {
         if(r.bottom()<=height-s*2) {
             bool ok=false;
-            for(int i=sPos;i<ePos;i++) {
-                if(QRect(r.x(),r.y()+s,r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
-                    if(!lvlObjs[i]->getType()) {
-                        ok = true;
-                        break;
+            if(ownTank->getVehicleID()!=1) {
+                for(int i=sPos;i<ePos;i++) {
+                    if(QRect(r.x(),r.y()+s,r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
+                        if(!lvlObjs[i]->getType()) {
+                            ok = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -152,8 +180,19 @@ void Movement::on_tmoveS() {
             for(int i=min;i<max;i++) {
                 if(QRect(r.x(),r.y()+s,r.width(),r.height()).intersects(spawns[i])) ok = true;
             }
+            if(ownTank->getVehicleID()==1) ok = false;
             if(!ok) {
                 ownTank->s();
+            }
+        } else if(ownTank->getVehicleID()==1) {
+            int dir = qrand() %(2-0) + 0;
+            t_moveS->stop();
+            if(dir) {
+                first = 2;
+                t_moveA->start(ownTank->getTimer());
+            } else {
+                first = 4;
+                t_moveD->start(ownTank->getTimer());
             }
         }
         ownTank->setMoved(true);
@@ -166,11 +205,13 @@ void Movement::on_tmoveD() {
     if(((!t_moveW->isActive()&&!t_moveS->isActive())||first==4)&&!t_moveA->isActive()) {
         if(r.right()<=width-s*2) {
             bool ok=false;
-            for(int i=sPos;i<ePos;i++) {
-                if(QRect(r.x()+s,r.y(),r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
-                    if(!lvlObjs[i]->getType()) {
-                        ok = true;
-                        break;
+            if(ownTank->getVehicleID()!=1) {
+                for(int i=sPos;i<ePos;i++) {
+                    if(QRect(r.x()+s,r.y(),r.width(),r.height()).intersects(lvlObjs[i]->getRect())) {
+                        if(!lvlObjs[i]->getType()) {
+                            ok = true;
+                            break;
+                        }
                     }
                 }
             }
@@ -188,8 +229,19 @@ void Movement::on_tmoveD() {
             for(int i=min;i<max;i++) {
                 if(QRect(r.x()+s,r.y(),r.width(),r.height()).intersects(spawns[i])) ok = true;
             }
+            if(ownTank->getVehicleID()==1) ok = false;
             if(!ok) {
                 ownTank->d();
+            }
+        } else if(ownTank->getVehicleID()==1) {
+            int dir = qrand() %(2-0) + 0;
+            t_moveD->stop();
+            if(dir) {
+                first = 1;
+                t_moveW->start(ownTank->getTimer());
+            } else {
+                first = 3;
+                t_moveS->start(ownTank->getTimer());
             }
         }
         ownTank->setMoved(true);
@@ -209,24 +261,44 @@ void Movement::keyPressEvent(QVector<Terrain *> lvlObjs, int sPos, int ePos,int 
         if(r.y()>=0+s) {
             first = 1;
             t_moveW->start(t);
+            if(ownTank->getVehicleID()==1) {
+                t_moveA->stop();
+                t_moveS->stop();
+                t_moveD->stop();
+            }
         }
     }
     if(key==Qt::Key_A) {
         if(r.x()>=0+s) {
             first = 2;
             t_moveA->start(t);
+            if(ownTank->getVehicleID()==1) {
+                t_moveW->stop();
+                t_moveS->stop();
+                t_moveD->stop();
+            }
         }
     }
     if(key==Qt::Key_S) {
         if(r.bottom()<=height-s) {
             first = 3;
             t_moveS->start(t);
+            if(ownTank->getVehicleID()==1) {
+                t_moveA->stop();
+                t_moveW->stop();
+                t_moveD->stop();
+            }
         }
     }
     if(key==Qt::Key_D) {
         if(r.right()<=width-s) {
             first = 4;
             t_moveD->start(t);
+            if(ownTank->getVehicleID()==1) {
+                t_moveA->stop();
+                t_moveS->stop();
+                t_moveW->stop();
+            }
         }
     }
     if(key==Qt::Key_Tab) {
@@ -239,7 +311,7 @@ void Movement::keyReleaseEvent(int key)
     if(key==Qt::Key_F11) {
         emit fullscreen();
     }
-    if(!ownTank->isSpawned()) return;
+    if(!ownTank->isSpawned()||ownTank->getVehicleID()==1) return;
     if(key==Qt::Key_W) {
         t_moveW->stop();
         ownTank->setMoved(false);
@@ -263,6 +335,7 @@ void Movement::keyReleaseEvent(int key)
 
 void Movement::stop()
 {
+    if(ownTank->getVehicleID()) return;
     t_moveW->stop();
     t_moveA->stop();
     t_moveS->stop();

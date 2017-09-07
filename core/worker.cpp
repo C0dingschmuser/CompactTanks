@@ -26,7 +26,7 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     t_main->setTimerType(Qt::PreciseTimer);
     move = new Movement(this->ownTank,this->width,this->height,this);
     //37.120.177.121
-    network = new Network(this->ownTank,tanks,QHostAddress("37.120.177.121")); //ändern
+    network = new Network(this->ownTank,tanks,QHostAddress("127.0.0.1")); //ändern
     shoot = new Shoot(this->ownTank,network,this->aim);
     tankWindow = new FrmTanks(f,ownTank);
     connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
@@ -36,7 +36,7 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     connect(network,SIGNAL(delPlayer(int)),this,SLOT(on_delPlayer(int)));
     connect(network,SIGNAL(delObjs()),this,SLOT(on_delObjs()));
     connect(network,SIGNAL(newBullet(Bullet*,Tank*)),this,SLOT(on_newBullet(Bullet*,Tank*)));
-    connect(network,SIGNAL(delBullet(int)),this,SLOT(on_delBullet(int)));
+    connect(network,SIGNAL(delBullet(int,bool)),this,SLOT(on_delBullet(int,bool)));
     connect(network,SIGNAL(syncBullet(int,int)),this,SLOT(on_syncBullet(int,int)));
     connect(network,SIGNAL(visible(int)),this,SLOT(on_visible(int)));
     connect(network,SIGNAL(message(QString,int)),this,SIGNAL(message(QString,int)));
@@ -49,13 +49,16 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     connect(network,SIGNAL(hit(Tank*,QString)),this,SIGNAL(hit(Tank*,QString)));
     connect(network,SIGNAL(stats(int,int,int,int,int,int,int,int,double,double,double,int,int,int,int)),this,SLOT(on_db(int,int,int,int,int,int,int,int,double,double,double,int,int,int,int)));
     connect(network,SIGNAL(spawn(Tank*)),this,SLOT(on_spawn(Tank*)));
-    connect(network,SIGNAL(otherDeath(QRect)),this,SIGNAL(otherDeath(QRect)));
+    connect(network,SIGNAL(otherDeath(QRect,bool)),this,SIGNAL(otherDeath(QRect,bool)));
     connect(network,SIGNAL(chat(QString)),this,SIGNAL(chatS(QString)));
     connect(network,SIGNAL(ping(int)),this,SIGNAL(ping(int)));
     connect(network,SIGNAL(teamCP(int,int)),this,SIGNAL(teamCP(int,int)));
     connect(network,SIGNAL(reset(int)),this,SLOT(on_reset(int)));
     connect(network,SIGNAL(ownHit()),this,SIGNAL(ownHit()));
     connect(network,SIGNAL(changelog(int)),this,SLOT(on_changelog(int)));
+    connect(network,SIGNAL(powerup(Powerup*)),this,SIGNAL(powerup(Powerup*)));
+    connect(network,SIGNAL(delPowerup(int)),this,SIGNAL(delPowerup(int)));
+    connect(network,SIGNAL(registration(int)),this,SIGNAL(registration(int)));
     connect(move,SIGNAL(fullscreen()),this,SIGNAL(fullscreen()));
     connect(move,SIGNAL(tab()),this,SIGNAL(tab()));
     connect(shoot,SIGNAL(newBullet(Bullet*,Tank*)),this,SLOT(on_newBullet(Bullet*,Tank*)));
@@ -231,8 +234,11 @@ void Worker::on_newBullet(Bullet *b, Tank *t)
     emit newBullet(b);
 }
 
-void Worker::on_delBullet(int pos)
+void Worker::on_delBullet(int pos, bool flak)
 {
+    if(flak) {
+        emit otherDeath(bullets[pos]->get(),flak);
+    }
     if(bullets.size()-1>=pos) {
         bullets.removeAt(pos);
         emit delBullet(pos);
@@ -254,17 +260,22 @@ void Worker::on_tbullet()
             if(bullets[i]->getEnabled()) {
                 bullets[i]->update();
             }
+            Tank *shooter = network->sucheTank(bullets[i]->getShooter());
             for(int a=0;a<tanks.size();a++) {
                 if(bullets[i]->getShooter()!=tanks[a]->getName()) {
                     if(bullets[i]->get().intersects(tanks[a]->getRect())) {
-                        bullets[i]->setEnabled(false);
+                        if((tanks[a]->getVehicleID()==1&&shooter->getVehicleID()==2)||
+                                tanks[a]->getVehicleID()!=1&&shooter->getVehicleID()!=2) {
+                            bullets[i]->setEnabled(false);
+                        }
                     }
                 }
             }
             int x = bullets[i]->get().center().x();
             int y = bullets[i]->get().center().y();
             int pos = (x/72+(y/72*40));
-            if(x<0||y<0||x>width||y>height||!lvlObjs[pos]->getType()) bullets[i]->setEnabled(false);
+            if(pos>1199) pos = 1199;
+            if(x<0||y<0||x>width||y>height||(!lvlObjs[pos]->getType()&&shooter->getVehicleID()!=2)) bullets[i]->setEnabled(false);
         }
     }
 }
@@ -365,8 +376,8 @@ void Worker::on_spawn(Tank *t)
 {
     int id = t->getType();
     t->setData(id,dbTanks[id-1]->getSpeed(),dbTanks[id-1]->getHealth(),dbTanks[id-1]->getVel(),dbTanks[id-1]->getReload(),
-            dbTanks[id-1]->getWidth(),dbTanks[id-1]->getHeight(),dbTanks[id-1]->getBarrelLength(),dbTanks[id-1]->getTreeColl(),
-            dbTanks[id-1]->getCamo(),dbTanks[id-1]->getViewrange());
+            dbTanks[id-1]->getWidth(),dbTanks[id-1]->getHeight(),dbTanks[id-1]->getBarrelLength(),dbTanks[id-1]->getHeal(),
+            dbTanks[id-1]->getCamo(),dbTanks[id-1]->getViewrange(),dbTanks[id-1]->getVehicleID());
 }
 
 void Worker::on_tmove()
@@ -376,6 +387,7 @@ void Worker::on_tmove()
             tanks[i]->move();
         }
     }
+    emit reloadData(shoot->getReload(),ownTank->getReload());
 }
 
 void Worker::on_reset(int team)
@@ -399,6 +411,11 @@ void Worker::on_tRespawn()
         respawn--;
         if(!respawn) t_respawn->stop();
     }
+}
+
+void Worker::send(QString data)
+{
+    QMetaObject::invokeMethod(network,"send",Q_ARG(QString,data));
 }
 
 void Worker::chat(QString message)
@@ -450,7 +467,7 @@ void Worker::loadMap()
     int max1 = height/72;
     for(int i=0;i<max1;i++) {
         for(int a=0;a<max2;a++) {
-            Terrain *obj = new Terrain(0+(72*a),0+(72*i),72,72,getType(basic.at(lvlObjs.size()).toInt()),getType(basic.at(lvlObjs.size()+(max1*max2)).toInt()));
+            Terrain *obj = new Terrain(0+(72*a),0+(72*i),72,72,getType(basic.at(lvlObjs.size()).toInt()),0);
             lvlObjs.append(obj);
             if(obj->getType()==2) capObjs.append(lvlObjs.size()-1);
         }
@@ -579,7 +596,7 @@ void Worker::setScale(double scaleX, double scaleY, int transX, int transY)
 
 void Worker::notActive()
 {
-    move->stop();
+    QMetaObject::invokeMethod(move,"stop");
 }
 
 void Worker::setViewRect(QRect viewRect, int startPos, int endPos)

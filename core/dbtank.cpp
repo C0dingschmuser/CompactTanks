@@ -1,6 +1,6 @@
 #include "dbtank.h"
 
-dbTank::dbTank(QString name, int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel, int camo, int viewrange)
+dbTank::dbTank(QString name, int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, int vehicleID, bool heal, int vel, int camo, int viewrange)
 {
     this->camo = camo;
     this->viewrange = viewrange;
@@ -14,8 +14,8 @@ dbTank::dbTank(QString name, int dmg, int reload, int speed, int health, int wid
     this->barrelLength = barrelLength;
     this->softTerrRes = softTerrRes;
     this->hardTerrRes = hardTerrRes;
-    this->treeTerrRes = treeTerrRes;
-    this->treeColl = treeColl;
+    this->vehicleID = vehicleID;
+    this->heal = heal;
     this->vel = vel;
 }
 
@@ -24,7 +24,7 @@ QString dbTank::toString()
     QString r;
     r = QString::number(dmg,'f',0) + "#" + QString::number(reload,'f',0) + "#" + QString::number(speed,'f',0) + "#" + QString::number(health,'f',0) + "#" +
         QString::number(width,'f',0) + "#" + QString::number(height,'f',0) + "#" + QString::number(barrelLength,'f',0) + "#" + QString::number(softTerrRes,'f',2) + "#" +
-        QString::number(hardTerrRes,'f',2) + "#" + QString::number(treeTerrRes,'f',2) + "#" + QString::number(treeColl,'f',0) + "#" + QString::number(vel,'f',0) +"#" +
+        QString::number(hardTerrRes,'f',2) + "#" + QString::number(vehicleID,'f',0) + "#" + QString::number(heal,'f',0) + "#" + QString::number(vel,'f',0) +"#" +
             QString::number(camo,'f',0) + "#" + QString::number(viewrange,'f',0) +"#~";
     return r;
 }
@@ -89,14 +89,14 @@ double dbTank::getHardTerrRes()
     return hardTerrRes;
 }
 
-double dbTank::getTreeTerrRes()
+int dbTank::getVehicleID()
 {
-    return treeTerrRes;
+    return vehicleID;
 }
 
-int dbTank::getTreeColl()
+bool dbTank::getHeal()
 {
-    return treeColl;
+    return heal;
 }
 
 int dbTank::getVel()

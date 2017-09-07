@@ -26,12 +26,14 @@ private:
     Weapon *w;
     QPoint *mpos;
     Tank *t;
+    int remaining;
 public:
     explicit Shoot(Tank *t, Network *n, QPoint *aim, QObject *parent = 0);
     void MousePressEvent(QMouseEvent *e);
     void MouseReleaseEvent(QMouseEvent *e);
     void setMpos(QPoint mpos);
     void reset();
+    int getReload();
 
 signals:
     void newBullet(Bullet *b, Tank *t);

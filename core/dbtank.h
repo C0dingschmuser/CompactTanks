@@ -18,11 +18,11 @@ private:
     int viewrange;
     double softTerrRes;
     double hardTerrRes;
-    double treeTerrRes;
-    int treeColl;
+    int vehicleID;
+    bool heal;
     int vel;
 public:
-    dbTank(QString name,int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel, int camo, int viewrange);
+    dbTank(QString name,int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, int vehicleID, bool heal, int vel, int camo, int viewrange);
     QString getName();
     int getDmg();
     int getReload();
@@ -35,8 +35,8 @@ public:
     int getViewrange();
     double getSoftTerrRes();
     double getHardTerrRes();
-    double getTreeTerrRes();
-    int getTreeColl();
+    int getVehicleID();
+    bool getHeal();
     int getVel();
     QString toString();
 };

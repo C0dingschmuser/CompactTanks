@@ -22,13 +22,9 @@ Tank::Tank(QRect rect, QString name, int team, QObject *parent) :
     coins = 0;
     type = 0;
     endSpeed = 0;
-    grid = QPixmap(":/images/area/grid2.png");
+    grid = QPixmap("images/area/grid2.png");
     this->team = team;
-    for(int i=0;i<4;i++) {
-        QPixmap p = QPixmap(":/images/tank/"+QString::number(type,'f',0)+"/tank"+QString::number(i+1,'f',0)+".png");
-        imgs.append(p);
-    }
-    currentImg = imgs[0];
+    img = QPixmap("images/tank/"+QString::number(type,'f',0)+"/tank1.png");
 }
 
 Tank::~Tank()
@@ -56,6 +52,11 @@ bool Tank::isHidden()
     return hidden;
 }
 
+bool Tank::getHeal()
+{
+    return heal;
+}
+
 QRect Tank::getRect()
 {
     return this->rect;
@@ -73,7 +74,6 @@ void Tank::setSpawned(bool spawned)
 
 void Tank::w(bool a)
 {
-    //currentImg = imgs[0];
     if(!a) {
         this->dir = 1;
     }
@@ -82,7 +82,6 @@ void Tank::w(bool a)
 
 void Tank::a(bool a)
 {
-    //currentImg = imgs[1];
     if(!a) {
         this->dir = 2;
     }
@@ -91,7 +90,6 @@ void Tank::a(bool a)
 
 void Tank::s(bool a)
 {
-    //currentImg = imgs[2];
     if(!a) {
         this->dir = 3;
     }
@@ -100,7 +98,6 @@ void Tank::s(bool a)
 
 void Tank::d(bool a)
 {
-    //currentImg = imgs[3];
     if(!a) {
         this->dir = 4;
     }
@@ -142,17 +139,14 @@ void Tank::setType(int type)
 {
     if(this->type==type) return;
     this->type = type;
-    imgs.resize(0);
-    for(int i=0;i<4;i++) {
-        QPixmap p = QPixmap(":/images/tank/"+QString::number(type,'f',0)+"/tank"+QString::number(i+1,'f',0)+".png");
-        imgs.append(p);
-    }
-    currentImg = imgs[0];
-    turret = QPixmap(":/images/tank/"+QString::number(type,'f',0)+"/turm.png");
+    img = QPixmap("images/tank/"+QString::number(type,'f',0)+"/tank1.png");
+    if(vehicleID==1) return;
+    turret = QPixmap("images/tank/"+QString::number(type,'f',0)+"/turm.png");
 }
 
-void Tank::setData(int type, int speed, int health, int bvel, int reload, int width, int height, int barrelLength, int treeColl, int camo, int viewrange)
+void Tank::setData(int type, int speed, int health, int bvel, int reload, int width, int height, int barrelLength, bool heal, int camo, int viewrange, int vehicleID)
 {
+    this->vehicleID = vehicleID;
     setType(type);
     this->timer = ((double)speed/10)/2;
     this->health = health;
@@ -162,7 +156,7 @@ void Tank::setData(int type, int speed, int health, int bvel, int reload, int wi
     this->width = width;
     this->height = height;
     this->barrelLength = barrelLength;
-    this->treeColl = treeColl;
+    this->heal = heal;
     this->camo = camo;
     this->viewRange = viewrange;
     rect = QRect(rect.x(),rect.y(),width,height);
@@ -228,6 +222,11 @@ int Tank::getViewrange()
     return viewRange;
 }
 
+int Tank::getVehicleID()
+{
+    return vehicleID;
+}
+
 QPoint Tank::getDeathPoint()
 {
     return deathPoint;
@@ -266,6 +265,7 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     if(name==NULL||(!spawned&&this!=own)) return;
     QColor rcolor;
     QRect r;
+    int deg = 0;
     int xt = rect.x();
     int yt = rect.y();
     if(!visible) {
@@ -282,21 +282,29 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     switch(dir) {
         case 1:
             r = QRect(xt+5,yt+4,30,34);
+            deg = 0;
         break;
         case 2:
             r = QRect(xt+4,yt+4,34,30);
+            deg = 90;
         break;
         case 3:
             r = QRect(xt+5,yt+2,30,34);
+            deg = 180;
         break;
         case 4:
             r = QRect(xt+2,yt+6,34,29);
+            deg = 270;
         break;
     }
     p.setBrush(rcolor);
     p.setPen(Qt::NoPen);
     //p.drawRect(r);
-    p.drawPixmap(xt,yt,rect.width(),rect.height(),imgs[dir-1]);
+    p.save();
+    p.translate(xt+rect.width()/2,yt+rect.height()/2);
+    p.rotate(-deg);
+    p.drawPixmap(-rect.width()/2,-rect.height()/2,rect.width(),rect.height(),img);
+    p.restore();
     QFont f = p.font();
     f.setPointSize(12);
     p.setFont(f);
@@ -358,11 +366,16 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
                 p.rotate(-angle);
                 p.drawPixmap(-20,-21,80,40,turret);
             break;
+            case 9:
+                p.translate(xt+25,yt+25);
+                p.rotate(-angle);
+                p.drawPixmap(-25,-30,100,60,turret);
+            break;
         }
         p.restore();
         /*p.setPen(Qt::red);
         p.setBrush(Qt::red);
-        p.drawRect(xt+30,yt+30,1,1);
+        p.drawRect(xt+25,yt+30,1,1);
         /*p.setPen(Qt::green);
         p.setBrush(Qt::green);
         p.drawRect(xt+30,yt+25,1,1);*/
@@ -403,7 +416,7 @@ QString Tank::toString()
 
 QPixmap Tank::getIMG()
 {
-    return this->currentImg;
+    return this->img;
 }
 
 void Tank::teleport(int x, int y)
@@ -496,6 +509,11 @@ void Tank::setAngle(int angle)
 void Tank::setCoins(int coins)
 {
     this->coins = coins;
+}
+
+void Tank::setVehicleID(int id)
+{
+    this->vehicleID = id;
 }
 
 void Tank::setName(QString name)

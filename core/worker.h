@@ -17,6 +17,7 @@
 #include "core/terrain.h"
 #include "core/sound.h"
 #include "core/dbtank.h"
+#include "core/powerup.h"
 #include "ui/frmtanks.h"
 
 Q_DECLARE_METATYPE(QKeyEvent*)
@@ -30,7 +31,7 @@ private slots:
     void on_newPlayer(Tank *t);
     void on_delPlayer(int pos);
     void on_newBullet(Bullet *b, Tank *t);
-    void on_delBullet(int pos);
+    void on_delBullet(int pos, bool flak=false);
     void on_syncBullet(int pos,int dmg);
     void on_delObjs();
     void on_tbullet();
@@ -107,7 +108,7 @@ public:
     void mRls(QMouseEvent *e);
     void notActive();
     void setViewRect(QRect viewRect, int startPos = 0, int endPos = 1200);
-    void connectToServer(QString username,QString password,QString version);
+    void connectToServer(QString username,QString password="",QString version="");
     void doSpawn();
     void setScale(double scaleX, double scaleY,int transX,int transY);
     void chat(QString message);
@@ -119,6 +120,7 @@ public:
     double getDifference(double v1, double v2);
     QVector<QRect> getSpawns();
     void run(QThread *thread);
+    void send(QString data);
 signals:
     void newPlayer(Tank *t);
     void delPlayer(int pos);
@@ -142,13 +144,17 @@ signals:
     void spawn();
     void death();
     void msgbox(QString title,QString text);
-    void otherDeath(QRect rect);
+    void otherDeath(QRect rect, bool flak);
     void chatS(QString message);
     void ping(int ping);
     void teamCP(int team1cp, int team2cp);
     void resetMatch(int team);
     void ownHit();
     void changeStart();
+    void reloadData(int current, int max);
+    void powerup(Powerup *tmp);
+    void delPowerup(int pos);
+    void registration(int code);
 };
 
 #endif // WORKER_H

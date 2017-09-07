@@ -16,6 +16,7 @@ FrmMain::FrmMain(QWidget *parent) :
     tab = false;
     login = new FrmLogin();
     login->show();
+    settings = new FrmSettings();
     this->hide();
     width = 2880;
     height = 2160;
@@ -28,6 +29,8 @@ FrmMain::FrmMain(QWidget *parent) :
     team2CP = 0;
     graphics = 0;
     maxDmg = 0;
+    currentReload = 0;
+    maxReload = 0;
     chatActive = false;
     isConnected = true;
     fullscreen = false;
@@ -46,10 +49,12 @@ FrmMain::FrmMain(QWidget *parent) :
     t_killMessage = new QTimer();
     t_hit = new QTimer();
     t_time = new QTimer();
+    t_mouse = new QTimer();
     t_draw->setTimerType(Qt::PreciseTimer);
     sound = new Sound();
     lowGraphics = false;
-    version = "v0.0.6.2b2";
+    version = "v0.0.6.3";
+    reloadRect = QRect(-200,-200,60,60);
     changeDl = new FileDownloader(QUrl("http://37.120.177.121/compacttanks/changelog.txt"));
     updateDL = new FileDownloader(QUrl("http://37.120.177.121/compacttanks/update.zip"));
     connect(updateDL,SIGNAL(downloaded()),this,SLOT(on_download()));
@@ -63,6 +68,7 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(t_hit,SIGNAL(timeout()),this,SLOT(on_thit()));
     connect(t_spawn,SIGNAL(timeout()),this,SLOT(on_tspawn()));
     connect(t_time,SIGNAL(timeout()),this,SLOT(on_ttime()));
+    connect(t_mouse,SIGNAL(timeout()),this,SLOT(on_tmouse()));
     connect(worker,SIGNAL(spawn()),this,SLOT(on_spawn()));
     connect(worker,SIGNAL(newBullet(Bullet*)),this,SLOT(on_newBullet(Bullet*)));
     connect(worker,SIGNAL(newPlayer(Tank*)),this,SLOT(on_newPlayer(Tank*))); //bei neuem spieler aufrufen
@@ -86,40 +92,48 @@ FrmMain::FrmMain(QWidget *parent) :
     connect(worker,SIGNAL(hit(Tank*,QString)),this,SLOT(on_hit(Tank*,QString)));
     connect(worker,SIGNAL(death()),this,SLOT(on_death()));
     connect(worker,SIGNAL(msgbox(QString,QString)),this,SLOT(on_msgBox(QString,QString)));
-    connect(worker,SIGNAL(otherDeath(QRect)),this,SLOT(on_otherDeath(QRect)));
+    connect(worker,SIGNAL(otherDeath(QRect,bool)),this,SLOT(on_otherDeath(QRect,bool)));
     connect(worker,SIGNAL(chatS(QString)),this,SLOT(on_chat(QString)));
     connect(worker,SIGNAL(ping(int)),this,SLOT(on_ping(int)));
     connect(worker,SIGNAL(teamCP(int,int)),this,SLOT(on_teamCP(int,int)));
     connect(worker,SIGNAL(resetMatch(int)),this,SLOT(on_resetMatch(int)));
     connect(worker,SIGNAL(ownHit()),this,SLOT(on_ownHit()));
     connect(worker,SIGNAL(changeStart()),this,SLOT(on_changeDLStart()));
+    connect(worker,SIGNAL(reloadData(int,int)),this,SLOT(on_reload(int,int)));
+    connect(worker,SIGNAL(powerup(Powerup*)),this,SLOT(on_powerup(Powerup*)));
+    connect(worker,SIGNAL(delPowerup(int)),this,SLOT(on_delPowerup(int)));
+    connect(worker,SIGNAL(registration(int)),this,SLOT(on_registration(int)));
     connect(t_expAn,SIGNAL(timeout()),this,SLOT(on_tExpAn()));
     connect(login,SIGNAL(connectWithData(QString,QString,double,int,bool)),this,SLOT(on_connectData(QString,QString,double,int,bool)));
+    connect(login,SIGNAL(confirm(QString)),this,SLOT(on_sendData(QString)));
+    connect(login,SIGNAL(sendEmail(QString)),this,SLOT(on_sendData(QString)));
+    connect(settings,SIGNAL(save(double,int,bool)),this,SLOT(on_settingsSave(double,int,bool)));
     msgCount = 0;
-    map = QPixmap(":/images/area/map.png");
+    map = QPixmap("images/area/map.png");
     for(int i=0;i<74;i++) {
-        expAnPixmap.append(QPixmap(":/images/animation/explosion/"+QString::number(i)+".png"));
+        expAnPixmap.append(QPixmap("images/animation/explosion/"+QString::number(i)+".png"));
     }
     //maxplayerid
-    for(int i=0;i<7;i++) {
-        classIcons.append(QPixmap(":/images/tank/tank"+QString::number(i+1)+".png"));
+    for(int i=0;i<9;i++) {
+        classIcons.append(QPixmap("images/tank/tank"+QString::number(i+1)+".png"));
     }
     /*tanks.append(new Tank(QRect(0,0,1,1),"num1",1));
     tanks.append(new Tank(QRect(0,0,1,1),"num2",1));
     tanks.append(new Tank(QRect(0,0,1,1),"num3",2));
     tanks.append(new Tank(QRect(0,0,1,1),"num4",2));
     tanks.append(new Tank(QRect(0,0,1,1),"num5",1));*/
-    this->setCursor(QPixmap(":/images/tank/cursor.png"));
-    tree = QPixmap(":/images/area/obj0.png");
-    grass = QPixmap(":/images/area/obj9.png");
-    minimap = QPixmap(":/images/gui/minimap.png");
-    grid = QPixmap(":/images/area/obj2g.png");
-    sSpawn = QPixmap(":/images/gui/sSpawn.png");
-    sCap = QPixmap(":/images/gui/sCap.png");
-    tanksMenu = QPixmap(":/images/gui/tanks.png");
-    win = QPixmap(":/images/gui/win.png");
+    this->setCursor(QPixmap("images/tank/cursor.png"));
+    tree = QPixmap("images/area/obj0.png");
+    grass = QPixmap("images/area/obj9.png");
+    minimap = QPixmap("images/gui/minimap.png");
+    grid = QPixmap("images/area/obj2g.png");
+    sSpawn = QPixmap("images/gui/sSpawn.png");
+    sCap = QPixmap("images/gui/sCap.png");
+    tanksMenu = QPixmap("images/gui/tanks.png");
+    win = QPixmap("images/gui/win.png");
     t_draw->start(25);
     t_hit->start(10);
+    t_mouse->start(1);
     //t_bullet->start(5);
 }
 
@@ -145,36 +159,32 @@ FrmMain::~FrmMain()
     delete aim;
     delete mpos;
     delete ui;
+    delete settings;
     QApplication::exit();
 }
 
-void FrmMain::on_connectData(QString username, QString pw, double volume, int graphics, bool VSync)
+void FrmMain::on_connectData(QString username, QString pw, double volume, int volume2, bool VSync)
 {
-    this->graphics = graphics;
-    ownTank->setUsername(username);
-    if(!VSync) {
-        QSurfaceFormat f;
-        f.setSwapInterval(0);
-        QSurfaceFormat::setDefaultFormat(f);
+    if(username!="#0") {
+        ownTank->setUsername(username);
+        if(!VSync) {
+            QSurfaceFormat f;
+            f.setSwapInterval(0);
+            QSurfaceFormat::setDefaultFormat(f);
+        }
+        sound->setVolume(volume);
+        sound->setMusicVolume(volume2);
+        settings->setData(volume,volume2,VSync);
+        worker->connectToServer(username,pw,version);
+    } else {
+        worker->connectToServer("#0");
     }
-    switch(graphics) {
-        case 0:
-            t_draw->setInterval(25);
-        break;
-        case 1:
-            t_draw->setInterval(10);
-        break;
-        case 2:
-            t_draw->setInterval(5);
-        break;
-    }
-
-    sound->setVolume(volume);
-    worker->connectToServer(username,pw,version);
 }
 
 void FrmMain::on_connSuccess()
 {
+    t_draw->setInterval(5);
+    sound->playMusic();
     login->setLogin(false);
     isConnected = false;
     worker->moveToThread(workerThread);
@@ -186,10 +196,18 @@ void FrmMain::on_connSuccess()
     initializeGL();
     login->hide();
     spawns = worker->getSpawns();
-    t_expAn->start(6);
-    t_chat->start(30000);
+    t_expAn->start(4);
+    t_expAn->moveToThread(workerThread);
+    t_mouse->moveToThread(workerThread);
     t_time->start(5000);
+    t_time->moveToThread(workerThread);
+    t_chat->start(30000);
     this->show();
+}
+
+void FrmMain::on_sendData(QString email)
+{
+    worker->send(email);
 }
 
 void FrmMain::on_wrongData(int id)
@@ -216,6 +234,28 @@ void FrmMain::on_wrongData(int id)
 
     QMessageBox::information(login,"FEHLER",msg);
     login->reset();
+}
+
+void FrmMain::on_registration(int code)
+{
+    login->reg(code);
+}
+
+void FrmMain::on_settingsSave(double vol1, int vol2, bool vsync)
+{
+    sound->setVolume(vol1);
+    sound->setMusicVolume(vol2);
+    QFile file;
+    QString path = qApp->applicationDirPath();
+    path.append("/settings.ini");
+    file.setFileName(path);
+    file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text);
+    QTextStream out(&file);
+    QString sel = "0";
+    if(vsync) sel = "1";
+    out << ownTank->getName() << "#" << sel << "#" <<
+           QString::number(vol1,'f',2) << "#" << QString::number(vol2) << "#" << endl;
+    file.close();
 }
 
 void FrmMain::on_download()
@@ -265,7 +305,7 @@ void FrmMain::on_teamCP(int team1cp, int team2cp)
 
 void FrmMain::on_ping(int ping)
 {
-    this->setCursor(QPixmap(":/images/tank/cursor.png"));
+    this->setCursor(QPixmap("images/tank/cursor.png"));
     this->ping = ping;
 }
 
@@ -293,10 +333,16 @@ void FrmMain::on_ttime()
     msgCount = 0;
 }
 
-void FrmMain::on_otherDeath(QRect rect)
+void FrmMain::on_otherDeath(QRect rect, bool flak)
 {
-    expAn.append(new ExpAnimation(rect));
-    sound->playDeath();
+    if(!flak) {
+        expAn.append(new ExpAnimation(rect));
+        sound->playDeath();
+    } else {
+        rect.adjust(-7,-7,14,14);
+        expAn.append(new ExpAnimation(rect));
+        sound->playOwnHit(1);
+    }
 }
 
 void FrmMain::on_shot(int type)
@@ -549,7 +595,9 @@ void FrmMain::on_newMap(QVector<Terrain*> lvlObjs)
 
 void FrmMain::on_ownHit()
 {
-    sound->playOwnHit();
+    int type = 0;
+    if(ownTank->getVehicleID()==1) type = 1;
+    sound->playOwnHit(type);
 }
 
 bool FrmMain::contains(QString data,QString c)
@@ -561,12 +609,6 @@ bool FrmMain::contains(QString data,QString c)
         }
     }
     return ok;
-}
-
-void FrmMain::closeEvent(QCloseEvent *e)
-{
-    Q_UNUSED(e)
-    worker->close();
 }
 
 void FrmMain::on_msgBox(QString title, QString text)
@@ -588,6 +630,24 @@ void FrmMain::on_resetMatch(int team)
     ownTank->setAll(-200,-200);
     ownTank->setSpawned(false);
     on_death();
+}
+
+void FrmMain::on_powerup(Powerup *tmp)
+{
+    powerups.append(tmp);
+}
+
+void FrmMain::on_delPowerup(int pos)
+{
+    if(pos==-1) {
+        for(int i=0;i<powerups.size();i++) {
+            delete powerups[i];
+        }
+        powerups.resize(0);
+        return;
+    }
+    delete powerups[pos];
+    powerups.removeAt(pos);
 }
 
 void FrmMain::drawPlayerScores(QPainter &p)
@@ -745,7 +805,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     int endPos = 1200;
     if(ownTank->isSpawned()) {
         viewRect = QRect(ownTank->getRect().center().x()-960,
-                               ownTank->getRect().center().y()-540,2100,1250);
+                               ownTank->getRect().center().y()-600,2100,1310);
         scaleX = double(this->geometry().width()/double(1920));
         scaleY = double(this->geometry().height()/double(1080));
     } else {
@@ -772,20 +832,8 @@ void FrmMain::paintEvent(QPaintEvent *e)
         painter.translate(transX,transY);
     }
     worker->setScale(scaleX,scaleY,transX,transY);
-    QPoint m;
-    m.setX(this->mapFromGlobal(QCursor::pos()).x()/scaleX);
-    m.setY(this->mapFromGlobal(QCursor::pos()).y()/scaleY);
-    mpos->setX(m.x());
-    mpos->setY(m.y());
-    if(ownTank->isSpawned()) {
-        this->aim->setX(ownTank->getRect().x()+mpos->x()-940);
-        this->aim->setY(ownTank->getRect().y()+mpos->y()-520);
-    } else {
-        this->aim->setX(mpos->x()-transX);
-        this->aim->setY(mpos->y()-transY);
-    }
     painter.setFont(font);
-    for(int i=2160+576;i>viewRect.y()-72;i-=72) {
+    for(int i=2160+576;i>viewRect.y()-144;i-=72) {
         for(int a=2880+936;a>viewRect.x()-72;a-=72) {
             if(QRect(a,i,72,72).intersects(viewRect)&&((a<0||i<0)
                     ||(a>width-72||i>height-72))) {
@@ -859,6 +907,10 @@ void FrmMain::paintEvent(QPaintEvent *e)
             painter.drawEllipse(bullets[i]->get().center(),3,3);
         }
     }
+    //painter.setPen(Qt::NoPen);
+    for(int i=0;i<powerups.size();i++) {
+        painter.drawPixmap(powerups[i]->getRect(),powerups[i]->getPixmap());
+    }
     painter.setPen(Qt::NoPen);
     if(ownTank->isSpawned()||t_spawn->isActive()) ownTank->drawTank(painter,ownTank,true);
     for(int i=0;i<tanks.size();i++) {
@@ -873,7 +925,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
     }
     //-------------DEBUG----------------
     //for(int i=0;i<lvlObjs.size();i++) {
-    //    painter.drawPixmap(lvlObjs[i]->getRect(),QPixmap(":/images/area/grid.png"));
+    //    painter.drawPixmap(lvlObjs[i]->getRect(),QPixmap("images/area/grid.png"));
     //}
     //-------------/DEBUG----------------
     //painter.setBrush(Qt::transparent);
@@ -917,11 +969,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
         int health = ownTank->getHealth();
         int maxHealth = ownTank->getHealth(1);
         int offset = 400;
-        painter.drawRect(18,998,offset+4,2);
-        painter.drawRect(18,998+52,offset+4,2);
-        painter.drawRect(18,998,2,52);
-        painter.drawRect(18+offset+2,998,2,52);
-        //painter.drawRect(18,998,404,54);
+        //painter.drawRect(18,998,404,66);
         if(health>maxHealth*0.8) {
             painter.setBrush(QColor(34,177,76));
         } else if(health>maxHealth*0.6) {
@@ -933,12 +981,20 @@ void FrmMain::paintEvent(QPaintEvent *e)
         } else if(health>0) {
             painter.setBrush(QColor(237,28,36));
         }
+        QPen pen;
+        pen.setWidth(3);
+        painter.setPen(pen);
         painter.drawRect(20,1000,400*((double)health/maxHealth),50);
         f = painter.font();
         f.setPointSize(32);
         painter.setFont(f);
         painter.setPen(Qt::black);
         painter.drawText(190,1040,QString::number(health));
+        //reload
+        //painter.setPen(Qt::NoPen);
+        painter.setPen(pen);
+        painter.setBrush(Qt::darkGreen);
+        painter.drawRect(20,1052,400*((double)currentReload/maxReload),10);
         //dmg log start
         f = painter.font();
         f.setPointSize(24);
@@ -946,6 +1002,7 @@ void FrmMain::paintEvent(QPaintEvent *e)
         painter.drawText(1400,1060,"HP: "+QString::number(maxDmg));
         //dmg log end
         //Minimap start
+        painter.save();
         painter.setPen(Qt::NoPen);
         painter.setOpacity(0.75);
         int x = 1920-1920*0.2;
@@ -987,6 +1044,16 @@ void FrmMain::paintEvent(QPaintEvent *e)
             }
         }
         painter.setOpacity(1);
+        painter.restore();
+        QRect arc(mpos->x()-35,mpos->y()-35,70,70);
+        QPen pen2(Qt::black,7);
+        painter.setPen(pen2);
+        int startAngle = 90;
+        int stopAngle = 0-(((double)currentReload/maxReload)*360);
+        painter.drawArc(arc,startAngle*16,stopAngle*16);
+        double remaining = maxReload-currentReload;
+        if(remaining==-1) remaining = maxReload;
+        painter.drawText(mpos->x()+50,mpos->y()+40,QString::number(remaining/1000,'f',2)+"s");
         //minimap end
     } else {
         if(t_spawn->isActive()||t_death->isActive()) return;
@@ -1106,10 +1173,39 @@ void FrmMain::paintEvent(QPaintEvent *e)
     painter.drawRect(x+80+(600-barWidth*((double)team2CP/barWidth)),0,barWidth*((double)team2CP/barWidth),50);
 }
 
+void FrmMain::on_tmouse()
+{
+    QPoint m;
+    m.setX(this->mapFromGlobal(QCursor::pos()).x()/scaleX);
+    m.setY(this->mapFromGlobal(QCursor::pos()).y()/scaleY);
+    mpos->setX(m.x());
+    mpos->setY(m.y());
+    if(ownTank->isSpawned()) {
+        this->aim->setX(ownTank->getRect().x()+mpos->x()-940);
+        this->aim->setY(ownTank->getRect().y()+mpos->y()-520);
+    } else {
+        this->aim->setX(mpos->x()-transX);
+        this->aim->setY(mpos->y()-transY);
+    }
+}
+
+void FrmMain::on_reload(int current, int max)
+{
+    currentReload = current;
+    maxReload = max;
+}
+
 void FrmMain::leaveEvent(QEvent *event)
 {
     Q_UNUSED(event);
     //QCursor::setPos(mapToGlobal(QPoint(1280/2,720/2)));
+}
+
+void FrmMain::closeEvent(QCloseEvent *e)
+{
+    Q_UNUSED(e)
+    worker->close();
+    settings->hide();
 }
 
 void FrmMain::keyPressEvent(QKeyEvent *e)
@@ -1138,6 +1234,11 @@ void FrmMain::keyPressEvent(QKeyEvent *e)
         }
         return;
     }
+    if(e->key()==Qt::Key_Escape) {
+        if(!settings->isVisible()) {
+            settings->show();
+        }
+    }
     worker->keyP(e);
 }
 
@@ -1145,6 +1246,7 @@ void FrmMain::keyReleaseEvent(QKeyEvent *e)
 {
     worker->keyR(e);
 }
+
 
 void FrmMain::mousePressEvent(QMouseEvent *e)
 {
