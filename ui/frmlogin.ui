@@ -39,7 +39,7 @@
   </widget>
   <widget class="QLineEdit" name="edtPassword">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -157,7 +157,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Built with Qt - Published under GNU GPL - Copyright Bruh Games</string>
+    <string>Built with Qt - Copyright Bruh Games - Dev: FireDiver</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_6">
@@ -241,7 +241,7 @@
   </widget>
   <widget class="QPushButton" name="btnRegister">
    <property name="enabled">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -276,7 +276,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Dev: FireDiver,  Bilder:  Soldiermelly &amp; Darmzotte, Server: AciVanConis</string>
+    <string>Musik: Reverk,  Bilder:  Soldiermelly &amp; Darmzotte, Server: AciVanConis</string>
    </property>
   </widget>
  </widget>

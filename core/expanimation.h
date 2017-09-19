@@ -1,16 +1,16 @@
 #ifndef EXPANIMATION_H
 #define EXPANIMATION_H
-#include <QRect>
+#include <QRectF>
 
 class ExpAnimation
 {
 private:
     int step;
-    QRect rect;
+    QRectF rect;
 public:
     ExpAnimation();
-    ExpAnimation(QRect rect);
-    QRect getRect();
+    ExpAnimation(QRectF rect);
+    QRectF getRect();
     void setStep(int step);
     int getStep();
 };

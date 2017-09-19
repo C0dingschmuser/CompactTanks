@@ -6,6 +6,7 @@
 #include <QKeyEvent>
 #include <QThread>
 #include <QDebug>
+#include <QtMath>
 #include "tank.h"
 #include "terrain.h"
 
@@ -33,6 +34,7 @@ private:
     int first;
     int sPos;
     int ePos;
+    QRectF map;
 public:
     explicit Movement(Tank *t,int width,int height,QObject *parent = 0);
     ~Movement();
@@ -46,6 +48,7 @@ public:
 signals:
     void fullscreen();
     void tab();
+    void outOfBounds();
 public slots:
 };
 

@@ -15,6 +15,7 @@ public:
     void sync(int x, int y, int elapsed=-1);
     void setDmg(int dmg);
     void setEnabled(bool enabled);
+    void setTarget(int target=1);
     bool getColl();
     bool getEnabled();
     QString getShooter();
@@ -24,6 +25,7 @@ public:
     int getElapsed();
     int getVel();
     int getDmg();
+    int getTarget();
 private:
     QColor color;
     double x;
@@ -35,6 +37,7 @@ private:
     QString shooter;
     int elapsed;
     int dmg;
+    int target;
     bool coll;
     bool enabled;
     double getDistance(QPoint p1,QPoint p2);

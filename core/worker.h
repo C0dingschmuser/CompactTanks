@@ -9,6 +9,8 @@
 #include <QKeyEvent>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QRectF>
+#include <QPolygonF>
 #include <QThread>
 #include "core/filedownloader.h"
 #include "core/network.h"
@@ -19,6 +21,7 @@
 #include "core/dbtank.h"
 #include "core/powerup.h"
 #include "ui/frmtanks.h"
+#include "Box2D/Box2D.h"
 
 Q_DECLARE_METATYPE(QKeyEvent*)
 Q_DECLARE_METATYPE(QVector<Terrain*>)
@@ -44,7 +47,8 @@ private slots:
     void on_visible(int v);
     void on_capobj(int num,int owner,int cp);
     void on_setT(int timer);
-    void on_pos(Tank *p,int x,int y,int dir,int health, int angle,int spotted,int stimer);
+    void on_pos(Tank *p,double x,double y,int turnAngle,int health, int angle,int spotted,int stimer,
+                int stationary,double vx,double vy);
     void on_db(int id, int dmg, int reload, int speed, int health, int width, int height, int barrelLength,
                double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel,
                int camo, int viewrange);
@@ -58,6 +62,8 @@ private slots:
     void on_reset(int team);
     void on_tRespawn();
     void on_changelog(int size);
+    void on_tPhysics();
+
 private:
     QRect viewRect;
     QTimer *t_bullet;
@@ -68,6 +74,7 @@ private:
     QTimer *t_visible;
     QTimer *t_move;
     QTimer *t_respawn;
+    QTimer *t_physics;
     Tank *ownTank;
     FrmTanks *tankWindow;
     QWidget *mainWindow;
@@ -77,6 +84,7 @@ private:
     QVector <QRect> spawns;
     QVector <QRect> classRects;
     QVector <dbTank*> dbTanks;
+    QVector <b2Body*> delBodys;
     QVector <int> capObjs;
     int classID;
     Movement *move;
@@ -96,11 +104,14 @@ private:
     int endPos;
     int selected;
     int respawn;
+    b2World *world;
     void loadMap();
     int getType(int type);
     bool contains(QString data, QString c);
+    void updateFriction();
+    void createBounds();
 public:
-    explicit Worker(Tank *ownTank,QPoint *aim, int width, int height, QFont f, QWidget *mainWindow,QObject *parent = 0);
+    explicit Worker(Tank *ownTank,QPoint *aim, int width, int height, QFont f, b2World *world, QWidget *mainWindow,QObject *parent = 0);
     ~Worker();
     void keyP(QKeyEvent *e);
     void keyR(QKeyEvent *e);
@@ -144,7 +155,7 @@ signals:
     void spawn();
     void death();
     void msgbox(QString title,QString text);
-    void otherDeath(QRect rect, bool flak);
+    void otherDeath(QRectF rect, bool flak);
     void chatS(QString message);
     void ping(int ping);
     void teamCP(int team1cp, int team2cp);

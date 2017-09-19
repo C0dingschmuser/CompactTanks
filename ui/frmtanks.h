@@ -42,7 +42,7 @@ private:
     double softTerrRes;
     double hardTerrRes;
     int vehicleID;
-    double calcSpeed(int value);
+    double calcSpeed(double value);
     bool heal;
     int vel;
     int camo;

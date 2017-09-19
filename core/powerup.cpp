@@ -10,7 +10,7 @@ Powerup::Powerup(QRect rect, int type, int team)
     this->rect = rect;
     this->type = type;
     this->team = team;
-    pixmap = QPixmap(":/images/powerup/"+QString::number(type)+".png");
+    pixmap = QPixmap("images/powerup/"+QString::number(type)+".png");
 }
 
 QRect Powerup::getRect()

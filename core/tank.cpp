@@ -1,6 +1,11 @@
 #include "tank.h"
 
-Tank::Tank(QRect rect, QString name, int team, QObject *parent) :
+QPoint Tank::getCenter()
+{
+    return QPoint(body->GetPosition().x,body->GetPosition().y);
+}
+
+Tank::Tank(QRect rect, QString name, b2World *world, int team, bool locked,QObject *parent) :
     QObject(parent)
 {
     this->rect = rect;
@@ -8,6 +13,7 @@ Tank::Tank(QRect rect, QString name, int team, QObject *parent) :
     speed = 1;
     dir = 1;
     this->currentID = 0;
+    stationary = true;
     angle = 0;
     kills = 0;
     deaths = 0;
@@ -16,12 +22,20 @@ Tank::Tank(QRect rect, QString name, int team, QObject *parent) :
     visible = true;
     spawned = false;
     viewRange = 120;
+    this->locked = locked;
     health = 100;
     hidden = false;
     spotted = 1;
+    turnAngle = 0;
+    shootmode = 0;
     coins = 0;
     type = 0;
     endSpeed = 0;
+    b2BodyDef BodyDef;
+    BodyDef.type = b2_dynamicBody; //this will be a dynamic body
+    BodyDef.position.Set(300, 200); //set the starting position
+    BodyDef.angle = 0; //set the starting angle
+    body = world->CreateBody(&BodyDef);
     grid = QPixmap("images/area/grid2.png");
     this->team = team;
     img = QPixmap("images/tank/"+QString::number(type,'f',0)+"/tank1.png");
@@ -52,14 +66,59 @@ bool Tank::isHidden()
     return hidden;
 }
 
+bool Tank::isStationary()
+{
+    return stationary;
+}
+
 bool Tank::getHeal()
 {
     return heal;
 }
 
-QRect Tank::getRect()
+QPolygonF Tank::getPolygon(int type)
 {
-    return this->rect;
+    QRectF r = rect;
+    int deg = turnAngle;
+    QTransform transform;
+    switch(type) {
+        case 1: // move w
+            r.moveTo(r.x()+vx,r.y()+vy);
+        break;
+        case 2: //move s
+            r.moveTo(r.x()-vx,r.y()-vy);
+        break;
+        case 3: //turn right
+            deg++;
+        break;
+        case 4: //turn left
+            deg--;
+        break;
+    }
+    QPointF center = r.center();
+    r.translate(-center);
+    QPolygonF pol(r);
+    for(int i=0;i<pol.size();i++) {
+        QPointF p = pol.at(i);
+        double tempX = p.x()*qCos(qDegreesToRadians((double)deg)) - p.y()*qSin(qDegreesToRadians((double)deg));
+        double tempY = p.x()*qSin(qDegreesToRadians((double)deg)) + p.y()*qCos(qDegreesToRadians((double)deg));
+        pol.replace(i,QPointF(tempX+center.x(),tempY+center.y()));
+    }
+    return pol;
+}
+
+QRectF Tank::getRect()
+{
+    if(body!=NULL&&body!=nullptr) {
+        return QRectF(body->GetPosition().x-(rect.width()/2),body->GetPosition().y-(rect.height()/2),rect.width(),rect.height());
+    } else {
+        return QRectF(-200,-200,rect.width(),rect.height());
+    }
+}
+
+b2Body *Tank::getBody()
+{
+    return body;
 }
 
 void Tank::setVisible(bool visible)
@@ -140,15 +199,28 @@ void Tank::setType(int type)
     if(this->type==type) return;
     this->type = type;
     img = QPixmap("images/tank/"+QString::number(type,'f',0)+"/tank1.png");
-    if(vehicleID==1) return;
+    if(vehicleID==1&&type!=1) return;
     turret = QPixmap("images/tank/"+QString::number(type,'f',0)+"/turm.png");
 }
 
 void Tank::setData(int type, int speed, int health, int bvel, int reload, int width, int height, int barrelLength, bool heal, int camo, int viewrange, int vehicleID)
 {
+    body->DestroyFixture(body->GetFixtureList());
+    b2PolygonShape boxShape;
+    boxShape.SetAsBox(width/2,height/2);
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &boxShape;
+    fixtureDef.density = 20;
+    if(vehicleID!=1) {
+        body->SetLinearDamping(3);
+    } else {
+        fixtureDef.filter.maskBits = 0x0000;
+    }
+    body->CreateFixture(&fixtureDef);
+    body->SetAngularDamping(15);
     this->vehicleID = vehicleID;
     setType(type);
-    this->timer = ((double)speed/10)/2;
+    this->speed = (((double)speed*3.6)*5); //kmh zu m/s -> 1m = 5px -> m/s*5 = px/s
     this->health = health;
     this->maxHealth = health;
     this->bvel = bvel;
@@ -227,6 +299,14 @@ int Tank::getVehicleID()
     return vehicleID;
 }
 
+int Tank::getTurnAngle()
+{
+    int w = qRadiansToDegrees(body->GetAngle());
+    int an = w/360;
+    an = w-(an*360);
+    return an;
+}
+
 QPoint Tank::getDeathPoint()
 {
     return deathPoint;
@@ -234,24 +314,7 @@ QPoint Tank::getDeathPoint()
 
 QPoint Tank::getShootPoint()
 {
-    QPoint p;
-    switch(type) {
-        case 1:
-            p = QPoint(rect.center().x(),rect.center().y()+2);
-        break;
-        case 2:
-            p = QPoint(rect.center().x(),rect.center().y()+2);
-        break;
-        case 3:
-            p = QPoint(rect.center().x(),rect.center().y()+2);
-        break;
-        case 4:
-            p = QPoint(rect.center().x(),rect.center().y()+2);
-        break;
-        default:
-            p = QPoint(rect.center().x(),rect.center().y()+2);
-        break;
-    }
+    QPoint p = getCenter();
     return p;
 }
 
@@ -260,14 +323,40 @@ void Tank::setUsername(QString text)
     this->name = text;
 }
 
+void Tank::setShootmode(int shootmode)
+{
+    this->shootmode = shootmode;
+}
+
+void Tank::setTurnAngle(int angle)
+{
+    if(angle>360) {
+        angle = 0;
+    } else if(angle<0) {
+        angle = 360;
+    }
+    this->turnAngle = angle;
+    body->SetTransform(body->GetPosition(),qDegreesToRadians((double)angle));
+}
+
+void Tank::setDir(int dir)
+{
+    this->dir = dir;
+}
+
+int Tank::getShootmode()
+{
+    return shootmode;
+}
+
 void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
 {
     if(name==NULL||(!spawned&&this!=own)) return;
     QColor rcolor;
     QRect r;
     int deg = 0;
-    int xt = rect.x();
-    int yt = rect.y();
+    int xt = (body->GetPosition().x-rect.width()/2);
+    int yt = (body->GetPosition().y-rect.height()/2);
     if(!visible) {
         p.setOpacity(0.5);
     }
@@ -279,30 +368,13 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
             rcolor = QColor(0,255,0);
         break;
     }
-    switch(dir) {
-        case 1:
-            r = QRect(xt+5,yt+4,30,34);
-            deg = 0;
-        break;
-        case 2:
-            r = QRect(xt+4,yt+4,34,30);
-            deg = 90;
-        break;
-        case 3:
-            r = QRect(xt+5,yt+2,30,34);
-            deg = 180;
-        break;
-        case 4:
-            r = QRect(xt+2,yt+6,34,29);
-            deg = 270;
-        break;
-    }
     p.setBrush(rcolor);
     p.setPen(Qt::NoPen);
     //p.drawRect(r);
     p.save();
     p.translate(xt+rect.width()/2,yt+rect.height()/2);
-    p.rotate(-deg);
+    //p.rotate(qRadiansToDegrees(body->GetAngle())+90);
+    p.rotate(getTurnAngle()+90);
     p.drawPixmap(-rect.width()/2,-rect.height()/2,rect.width(),rect.height(),img);
     p.restore();
     QFont f = p.font();
@@ -383,23 +455,17 @@ void Tank::drawTank(QPainter &p, Tank *own, bool barrel)
     p.setOpacity(1.0);
 }
 
-void Tank::move()
+void Tank::move(int type)
 {
-    //rect.moveTo(targetPos.x(),targetPos.y());
-    int speed = this->endSpeed/5;
-    if(rect.x()<targetPos.x()-speed-1) {
-        rect.moveTo(rect.x()+speed,rect.y());
-        //targetPos.setX(targetPos.x()+1);
-    } else if(rect.x()>targetPos.x()+speed-1) {
-        rect.moveTo(rect.x()-speed,rect.y());
-        //targetPos.setX(targetPos.x()-1);
+    if(!locked) {
+        vx = qCos(body->GetAngle())*speed/1.75;
+        vy = qSin(body->GetAngle())*speed/1.75;
     }
-    if(rect.y()<targetPos.y()-speed-1) {
-        rect.moveTo(rect.x(),rect.y()+speed);
-        //targetPos.setY(targetPos.y()+1);
-    } else if(rect.y()>targetPos.y()+speed-1) {
-        rect.moveTo(rect.x(),rect.y()-speed);
-        //targetPos.setY(targetPos.y()-1);
+    if(!type||locked) {
+        body->SetLinearVelocity(b2Vec2(vx,vy));
+        //body->ApplyForce(b2Vec2(vx,vy),body->GetWorldCenter(),true);
+    } else {
+        body->SetLinearVelocity(b2Vec2(-vx,-vy));
     }
 }
 
@@ -410,8 +476,12 @@ QString Tank::getName()
 
 QString Tank::toString()
 {
-    return this->name + "#" + QString::number(rect.x(),'f',0)+"#"+QString::number(rect.y(),'f',0)+"#"+
-            QString::number(dir,'f',0)+"#"+QString::number(angle,'f',0)+"#";
+    rect = getRect();
+    turnAngle = getTurnAngle();
+    b2Vec2 vel = body->GetLinearVelocity();
+    return this->name + "#" + QString::number(rect.x(),'f',3)+"#"+QString::number(rect.y(),'f',3)+"#"+
+            QString::number(turnAngle,'f',0)+"#"+QString::number(angle,'f',0)+"#"+QString::number(dir,'f',0)+"#"+
+            QString::number(vel.x,'f',3)+"#"+QString::number(vel.y,'f',3)+"#";
 }
 
 QPixmap Tank::getIMG()
@@ -424,61 +494,36 @@ void Tank::teleport(int x, int y)
     this->dir = 1;
     this->targetPos = QPoint(x,y);
     rect.moveTo(x,y);
+    body->SetTransform(b2Vec2(x+rect.width()/2,y+rect.height()/2),qDegreesToRadians((double)angle));
 }
 
-void Tank::setAll(int x, int y, int dir, int health, int diff)
+void Tank::setAll(double x, double y, int turnAngle, int health, int diff, double vx, double vy)
 {
     this->health = health;
-    if(!dir) {
-        dir = 1;
-    }
+    dir = diff;
+    rect = getRect();
     if((rect.x()==-200&&rect.y()==-200)||(x==-200&&y==-200)) {
-        //qDebug()<<"a";
-        this->dir = 1;
+        this->turnAngle=0;
         rect.moveTo(x,y);
+        body->SetTransform(b2Vec2(x-rect.width()/2,y-rect.height()/2),qDegreesToRadians((double)turnAngle));
         targetPos = QPoint(x,y);
     } else {
-        if(rect.x()!=x||rect.y()!=y) rect.moveTo(x,y);
-        int tx = x;
-        int ty = y;
-        int s = (speed*diff);
-        switch(dir) {
-            case 1:
-                if(getDifference(y,y-s)>s) {
-                    y-=s;
-                    ty-=s*2;
-                }
-            break;
-            case 2:
-                if(getDifference(x,x-s)>s) {
-                    x-=s;
-                    tx-=s*2;
-                }
-            break;
-            case 3:
-                if(getDifference(y,y+s)>s) {
-                    y+=s;
-                    ty+=s*2;
-                }
-            break;
-            case 4:
-                if(getDifference(x,x+s)>s) {
-                    x+=s;
-                    tx-=s*2;
-                }
-            break;
+        if(rect.x()!=x||rect.y()!=y) {
+            rect.moveTo(x,y);
+            body->SetTransform(b2Vec2(x+rect.width()/2,y+rect.height()/2),qDegreesToRadians((double)turnAngle));
         }
-        endSpeed = s*2;
-        targetPos = QPoint(tx,ty);
-        //rect.moveTo(x,y);
-        this->dir = dir;
+        this->turnAngle = turnAngle;
+
     }
+    this->vx = vx;
+    this->vy = vy;
     //this->rect.moveTo(x,y);
 }
 
-void Tank::setAll(int x, int y)
+void Tank::setAll(double x, double y)
 {
     rect.moveTo(x,y);
+    body->SetTransform(b2Vec2(x+rect.width()/2,y+rect.height()/2),qDegreesToRadians((double)angle));
 }
 
 void Tank::setMoved(bool m)
@@ -496,7 +541,7 @@ void Tank::setColor(int color)
     this->color = color;
 }
 
-void Tank::setAngle(int angle)
+void Tank::setAngle(double angle)
 {
     this->angle = angle;
     /*if(this->angle<0) {
@@ -532,12 +577,12 @@ int Tank::getDifference(int v1, int v2)
     return diff;
 }
 
-int Tank::getAngle()
+double Tank::getAngle()
 {
     return angle;
 }
 
-int Tank::getSpeed()
+double Tank::getSpeed()
 {
     return this->speed;
 }
@@ -574,6 +619,16 @@ int Tank::getTeam()
 int Tank::getCoins()
 {
     return this->coins;
+}
+
+double Tank::getVx()
+{
+    return vx;
+}
+
+double Tank::getVy()
+{
+    return vy;
 }
 
 void Tank::setHealth(int health, int maxHealth)

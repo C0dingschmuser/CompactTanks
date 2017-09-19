@@ -2,10 +2,10 @@
 
 Terrain::Terrain()
 {
-
+    body = nullptr;
 }
 
-Terrain::Terrain(int x, int y, int w, int h, int type, int itype)
+Terrain::Terrain(int x, int y, int w, int h, b2World *world, int type, int itype)
 {
     this->x = x;
     this->y = y;
@@ -14,6 +14,21 @@ Terrain::Terrain(int x, int y, int w, int h, int type, int itype)
     this->type = type;
     owner = 0;
     cp = 0;
+    if(!type) {
+        b2BodyDef def;
+        def.type = b2_staticBody;
+        def.position.Set(x+(w/2),y+(h/2));
+        def.angle = 0;
+        body = world->CreateBody(&def);
+        b2PolygonShape boxShape;
+        boxShape.SetAsBox(72/2,72/2);
+        b2FixtureDef fixDef;
+        fixDef.shape = &boxShape;
+        fixDef.density = 2;
+        body->CreateFixture(&fixDef);
+    } else {
+        body = nullptr;
+    }
 }
 
 

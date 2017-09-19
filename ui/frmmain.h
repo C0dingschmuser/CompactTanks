@@ -10,9 +10,11 @@
 #include <QFontDatabase>
 #include <QDesktopServices>
 #include <QFile>
+#include <QImage>
 #include <QTextStream>
 #include <QApplication>
 #include <QMessageBox>
+#include <qdrawutil.h>
 #include "core/bullet.h"
 #include "core/tank.h"
 #include "core/movement.h"
@@ -26,6 +28,7 @@
 #include "core/powerup.h"
 #include "ui/frmlogin.h"
 #include "ui/frmsettings.h"
+#include "Box2D/Box2D.h"
 
 namespace Ui {
 class FrmMain;
@@ -68,7 +71,7 @@ private slots:
     void on_death();
     void on_tdeath();
     void on_msgBox(QString title, QString text);
-    void on_otherDeath(QRect rect, bool flak);
+    void on_otherDeath(QRectF rect, bool flak);
     void on_tExpAn();
     void on_ttime();
     void on_ping(int ping);
@@ -152,12 +155,15 @@ private:
     QPixmap tanksMenu;
     QPixmap win;
     QPixmap map;
+    QPixmap mode0,mode0g;
+    QPixmap mode1,mode1g;
     QPainter::PixmapFragment camera;
     QString version;
     bool contains(QString data, QString c);
     void drawPlayerScores(QPainter &p);
     FrmLogin *login;
     FrmSettings *settings;
+    b2World *world;
 protected:
     void paintEvent(QPaintEvent *e) override;
     void keyPressEvent(QKeyEvent *e) override;

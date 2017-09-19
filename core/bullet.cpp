@@ -33,6 +33,11 @@ void Bullet::setEnabled(bool enabled)
     this->enabled = enabled;
 }
 
+void Bullet::setTarget(int target)
+{
+    this->target = target;
+}
+
 void Bullet::setColl(bool coll)
 {
     this->coll = coll;
@@ -104,4 +109,9 @@ int Bullet::getVel()
 int Bullet::getDmg()
 {
     return this->dmg;
+}
+
+int Bullet::getTarget()
+{
+    return target;
 }

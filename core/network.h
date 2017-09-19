@@ -11,6 +11,7 @@
 #include "tank.h"
 #include "bullet.h"
 #include "powerup.h"
+#include "Box2D/Box2D.h"
 
 class Network : public QObject
 {
@@ -33,6 +34,7 @@ private:
     QVector <Tank*> players;
     QByteArray buffer;
     Tank *ownTank;
+    b2World *world;
     int getArrayPos(QString name);
     void fetchUDP(QString data);
     void fetchTCP(QString data);
@@ -41,7 +43,7 @@ private:
     int timer;
     bool connected;
 public:
-    explicit Network(Tank *ownTank, QVector<Tank*> t, QHostAddress ip, QObject *parent = 0);
+    explicit Network(Tank *ownTank, QVector<Tank*> t, QHostAddress ip, b2World *world, QObject *parent = 0);
     ~Network();
     Q_INVOKABLE bool connectToServer(QString username, QString password="", QString version="");
     Q_INVOKABLE void send(QString data);
@@ -53,7 +55,8 @@ public:
     void run(QThread *thread);
 
 signals:
-    void pos(Tank *p,int x,int y,int dir,int health, int angle,int spotted,int stimer);
+    void pos(Tank *p,double x,double y,int turnAngle,int health, int angle,int spotted,int stimer, int stationary,
+             double vx,double vy);
     void newPlayer(Tank *t);
     void newlvlObj(int x,int y,int w,int h,int type);
     void delPlayer(int i);
@@ -77,7 +80,7 @@ signals:
                double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel,
                int camo, int viewrange);
     void spawn(Tank *t);
-    void otherDeath(QRect rect, bool flak);
+    void otherDeath(QRectF rect, bool flak);
     void chat(QString message);
     void ping(int ping);
     void teamCP(int team1cp, int team2cp);

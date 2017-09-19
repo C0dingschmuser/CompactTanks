@@ -71,14 +71,13 @@ void FrmTanks::paintEvent(QPaintEvent *e)
         painter.setBrush(Qt::darkGreen);
         painter.drawRect(605,57,width*((5000-(double)reload)/5000),10);
         //speed
-        int val = calcSpeed(speed);
         painter.setPen(Qt::black);
-        painter.drawText(QPoint(605,83),"Geschw.: "+QString::number(val)+"Km/h");
+        painter.drawText(QPoint(605,83),"Geschw.: "+QString::number(speed*2)+"Km/h");
         painter.setPen(Qt::NoPen);
         painter.setBrush(Qt::darkGray);
         painter.drawRect(605,87,width,10);
         painter.setBrush(Qt::darkGreen);
-        painter.drawRect(605,87,width*((double)val/100),10);
+        painter.drawRect(605,87,width*((double)(speed*2)/125),10);
         //health
         painter.setPen(Qt::black);
         painter.drawText(QPoint(605,113),"Leben: "+QString::number(health)+"HP");
@@ -124,7 +123,6 @@ void FrmTanks::paintEvent(QPaintEvent *e)
         //Warnung bei Flak
         painter.setPen(Qt::black);
         painter.drawText(605,263,"Fahrzeugtyp:");
-        painter.drawText(605,303,"Kann folgende Fahrzeugtypen angreifen:");
         QFont f = painter.font();
         f.setPointSize(12);
         f.setBold(true);
@@ -132,15 +130,12 @@ void FrmTanks::paintEvent(QPaintEvent *e)
         switch(vehicleID) {
             case 0:
                 painter.drawText(605,283,"Normal");
-                painter.drawText(605,323,"Normal/Flak");
             break;
             case 1:
                 painter.drawText(605,283,"Flugzeug");
-                painter.drawText(605,323,"Normal/Flak");
             break;
             case 2:
                 painter.drawText(605,283,"Flak");
-                painter.drawText(605,323,"Flugzeug");
             break;
         }
     }
@@ -201,12 +196,9 @@ void FrmTanks::on_lwTanks_itemDoubleClicked(QListWidgetItem *item)
     this->hide();
 }
 
-double FrmTanks::calcSpeed(int value)
+double FrmTanks::calcSpeed(double value)
 {
-    value*=2;
-    double p1 = 1/(double)120;
-    double p2 = (value-190)*(value-190);
-    double p3 = 235/(double)6;
-    double num = p1*p2+p3;
-    return num;
+    double num;
+    num = ((value/5)/3.6);
+    return value;
 }

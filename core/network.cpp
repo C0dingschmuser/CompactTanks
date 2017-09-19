@@ -1,10 +1,11 @@
 #include "network.h"
 
-Network::Network(Tank *ownTank, QVector<Tank *> t, QHostAddress ip,QObject *parent) : QObject(parent)
+Network::Network(Tank *ownTank, QVector<Tank *> t, QHostAddress ip, b2World *world, QObject *parent) : QObject(parent)
 {
     this->ownTank = ownTank;
     this->players = t;
     this->ip = ip;
+    this->world = world;
     t_main = new QTimer();
     t_disconnect = new QTimer();
     t_ping = new QTimer();
@@ -68,7 +69,8 @@ void Network::run(QThread *thread)
 void Network::on_tcpRecv()
 {
     buffer += tcpSocket->readAll();
-    if(buffer.size()>54) {
+    QString s = buffer;
+    if(s.at(s.size()-1)=="~") {
         QString input = buffer;
         buffer.clear();
         if(input.contains('|')&&input.at(input.size()-1)=='~') {
@@ -175,6 +177,9 @@ void Network::fetchTCP(QString data)
                         emit registration(list.at(1).toInt());
                     break;
                     case -9: //changelog size
+                        #ifdef QT_DEBUG
+                            return;
+                        #endif
                         emit changelog(list.at(1).toInt());
                     break;
                     case -8: //login erfolgreich?
@@ -193,6 +198,11 @@ void Network::fetchTCP(QString data)
                             ownTank->setAll(list.at(2).toInt(),list.at(3).toInt());
                             if(list.at(1).toInt()) {
                                 ownTank->setColor(1);
+                                if(ownTank->getTeam()==1) {
+                                    ownTank->setTurnAngle(0);
+                                } else {
+                                    ownTank->setTurnAngle(180);
+                                }
                                 emit spawn();
                             }
                         }
@@ -214,10 +224,8 @@ void Network::fetchTCP(QString data)
                             if(list.size()>8) {
                                 //9 = timer
                                 Tank *tmp = sucheTank(list.at(1));
-                                emit pos(tmp,list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(6).toInt(),list.at(8).toInt(),list.at(5).toInt(),list.at(9).toInt());
-                                /*tmp->setAll(list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt(),list.at(6).toInt());
-                                tmp->setAngle(list.at(8).toInt());
-                                tmp->setSpotted(list.at(5).toInt());*/
+                                emit pos(tmp,list.at(2).toDouble(),list.at(3).toDouble(),list.at(4).toInt(),list.at(6).toInt(),list.at(8).toInt(),
+                                         list.at(5).toInt(),list.at(9).toInt(),list.at(10).toInt(),list.at(11).toDouble(),list.at(12).toDouble());
                             }
                             break;
                         }
@@ -239,7 +247,7 @@ void Network::fetchTCP(QString data)
                     case 1: //spieler hinzufügen
                         {
                             if(list.size()>4) {
-                                Tank *t = new Tank(QRect(-200,-200,40,40),list.at(1),list.at(7).toInt());
+                                Tank *t = new Tank(QRect(-200,-200,40,40),list.at(1),world,list.at(7).toInt());
                                 if(t->getTeam()==ownTank->getTeam()) {
                                     t->setColor(1);
                                 } else {
@@ -275,6 +283,7 @@ void Network::fetchTCP(QString data)
                             if(list.size()>5) {
                                 Bullet *b = new Bullet(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toDouble(),list.at(4).toDouble(),list.at(5).toInt(),list.at(7));
                                 b->setDmg(list.at(6).toInt());
+                                b->setTarget(list.at(8).toInt());
                                 bool enabled = true;
                                 if(!ownTank->getRect().intersects(b->get())) {
                                     //enabled = false;
@@ -310,8 +319,7 @@ void Network::fetchTCP(QString data)
                         if(list.size()>2) {
                             //qDebug()<<list.at(1);
                             Tank *tmp = sucheTank(list.at(1));
-                            QRect rect = tmp->getRect();
-                            rect.moveTo(list.at(2).toInt(),list.at(3).toInt());
+                            QRectF rect = tmp->getPolygon(0).boundingRect();;
                             emit otherDeath(rect,false);
                             tmp->setSpawned(false);
                             tmp->teleport(-200,-200);
@@ -391,7 +399,7 @@ void Network::fetchTCP(QString data)
                         emit delPowerup(list.at(1).toInt());
                     break;
                     case 23: //explosion
-                        QRect rect(list.at(1).toInt(),list.at(2).toInt(),list.at(3).toInt(),list.at(4).toInt());
+                        QRectF rect(list.at(1).toDouble(),list.at(2).toDouble(),list.at(3).toDouble(),list.at(4).toDouble());
                         emit otherDeath(rect,false);
                     break;
                 }

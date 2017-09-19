@@ -1,10 +1,11 @@
 #include "worker.h"
 
-Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidget *mainWindow, QObject *parent) : QObject(parent)
+Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, b2World *world, QWidget *mainWindow, QObject *parent) : QObject(parent)
 {
     qRegisterMetaType<QKeyEvent*>("QKeyEvent*");
     qRegisterMetaType<QVector<Terrain*>>("QVector<Terrain*>");
     qRegisterMetaType<Tank*>("Tank*");
+    this->world = world;
     this->width = width;
     this->height = height;
     this->ownTank = ownTank;
@@ -23,10 +24,11 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     t_visible = new QTimer(this);
     t_move = new QTimer(this);
     t_respawn = new QTimer(this);
+    t_physics = new QTimer(this);
     t_main->setTimerType(Qt::PreciseTimer);
     move = new Movement(this->ownTank,this->width,this->height,this);
     //37.120.177.121
-    network = new Network(this->ownTank,tanks,QHostAddress("127.0.0.1")); //ändern
+    network = new Network(this->ownTank,tanks,QHostAddress("37.120.177.121"),world); //ändern
     shoot = new Shoot(this->ownTank,network,this->aim);
     tankWindow = new FrmTanks(f,ownTank);
     connect(t_bullet,SIGNAL(timeout()),this,SLOT(on_tbullet()));
@@ -44,12 +46,13 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     connect(network,SIGNAL(kick()),this,SIGNAL(kick()));
     connect(network,SIGNAL(capobj(int,int,int)),this,SLOT(on_capobj(int,int,int)));
     connect(network,SIGNAL(setT(int)),this,SLOT(on_setT(int)));
-    connect(network,SIGNAL(pos(Tank*,int,int,int,int,int,int,int)),this,SLOT(on_pos(Tank*,int,int,int,int,int,int,int)));
+    connect(network,SIGNAL(pos(Tank*,double,double,int,int,int,int,int,int,double,double)),this,
+            SLOT(on_pos(Tank*,double,double,int,int,int,int,int,int,double,double)));
     connect(network,SIGNAL(conn(int)),this,SLOT(on_conn(int)));
     connect(network,SIGNAL(hit(Tank*,QString)),this,SIGNAL(hit(Tank*,QString)));
     connect(network,SIGNAL(stats(int,int,int,int,int,int,int,int,double,double,double,int,int,int,int)),this,SLOT(on_db(int,int,int,int,int,int,int,int,double,double,double,int,int,int,int)));
     connect(network,SIGNAL(spawn(Tank*)),this,SLOT(on_spawn(Tank*)));
-    connect(network,SIGNAL(otherDeath(QRect,bool)),this,SIGNAL(otherDeath(QRect,bool)));
+    connect(network,SIGNAL(otherDeath(QRectF,bool)),this,SIGNAL(otherDeath(QRectF,bool)));
     connect(network,SIGNAL(chat(QString)),this,SIGNAL(chatS(QString)));
     connect(network,SIGNAL(ping(int)),this,SIGNAL(ping(int)));
     connect(network,SIGNAL(teamCP(int,int)),this,SIGNAL(teamCP(int,int)));
@@ -69,9 +72,12 @@ Worker::Worker(Tank *ownTank, QPoint *aim, int width, int height, QFont f, QWidg
     connect(t_visible,SIGNAL(timeout()),this,SLOT(on_tvisible()));
     connect(t_move,SIGNAL(timeout()),this,SLOT(on_tmove()));
     connect(t_respawn,SIGNAL(timeout()),this,SLOT(on_tRespawn()));
+    connect(t_physics,SIGNAL(timeout()),this,SLOT(on_tPhysics()));
+    createBounds();
     t_bullet->start(2);
     t_main->start(4);
-    t_move->start(5);
+    t_move->start(2);
+    t_physics->start(5);
     //loadMap();
 }
 
@@ -89,10 +95,14 @@ void Worker::run(QThread *thread)
     network->moveToThread(thread);
     move->run(thread);
     network->run(thread);
+    t_move->moveToThread(thread);
+    t_bullet->moveToThread(thread);
+    t_physics->moveToThread(thread);
 }
 
 void Worker::on_disconnect()
 {
+    t_physics->stop();
     emit disconnected();
 }
 
@@ -129,6 +139,59 @@ void Worker::on_changelog(int size)
     if(lsize!=size) emit changeStart();
 }
 
+void Worker::on_tPhysics()
+{
+    //1/100 = 0.01
+    world->Step(0.005,3,3);
+    for(int i=0;i<delBodys.size();i++) {
+        world->DestroyBody(delBodys[i]);
+    }
+    delBodys.resize(0);
+}
+
+void Worker::updateFriction()
+{
+    b2Body *body = ownTank->getBody();
+}
+
+void Worker::createBounds()
+{
+    b2BodyDef def;
+    def.type = b2_staticBody;
+    def.position.Set(width/2,-2);
+    def.angle = 0;
+    b2Body *wall1 = world->CreateBody(&def);
+    b2PolygonShape boxShape;
+    boxShape.SetAsBox(width/2,1);
+    b2FixtureDef fixDef;
+    fixDef.shape = &boxShape;
+    wall1->CreateFixture(&fixDef);
+
+    //2
+
+    def.position.Set(-2,height/2);
+    b2Body *wall2 = world->CreateBody(&def);
+    boxShape.SetAsBox(1,height/2);
+    fixDef.shape = &boxShape;
+    wall2->CreateFixture(&fixDef);
+
+    //3
+
+    def.position.Set(width/2,height);
+    b2Body *wall3 = world->CreateBody(&def);
+    boxShape.SetAsBox(width/2,1);
+    fixDef.shape = &boxShape;
+    wall3->CreateFixture(&fixDef);
+
+    //4
+
+    def.position.Set(width,height/2);
+    b2Body *wall4 = world->CreateBody(&def);
+    boxShape.SetAsBox(1,height/2);
+    fixDef.shape = &boxShape;
+    wall4->CreateFixture(&fixDef);
+}
+
 void Worker::on_tid()
 {
     for(int i=startPos;i<endPos;i++) {
@@ -139,20 +202,13 @@ void Worker::on_tid()
     }
 }
 
-void Worker::on_pos(Tank *p, int x, int y, int dir, int health, int angle, int spotted, int stimer)
+void Worker::on_pos(Tank *p, double x, double y, int turnAngle, int health, int angle, int spotted, int stimer, int stationary, double vx, double vy)
 {
     if(!p->isSpawned()) return;
     int diff = getDifference(stimer,timer);
-    /*qDebug()<<stimer;
-    qDebug()<<timer;
-    qDebug()<<diff/p->getTimer();
-    qDebug()<<"-------------";*/
-    p->setAll(x,y,dir,health,diff/p->getTimer());
+    p->setAll(x,y,turnAngle,health,stationary,vx,vy);
     p->setAngle(angle);
     p->setSpotted(spotted);
-    /*qDebug()<<"--------";
-    qDebug()<<timer;
-    qDebug()<<stimer;*/
 }
 
 void Worker::on_db(int id, int dmg, int reload, int speed, int health, int width, int height, int barrelLength, double softTerrRes, double hardTerrRes, double treeTerrRes, int treeColl, int vel, int camo, int viewrange)
@@ -211,6 +267,7 @@ void Worker::on_newPlayer(Tank *t)
 
 void Worker::on_delPlayer(int pos)
 {
+    delBodys.append(tanks[pos]->getBody());
     tanks.removeAt(pos);
     emit delPlayer(pos);
 }
@@ -262,11 +319,15 @@ void Worker::on_tbullet()
             }
             Tank *shooter = network->sucheTank(bullets[i]->getShooter());
             for(int a=0;a<tanks.size();a++) {
+                QPolygonF pol = tanks[a]->getPolygon(0);
+                QRectF bRect = pol.boundingRect();
                 if(bullets[i]->getShooter()!=tanks[a]->getName()) {
-                    if(bullets[i]->get().intersects(tanks[a]->getRect())) {
-                        if((tanks[a]->getVehicleID()==1&&shooter->getVehicleID()==2)||
-                                tanks[a]->getVehicleID()!=1&&shooter->getVehicleID()!=2) {
-                            bullets[i]->setEnabled(false);
+                    if(QRectF(bullets[i]->get()).intersects(bRect)) {
+                        if(QPolygonF(QRectF(bullets[i]->get())).intersected(pol).size()) {
+                            if((tanks[a]->getVehicleID()==1&&bullets[i]->getTarget()==1)||
+                                    tanks[a]->getVehicleID()!=1&&bullets[i]->getTarget()!=1) {
+                                bullets[i]->setEnabled(false);
+                            }
                         }
                     }
                 }
@@ -275,7 +336,7 @@ void Worker::on_tbullet()
             int y = bullets[i]->get().center().y();
             int pos = (x/72+(y/72*40));
             if(pos>1199) pos = 1199;
-            if(x<0||y<0||x>width||y>height||(!lvlObjs[pos]->getType()&&shooter->getVehicleID()!=2)) bullets[i]->setEnabled(false);
+            if(x<0||y<0||x>width||y>height||(!lvlObjs[pos]->getType()&&!bullets[i]->getTarget())) bullets[i]->setEnabled(false);
         }
     }
 }
@@ -360,6 +421,7 @@ void Worker::on_tmain()
 void Worker::on_playerDeath()
 {
     t_respawn->start(1000);
+    ownTank->getBody()->SetLinearVelocity(b2Vec2(0,0));
     emit death();
 }
 
@@ -383,8 +445,15 @@ void Worker::on_spawn(Tank *t)
 void Worker::on_tmove()
 {
     for(int i=0;i<tanks.size();i++) {
-        if(tanks[i]->isSpawned()&&tanks[i]->getRect().x()!=-200) {
-            tanks[i]->move();
+        if(tanks[i]->isSpawned()) {
+            switch(tanks[i]->getDir()) {
+                case 1:
+                    tanks[i]->move();
+                break;
+                case 2:
+                    tanks[i]->move(1);
+                break;
+            }
         }
     }
     emit reloadData(shoot->getReload(),ownTank->getReload());
@@ -467,7 +536,7 @@ void Worker::loadMap()
     int max1 = height/72;
     for(int i=0;i<max1;i++) {
         for(int a=0;a<max2;a++) {
-            Terrain *obj = new Terrain(0+(72*a),0+(72*i),72,72,getType(basic.at(lvlObjs.size()).toInt()),0);
+            Terrain *obj = new Terrain(0+(72*a),0+(72*i),72,72,world,getType(basic.at(lvlObjs.size()).toInt()),0);
             lvlObjs.append(obj);
             if(obj->getType()==2) capObjs.append(lvlObjs.size()-1);
         }

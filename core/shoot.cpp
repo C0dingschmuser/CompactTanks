@@ -37,13 +37,18 @@ void Shoot::on_tmain()
             v = t->getBvel();
         }
         int dmg = t->getDamage();
+        int target = 0;
+        if(t->getShootmode()) {
+            target = 1;
+        }
         if(t->getVehicleID()!=1) {
             QString str = "|1#"+t->getName()+"#"+QString::number(mpos->x(),'f',0)+
-                    "#"+QString::number(mpos->y(),'f',0)+"#1#~";
+                    "#"+QString::number(mpos->y(),'f',0)+"#1#"+QString::number(target)+"#~";
             QMetaObject::invokeMethod(network,"send",Q_ARG(QString,str));
             Bullet *b = new Bullet(t->getShootPoint().x(),t->getShootPoint().y(),
                                    (double)mpos->x(),(double)mpos->y(),v,t->getName());
             b->setDmg(dmg);
+            b->setTarget(target);
             bool enabled = true;
             if(!t->getRect().intersects(b->get())) {
                 enabled = false;
