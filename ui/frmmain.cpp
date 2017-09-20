@@ -55,7 +55,7 @@ FrmMain::FrmMain(QWidget *parent) :
     t_draw->setTimerType(Qt::PreciseTimer);
     sound = new Sound();
     lowGraphics = false;
-    version = "v0.0.6.3";
+    version = "v0.0.6.4";
     reloadRect = QRect(-200,-200,60,60);
     changeDl = new FileDownloader(QUrl("http://37.120.177.121/compacttanks/changelog.txt"));
     updateDL = new FileDownloader(QUrl("http://37.120.177.121/compacttanks/update.zip"));
